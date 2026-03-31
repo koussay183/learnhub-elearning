@@ -19,15 +19,15 @@
 }
 
 .dark {
-  --surface: #0a0a0a;
-  --surface-card: #111111;
-  --surface-hover: #1a1a1a;
-  --surface-input: #1a1a1a;
-  --text-primary: #F9FAFB;
-  --text-secondary: #D1D5DB;
-  --text-muted: #6B7280;
-  --border: #1F2937;
-  --border-hover: #374151;
+  --surface: #0f0f0f;
+  --surface-card: #1a1a1a;
+  --surface-hover: #252525;
+  --surface-input: #222222;
+  --text-primary: #FFFFFF;
+  --text-secondary: #E5E7EB;
+  --text-muted: #9CA3AF;
+  --border: #333333;
+  --border-hover: #444444;
   --shadow-brutal: rgba(250, 204, 21, 0.3);
   --accent-glow: rgba(250, 204, 21, 0.05);
 }
