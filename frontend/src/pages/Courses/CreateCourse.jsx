@@ -137,13 +137,13 @@ const CreateCourse = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-surface">
       {/* Header */}
-      <div className="border-b border-gray-800">
+      <div className="border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-black text-white">Create New Course</h1>
-            <p className="text-gray-500 mt-1">Share your knowledge with the community</p>
+            <h1 className="text-2xl font-black text-content">Create New Course</h1>
+            <p className="text-content-muted mt-1">Share your knowledge with the community</p>
           </div>
           <button onClick={() => navigate(-1)} className="btn-ghost flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
@@ -165,7 +165,7 @@ const CreateCourse = () => {
 
               {/* Course Details Card */}
               <div className="card p-6">
-                <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-content mb-5 flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-yellow-400" />
                   Course Details
                 </h2>
@@ -173,7 +173,7 @@ const CreateCourse = () => {
                 <div className="space-y-4">
                   {/* Title */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-content-secondary mb-2">
                       Course Title <span className="text-red-400 ml-1">*</span>
                     </label>
                     <input
@@ -190,7 +190,7 @@ const CreateCourse = () => {
 
                   {/* Description */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-content-secondary mb-2">
                       Description <span className="text-red-400 ml-1">*</span>
                     </label>
                     <textarea
@@ -209,7 +209,7 @@ const CreateCourse = () => {
                   {/* Category & Level */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-300 mb-2">Category</label>
+                      <label className="block text-sm font-semibold text-content-secondary mb-2">Category</label>
                       <select
                         name="category"
                         value={form.category}
@@ -223,7 +223,7 @@ const CreateCourse = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-300 mb-2">Level</label>
+                      <label className="block text-sm font-semibold text-content-secondary mb-2">Level</label>
                       <select
                         name="level"
                         value={form.level}
@@ -240,7 +240,7 @@ const CreateCourse = () => {
                   {/* Price & Language */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-1">
+                      <label className="block text-sm font-semibold text-content-secondary mb-2 flex items-center gap-1">
                         <DollarSign className="w-4 h-4 text-yellow-400" />
                         Price ($)
                       </label>
@@ -260,7 +260,7 @@ const CreateCourse = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-1">
+                      <label className="block text-sm font-semibold text-content-secondary mb-2 flex items-center gap-1">
                         <Globe className="w-4 h-4 text-yellow-400" />
                         Language
                       </label>
@@ -276,7 +276,7 @@ const CreateCourse = () => {
 
                   {/* Thumbnail */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-1">
+                    <label className="block text-sm font-semibold text-content-secondary mb-2 flex items-center gap-1">
                       <Image className="w-4 h-4 text-yellow-400" />
                       Thumbnail URL
                     </label>
@@ -294,7 +294,7 @@ const CreateCourse = () => {
               {/* Sessions Card */}
               <div className="card p-6">
                 <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <h2 className="text-lg font-bold text-content flex items-center gap-2">
                     <Layers className="w-5 h-5 text-yellow-400" />
                     Sessions ({sessions.length})
                   </h2>
@@ -308,11 +308,11 @@ const CreateCourse = () => {
                   {sessions.map((session, index) => (
                     <div
                       key={index}
-                      className="p-5 bg-[#0a0a0a] rounded-xl border-2 border-gray-800 animate-fadeIn"
+                      className="p-5 bg-surface rounded-xl border-2 border-border animate-fadeIn"
                     >
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-sm font-bold text-yellow-400 flex items-center gap-2">
-                          <GripVertical className="w-4 h-4 text-gray-600" />
+                          <GripVertical className="w-4 h-4 text-content-muted" />
                           Session {index + 1}
                         </h3>
                         <div className="flex items-center gap-1">
@@ -320,7 +320,7 @@ const CreateCourse = () => {
                             type="button"
                             onClick={() => moveSession(index, -1)}
                             disabled={index === 0}
-                            className="p-1.5 rounded-lg text-gray-500 hover:text-yellow-400 hover:bg-yellow-400/5 disabled:opacity-30 transition-colors"
+                            className="p-1.5 rounded-lg text-content-muted hover:text-yellow-400 hover:bg-yellow-400/5 disabled:opacity-30 transition-colors"
                             title="Move up"
                           >
                             <ChevronUp className="w-4 h-4" />
@@ -329,7 +329,7 @@ const CreateCourse = () => {
                             type="button"
                             onClick={() => moveSession(index, 1)}
                             disabled={index === sessions.length - 1}
-                            className="p-1.5 rounded-lg text-gray-500 hover:text-yellow-400 hover:bg-yellow-400/5 disabled:opacity-30 transition-colors"
+                            className="p-1.5 rounded-lg text-content-muted hover:text-yellow-400 hover:bg-yellow-400/5 disabled:opacity-30 transition-colors"
                             title="Move down"
                           >
                             <ChevronDown className="w-4 h-4" />
@@ -338,7 +338,7 @@ const CreateCourse = () => {
                             <button
                               type="button"
                               onClick={() => removeSession(index)}
-                              className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/5 transition-colors ml-1"
+                              className="p-1.5 rounded-lg text-content-muted hover:text-red-400 hover:bg-red-400/5 transition-colors ml-1"
                               title="Remove session"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -409,12 +409,12 @@ const CreateCourse = () => {
           {/* Preview Card */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">
+              <h3 className="text-sm font-bold text-content-muted uppercase tracking-wide mb-4">
                 Preview
               </h3>
               <div className="card overflow-hidden hover:shadow-brutal transition-all duration-300">
                 {/* Thumbnail */}
-                <div className="h-44 bg-[#0a0a0a] border-b border-gray-800 overflow-hidden flex items-center justify-center">
+                <div className="h-44 bg-surface border-b border-border overflow-hidden flex items-center justify-center">
                   {form.thumbnail ? (
                     <img
                       src={form.thumbnail}
@@ -423,7 +423,7 @@ const CreateCourse = () => {
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   ) : (
-                    <Image className="w-12 h-12 text-gray-700" />
+                    <Image className="w-12 h-12 text-content-muted" />
                   )}
                 </div>
 
@@ -433,10 +433,10 @@ const CreateCourse = () => {
                     <span className="badge badge-blue">{form.category}</span>
                   </div>
 
-                  <h3 className="text-lg font-bold text-white mb-1.5 line-clamp-1">
+                  <h3 className="text-lg font-bold text-content mb-1.5 line-clamp-1">
                     {form.title || 'Course Title'}
                   </h3>
-                  <p className="text-gray-500 text-sm mb-4 line-clamp-2">
+                  <p className="text-content-muted text-sm mb-4 line-clamp-2">
                     {form.description || 'Course description will appear here...'}
                   </p>
 
@@ -444,16 +444,16 @@ const CreateCourse = () => {
                     <span className="text-lg font-black text-yellow-400">
                       {form.price === 0 ? 'Free' : `$${form.price}`}
                     </span>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-content-muted">
                       {sessions.filter((s) => s.title.trim()).length} sessions
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-3 border-t border-gray-800">
+                  <div className="flex items-center gap-2 pt-3 border-t border-border">
                     <div className="w-6 h-6 rounded-md bg-yellow-400/10 flex items-center justify-center text-yellow-400 text-[10px] font-bold">
                       {(user?.firstName || 'Y')[0]}
                     </div>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-content-secondary">
                       {user?.firstName
                         ? `${user.firstName} ${user.lastName || ''}`
                         : 'You'}

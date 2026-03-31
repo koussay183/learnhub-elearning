@@ -116,12 +116,12 @@ const UserManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-black text-white">User Management</h1>
-          <p className="mt-1 text-gray-500">Manage platform users and their roles</p>
+          <h1 className="text-3xl font-black text-content">User Management</h1>
+          <p className="mt-1 text-content-muted">Manage platform users and their roles</p>
         </div>
 
         {/* Error */}
@@ -135,11 +135,11 @@ const UserManagement = () => {
         )}
 
         {/* Filters */}
-        <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-4 mb-6">
+        <div className="bg-surface-card border-2 border-border rounded-2xl p-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-3">
             <form onSubmit={handleSearch} className="flex-1 flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-muted" />
                 <input
                   type="text"
                   value={search}
@@ -174,55 +174,55 @@ const UserManagement = () => {
         </div>
 
         {/* Table */}
-        <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl overflow-hidden">
+        <div className="bg-surface-card border-2 border-border rounded-2xl overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="w-8 h-8 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
             </div>
           ) : users.length === 0 ? (
             <div className="text-center py-20">
-              <div className="w-14 h-14 bg-[#1a1a1a] border-2 border-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Users className="w-7 h-7 text-gray-600" />
+              <div className="w-14 h-14 bg-surface-input border-2 border-border rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Users className="w-7 h-7 text-content-muted" />
               </div>
-              <p className="text-gray-500">No users found.</p>
+              <p className="text-content-muted">No users found.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-[#0a0a0a] border-b-2 border-gray-800">
-                    <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  <tr className="bg-surface border-b-2 border-border">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
                       Roles
                     </th>
-                    <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
                       Joined
                     </th>
-                    <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="text-right px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    <th className="text-right px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-800/50">
                   {users.map((user) => (
-                    <tr key={user._id} className="hover:bg-[#1a1a1a] transition-colors">
+                    <tr key={user._id} className="hover:bg-surface-input transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-yellow-400/10 flex items-center justify-center text-sm font-bold text-yellow-400">
                             {user.name?.charAt(0)?.toUpperCase() || '?'}
                           </div>
-                          <span className="font-semibold text-white">{user.name}</span>
+                          <span className="font-semibold text-content">{user.name}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-400">{user.email}</td>
+                      <td className="px-6 py-4 text-sm text-content-secondary">{user.email}</td>
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1">
                           {(user.roles || []).map((role) => (
@@ -235,7 +235,7 @@ const UserManagement = () => {
                           ))}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-content-muted">
                         {formatDate(user.createdAt)}
                       </td>
                       <td className="px-6 py-4">
@@ -287,7 +287,7 @@ const UserManagement = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 py-4 border-t-2 border-gray-800">
+            <div className="flex items-center justify-center gap-2 py-4 border-t-2 border-border">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
@@ -302,7 +302,7 @@ const UserManagement = () => {
                   className={`w-9 h-9 rounded-xl text-sm font-bold transition-all ${
                     p === page
                       ? 'bg-yellow-400 text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-                      : 'text-gray-500 hover:text-white hover:bg-[#1a1a1a]'
+                      : 'text-content-muted hover:text-content hover:bg-surface-input'
                   }`}
                 >
                   {p}
@@ -323,9 +323,9 @@ const UserManagement = () => {
       {/* Edit Role Modal */}
       {editingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6 max-w-sm w-full mx-4 animate-scaleIn">
-            <h3 className="text-lg font-black text-white mb-1">Edit Roles</h3>
-            <p className="text-sm text-gray-500 mb-5">{editingUser.name}</p>
+          <div className="bg-surface-card border-2 border-border rounded-2xl p-6 max-w-sm w-full mx-4 animate-scaleIn">
+            <h3 className="text-lg font-black text-content mb-1">Edit Roles</h3>
+            <p className="text-sm text-content-muted mb-5">{editingUser.name}</p>
             <div className="space-y-3 mb-6">
               {ROLES.map((role) => (
                 <label
@@ -333,7 +333,7 @@ const UserManagement = () => {
                   className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
                     editRoles.includes(role)
                       ? 'border-yellow-400/50 bg-yellow-400/5'
-                      : 'border-gray-800 hover:border-gray-700'
+                      : 'border-border hover:border-border-hover'
                   }`}
                 >
                   <input
@@ -342,7 +342,7 @@ const UserManagement = () => {
                     onChange={() => toggleEditRole(role)}
                     className="accent-yellow-400 w-4 h-4 rounded"
                   />
-                  <span className="text-sm font-semibold text-gray-300 capitalize">
+                  <span className="text-sm font-semibold text-content-secondary capitalize">
                     {role}
                   </span>
                 </label>
@@ -370,13 +370,13 @@ const UserManagement = () => {
       {/* Delete Confirmation Modal */}
       {deletingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6 max-w-sm w-full mx-4 animate-scaleIn">
+          <div className="bg-surface-card border-2 border-border rounded-2xl p-6 max-w-sm w-full mx-4 animate-scaleIn">
             <div className="w-12 h-12 bg-red-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-6 h-6 text-red-400" />
             </div>
-            <h3 className="text-lg font-black text-white mb-2 text-center">Delete User?</h3>
-            <p className="text-sm text-gray-400 mb-5 text-center">
-              Are you sure you want to delete <strong className="text-white">{deletingUser.name}</strong>? This
+            <h3 className="text-lg font-black text-content mb-2 text-center">Delete User?</h3>
+            <p className="text-sm text-content-secondary mb-5 text-center">
+              Are you sure you want to delete <strong className="text-content">{deletingUser.name}</strong>? This
               action cannot be undone.
             </p>
             <div className="flex gap-3">

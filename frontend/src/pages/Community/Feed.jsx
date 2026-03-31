@@ -119,16 +119,16 @@ const Feed = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-surface">
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
         <div ref={headerRef} className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-1">
               <MessageSquare className="w-7 h-7 text-yellow-400" />
-              <h1 className="text-2xl font-bold text-white">Community</h1>
+              <h1 className="text-2xl font-bold text-content">Community</h1>
             </div>
-            <p className="text-sm text-gray-500 ml-10">
+            <p className="text-sm text-content-muted ml-10">
               Join the conversation with fellow learners
             </p>
           </div>
@@ -153,7 +153,7 @@ const Feed = () => {
               className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 border-2 ${
                 activeCategory === cat.key
                   ? 'bg-yellow-400/10 text-yellow-400 border-yellow-400/50'
-                  : 'bg-[#111111] text-gray-400 border-gray-800 hover:border-gray-700 hover:text-gray-300'
+                  : 'bg-surface-card text-content-secondary border-border hover:border-border-hover hover:text-content-secondary'
               }`}
             >
               {cat.label}
@@ -164,15 +164,15 @@ const Feed = () => {
         {/* New Post Modal */}
         {showNewPost && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl">
+            <div className="bg-surface-card border-2 border-border rounded-2xl w-full max-w-lg p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-yellow-400" />
-                  <h2 className="text-lg font-bold text-white">Create a Post</h2>
+                  <h2 className="text-lg font-bold text-content">Create a Post</h2>
                 </div>
                 <button
                   onClick={() => setShowNewPost(false)}
-                  className="text-gray-500 hover:text-white transition-colors p-1"
+                  className="text-content-muted hover:text-content transition-colors p-1"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -180,7 +180,7 @@ const Feed = () => {
 
               <form onSubmit={handleCreatePost} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                  <label className="block text-sm font-medium text-content-secondary mb-1.5">
                     Title
                   </label>
                   <input
@@ -188,14 +188,14 @@ const Feed = () => {
                     value={newPost.title}
                     onChange={(e) => setNewPost((p) => ({ ...p, title: e.target.value }))}
                     placeholder="What's on your mind?"
-                    className="w-full px-4 py-2.5 bg-[#1a1a1a] border-2 border-gray-800 rounded-xl text-sm text-white placeholder-gray-600
+                    className="w-full px-4 py-2.5 bg-surface-input border-2 border-border rounded-xl text-sm text-content placeholder-content-muted
                                focus:outline-none focus:border-yellow-400/50 transition-all"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                  <label className="block text-sm font-medium text-content-secondary mb-1.5">
                     Content
                   </label>
                   <textarea
@@ -203,20 +203,20 @@ const Feed = () => {
                     onChange={(e) => setNewPost((p) => ({ ...p, content: e.target.value }))}
                     placeholder="Share your thoughts, questions, or resources..."
                     rows={5}
-                    className="w-full px-4 py-2.5 bg-[#1a1a1a] border-2 border-gray-800 rounded-xl text-sm text-white placeholder-gray-600
+                    className="w-full px-4 py-2.5 bg-surface-input border-2 border-border rounded-xl text-sm text-content placeholder-content-muted
                                focus:outline-none focus:border-yellow-400/50 transition-all resize-none"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                  <label className="block text-sm font-medium text-content-secondary mb-1.5">
                     Category
                   </label>
                   <select
                     value={newPost.category}
                     onChange={(e) => setNewPost((p) => ({ ...p, category: e.target.value }))}
-                    className="w-full px-4 py-2.5 bg-[#1a1a1a] border-2 border-gray-800 rounded-xl text-sm text-white
+                    className="w-full px-4 py-2.5 bg-surface-input border-2 border-border rounded-xl text-sm text-content
                                focus:outline-none focus:border-yellow-400/50 transition-all appearance-none cursor-pointer"
                   >
                     <option value="discussion">Discussion</option>
@@ -230,8 +230,8 @@ const Feed = () => {
                   <button
                     type="button"
                     onClick={() => setShowNewPost(false)}
-                    className="px-4 py-2.5 text-sm font-medium text-gray-400 border-2 border-gray-800 rounded-xl
-                               hover:border-gray-700 hover:text-gray-300 transition-all"
+                    className="px-4 py-2.5 text-sm font-medium text-content-secondary border-2 border-border rounded-xl
+                               hover:border-border-hover hover:text-content-secondary transition-all"
                   >
                     Cancel
                   </button>
@@ -258,9 +258,9 @@ const Feed = () => {
           </div>
         ) : posts.length === 0 ? (
           <div className="text-center py-20">
-            <MessageSquare className="w-12 h-12 text-gray-700 mx-auto mb-3" />
-            <p className="text-gray-400 text-lg mb-2">No posts yet</p>
-            <p className="text-gray-600 text-sm">Be the first to start a conversation!</p>
+            <MessageSquare className="w-12 h-12 text-content-muted mx-auto mb-3" />
+            <p className="text-content-secondary text-lg mb-2">No posts yet</p>
+            <p className="text-content-muted text-sm">Be the first to start a conversation!</p>
           </div>
         ) : (
           <div ref={postsContainerRef} className="space-y-4">
@@ -281,19 +281,19 @@ const Feed = () => {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-4 py-2 text-sm font-medium text-gray-400 bg-[#111111] border-2 border-gray-800 rounded-xl
-                         hover:border-gray-700 hover:text-gray-300 transition-all disabled:opacity-40"
+              className="px-4 py-2 text-sm font-medium text-content-secondary bg-surface-card border-2 border-border rounded-xl
+                         hover:border-border-hover hover:text-content-secondary transition-all disabled:opacity-40"
             >
               Previous
             </button>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-content-muted">
               Page {page} of {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-4 py-2 text-sm font-medium text-gray-400 bg-[#111111] border-2 border-gray-800 rounded-xl
-                         hover:border-gray-700 hover:text-gray-300 transition-all disabled:opacity-40"
+              className="px-4 py-2 text-sm font-medium text-content-secondary bg-surface-card border-2 border-border rounded-xl
+                         hover:border-border-hover hover:text-content-secondary transition-all disabled:opacity-40"
             >
               Next
             </button>

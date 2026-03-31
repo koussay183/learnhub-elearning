@@ -1,27 +1,20 @@
-import express from 'express';
-import {
-  getTests,
-  getTest,
-  createTest,
-  updateTest,
-  deleteTest,
-  startTest,
-  submitAnswer,
-  submitTest,
-  getAttempt,
-} from '../controllers/testController.js';
+import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
+import { getTests, getTest, createTest, updateTest, deleteTest, startTest, submitAnswer, submitTest, getAttempt } from '../controllers/testController.js';
 
-const router = express.Router();
+const router = Router();
 
+// Static routes FIRST
 router.get('/', getTests);
-router.get('/:testId', getTest);
 router.post('/', authMiddleware, createTest);
-router.put('/:testId', authMiddleware, updateTest);
-router.delete('/:testId', authMiddleware, deleteTest);
 router.post('/start', authMiddleware, startTest);
 router.post('/submit-answer', authMiddleware, submitAnswer);
 router.post('/submit-test', authMiddleware, submitTest);
 router.get('/attempts/:attemptId', authMiddleware, getAttempt);
+
+// Dynamic :testId routes AFTER
+router.get('/:testId', getTest);
+router.put('/:testId', authMiddleware, updateTest);
+router.delete('/:testId', authMiddleware, deleteTest);
 
 export default router;

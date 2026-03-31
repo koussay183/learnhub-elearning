@@ -15,7 +15,7 @@ const Sidebar = ({ activePage, user }) => {
   const isAdmin = user?.roles?.includes('admin');
 
   return (
-    <aside className="fixed top-16 left-0 bottom-0 w-64 bg-[#0a0a0a] border-r border-gray-800 hidden lg:flex flex-col z-40">
+    <aside className="fixed top-16 left-0 bottom-0 w-64 bg-surface border-r border-border hidden lg:flex flex-col z-40">
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = activePage === item.key || activePage === item.to.replace('/', '');
@@ -25,7 +25,7 @@ const Sidebar = ({ activePage, user }) => {
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
                   ? 'bg-yellow-400/10 text-yellow-400 border-l-2 border-yellow-400 -ml-[2px]'
-                  : 'text-gray-500 hover:text-white hover:bg-white/5'
+                  : 'text-content-muted hover:text-content hover:bg-surface-hover'
               }`}>
               <Icon className="w-5 h-5" />
               {item.label}
@@ -40,7 +40,7 @@ const Sidebar = ({ activePage, user }) => {
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 activePage === 'admin'
                   ? 'bg-yellow-400/10 text-yellow-400 border-l-2 border-yellow-400 -ml-[2px]'
-                  : 'text-gray-500 hover:text-white hover:bg-white/5'
+                  : 'text-content-muted hover:text-content hover:bg-surface-hover'
               }`}>
               <Shield className="w-5 h-5" />
               Admin Panel
@@ -50,14 +50,14 @@ const Sidebar = ({ activePage, user }) => {
       </nav>
 
       {/* User card at bottom */}
-      <div className="p-3 border-t border-gray-800">
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#111111] border border-gray-800/50">
+      <div className="p-3 border-t border-border">
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-surface-card border border-border/50">
           <div className="w-9 h-9 rounded-lg bg-yellow-400 flex items-center justify-center text-black text-sm font-black border-2 border-black flex-shrink-0">
             {userInitial}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-white truncate">{user?.firstName} {user?.lastName}</p>
-            <p className="text-xs text-gray-600 truncate">{user?.roles?.join(', ')}</p>
+            <p className="text-sm font-bold text-content truncate">{user?.firstName} {user?.lastName}</p>
+            <p className="text-xs text-content-muted truncate">{user?.roles?.join(', ')}</p>
           </div>
         </div>
       </div>

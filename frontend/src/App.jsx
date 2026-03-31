@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import useAuth from './hooks/useAuth.js';
 import { LoadingSpinner } from './components/LoadingSpinner.jsx';
 import { SocketProvider } from './context/SocketContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import Layout from './components/common/Layout.jsx';
 
 // Auth pages
@@ -45,12 +46,15 @@ import Checkout from './pages/Checkout.jsx';
 // Landing
 import LandingPage from './pages/LandingPage.jsx';
 
+// User Profile
+import UserProfile from './pages/UserProfile.jsx';
+
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="h-screen bg-surface flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -75,9 +79,10 @@ const AppLayout = ({ children, activePage }) => (
 
 function App() {
   return (
-    <SocketProvider>
-      <Router>
-        <Routes>
+    <ThemeProvider>
+      <SocketProvider>
+        <Router>
+          <Routes>
           {/* Public auth pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -134,12 +139,16 @@ function App() {
           {/* Settings */}
           <Route path="/settings" element={<AppLayout activePage="settings"><Profile /></AppLayout>} />
 
+          {/* User Profile */}
+          <Route path="/users/:userId" element={<AppLayout activePage="community"><UserProfile /></AppLayout>} />
+
           {/* Landing / Default */}
           <Route path="/" element={<LandingPage />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
-      </Router>
-    </SocketProvider>
+        </Router>
+      </SocketProvider>
+    </ThemeProvider>
   );
 }
 

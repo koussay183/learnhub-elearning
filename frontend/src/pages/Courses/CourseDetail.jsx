@@ -34,13 +34,14 @@ const CourseDetail = () => {
     setError('');
     try {
       const res = await api.get(`/api/courses/${id}`);
-      const data = res.data.course || res.data;
+      const { course: courseData, sessions: sessionData, enrollment: enrollmentData } = res.data;
+      const data = courseData || res.data;
       setCourse(data);
-      setSessions(data.sessions || []);
+      setSessions(sessionData || data.sessions || []);
       setReviews(data.reviews || []);
-      setEnrollment(res.data.enrollment || (data.isEnrolled ? data : null));
-      setProgress(data.progress || 0);
-      const completed = (data.completedSessions || []).map((s) =>
+      setEnrollment(enrollmentData || res.data.enrollment || (data.isEnrolled ? data : null));
+      setProgress(enrollmentData?.progress || data.progress || 0);
+      const completed = (enrollmentData?.completedSessions || data.completedSessions || []).map((s) =>
         typeof s === 'string' ? s : s._id
       );
       setCompletedSessions(new Set(completed));
@@ -76,9 +77,13 @@ const CourseDetail = () => {
       setEnrolling(true);
       await api.post('/api/courses/enroll', { courseId: course._id });
       // Refresh course data to show enrolled state
-      const { data } = await api.get(`/api/courses/${id}`);
-      setCourse(data.course || data);
-      setEnrollment(data.enrollment || data.course || data);
+      const res = await api.get(`/api/courses/${id}`);
+      const { course: courseData, sessions: sessionData, enrollment: enrollmentData } = res.data;
+      const refreshed = courseData || res.data;
+      setCourse(refreshed);
+      if (sessionData) setSessions(sessionData);
+      setEnrollment(enrollmentData || (refreshed.isEnrolled ? refreshed : null));
+      setProgress(enrollmentData?.progress || refreshed.progress || 0);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to enroll');
     } finally {
@@ -91,8 +96,12 @@ const CourseDetail = () => {
     try {
       await api.delete(`/api/courses/enroll/${course._id}`);
       setEnrollment(null);
-      const { data } = await api.get(`/api/courses/${id}`);
-      setCourse(data.course || data);
+      setProgress(0);
+      const res = await api.get(`/api/courses/${id}`);
+      const { course: courseData, sessions: sessionData } = res.data;
+      const refreshed = courseData || res.data;
+      setCourse(refreshed);
+      if (sessionData) setSessions(sessionData);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to unenroll');
     }
@@ -102,21 +111,21 @@ const CourseDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-8 h-8 border-[3px] border-gray-800 border-t-yellow-400 rounded-full animate-spin" />
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="w-8 h-8 border-[3px] border-border border-t-yellow-400 rounded-full animate-spin" />
       </div>
     );
   }
 
   if (error && !course) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 bg-red-400/10 rounded-2xl border-2 border-red-400/20 flex items-center justify-center">
             <BookOpen className="w-8 h-8 text-red-400" />
           </div>
-          <h3 className="text-lg font-bold text-white mb-2">Course Not Found</h3>
-          <p className="text-gray-500 mb-4">{error}</p>
+          <h3 className="text-lg font-bold text-content mb-2">Course Not Found</h3>
+          <p className="text-content-muted mb-4">{error}</p>
           <button onClick={() => navigate('/courses')} className="btn-secondary">
             Back to Courses
           </button>
@@ -126,9 +135,9 @@ const CourseDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-surface">
       {/* Hero Section */}
-      <div ref={heroRef} className="relative bg-[#111111] border-b border-gray-800">
+      <div ref={heroRef} className="relative bg-surface-card border-b border-border">
         {course.thumbnail && (
           <div className="absolute inset-0">
             <img
@@ -142,7 +151,7 @@ const CourseDetail = () => {
         <div className="relative max-w-7xl mx-auto px-6 py-12">
           <button
             onClick={() => navigate('/courses')}
-            className="flex items-center gap-2 text-gray-500 hover:text-yellow-400 mb-6 transition-colors"
+            className="flex items-center gap-2 text-content-muted hover:text-yellow-400 mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Courses
@@ -158,8 +167,8 @@ const CourseDetail = () => {
                 )}
               </div>
 
-              <h1 className="text-4xl font-black text-white mb-4">{course.title}</h1>
-              <p className="text-lg text-gray-400 mb-6 max-w-2xl">
+              <h1 className="text-4xl font-black text-content mb-4">{course.title}</h1>
+              <p className="text-lg text-content-secondary mb-6 max-w-2xl">
                 {course.description?.substring(0, 200)}
                 {(course.description?.length || 0) > 200 ? '...' : ''}
               </p>
@@ -170,12 +179,12 @@ const CourseDetail = () => {
                   {(course.instructor?.firstName || 'I')[0]}
                 </div>
                 <div>
-                  <p className="font-semibold text-white">
+                  <p className="font-semibold text-content">
                     {course.instructor?.firstName
                       ? `${course.instructor.firstName} ${course.instructor.lastName || ''}`
                       : course.instructorName || 'Instructor'}
                   </p>
-                  <p className="text-sm text-gray-500">Instructor</p>
+                  <p className="text-sm text-content-muted">Instructor</p>
                 </div>
               </div>
             </div>
@@ -195,10 +204,10 @@ const CourseDetail = () => {
                   {/* Progress bar */}
                   <div className="mb-4">
                     <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-gray-400">Progress</span>
+                      <span className="text-content-secondary">Progress</span>
                       <span className="text-yellow-400 font-bold">{Math.round(progress)}%</span>
                     </div>
-                    <div className="w-full h-2.5 bg-[#0a0a0a] rounded-full overflow-hidden border border-gray-800">
+                    <div className="w-full h-2.5 bg-surface rounded-full overflow-hidden border border-border">
                       <div
                         className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-yellow-400 to-yellow-500"
                         style={{ width: `${progress}%` }}
@@ -250,22 +259,22 @@ const CourseDetail = () => {
                 </button>
               )}
 
-              <div className="mt-5 pt-5 border-t border-gray-800 space-y-3 text-sm">
+              <div className="mt-5 pt-5 border-t border-border space-y-3 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-500 flex items-center gap-2"><BookOpen className="w-4 h-4" /> Sessions</span>
-                  <span className="font-semibold text-white">{sessions.length}</span>
+                  <span className="text-content-muted flex items-center gap-2"><BookOpen className="w-4 h-4" /> Sessions</span>
+                  <span className="font-semibold text-content">{sessions.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-500 flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Level</span>
-                  <span className="font-semibold text-white">{course.level || 'Beginner'}</span>
+                  <span className="text-content-muted flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Level</span>
+                  <span className="font-semibold text-content">{course.level || 'Beginner'}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-500 flex items-center gap-2"><Globe className="w-4 h-4" /> Language</span>
-                  <span className="font-semibold text-white">{course.language || 'English'}</span>
+                  <span className="text-content-muted flex items-center gap-2"><Globe className="w-4 h-4" /> Language</span>
+                  <span className="font-semibold text-content">{course.language || 'English'}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-500 flex items-center gap-2"><Users className="w-4 h-4" /> Students</span>
-                  <span className="font-semibold text-white">{course.enrollmentCount || 0}</span>
+                  <span className="text-content-muted flex items-center gap-2"><Users className="w-4 h-4" /> Students</span>
+                  <span className="font-semibold text-content">{course.enrollmentCount || 0}</span>
                 </div>
               </div>
             </div>
@@ -274,24 +283,24 @@ const CourseDetail = () => {
       </div>
 
       {/* Stats Row */}
-      <div className="border-b border-gray-800">
+      <div className="border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-800">
             <div className="py-5 text-center">
-              <p className="text-2xl font-black text-white">{course.enrollmentCount || 0}</p>
-              <p className="text-sm text-gray-500">Students</p>
+              <p className="text-2xl font-black text-content">{course.enrollmentCount || 0}</p>
+              <p className="text-sm text-content-muted">Students</p>
             </div>
             <div className="py-5 text-center">
-              <p className="text-2xl font-black text-white">{sessions.length}</p>
-              <p className="text-sm text-gray-500">Sessions</p>
+              <p className="text-2xl font-black text-content">{sessions.length}</p>
+              <p className="text-sm text-content-muted">Sessions</p>
             </div>
             <div className="py-5 text-center">
               <p className="text-2xl font-black text-yellow-400">{course.level || 'Beginner'}</p>
-              <p className="text-sm text-gray-500">Level</p>
+              <p className="text-sm text-content-muted">Level</p>
             </div>
             <div className="py-5 text-center">
-              <p className="text-2xl font-black text-white">{course.language || 'English'}</p>
-              <p className="text-sm text-gray-500">Language</p>
+              <p className="text-2xl font-black text-content">{course.language || 'English'}</p>
+              <p className="text-sm text-content-muted">Language</p>
             </div>
           </div>
         </div>
@@ -305,7 +314,7 @@ const CourseDetail = () => {
           </div>
         )}
 
-        <div className="flex gap-1 mb-8 border-b border-gray-800">
+        <div className="flex gap-1 mb-8 border-b border-border">
           {TABS.map((tab) => (
             <button
               key={tab}
@@ -313,7 +322,7 @@ const CourseDetail = () => {
               className={`px-5 py-3 text-sm font-semibold transition-colors relative ${
                 activeTab === tab
                   ? 'text-yellow-400'
-                  : 'text-gray-500 hover:text-gray-300'
+                  : 'text-content-muted hover:text-content-secondary'
               }`}
             >
               {tab}
@@ -328,20 +337,20 @@ const CourseDetail = () => {
         {activeTab === 'Overview' && (
           <div className="animate-fadeIn">
             <div className="card p-8 mb-6">
-              <h2 className="text-2xl font-black text-white mb-4">About this course</h2>
-              <p className="text-gray-400 leading-relaxed whitespace-pre-line">
+              <h2 className="text-2xl font-black text-content mb-4">About this course</h2>
+              <p className="text-content-secondary leading-relaxed whitespace-pre-line">
                 {course.description}
               </p>
             </div>
 
             {course.learningPoints && course.learningPoints.length > 0 && (
               <div className="card p-8">
-                <h2 className="text-2xl font-black text-white mb-6">What you'll learn</h2>
+                <h2 className="text-2xl font-black text-content mb-6">What you'll learn</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {course.learningPoints.map((point, i) => (
                     <div key={i} className="flex items-start gap-3">
                       <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-300">{point}</span>
+                      <span className="text-content-secondary">{point}</span>
                     </div>
                   ))}
                 </div>
@@ -355,7 +364,7 @@ const CourseDetail = () => {
           <div className="animate-fadeIn">
             <div className="card overflow-hidden">
               {sessions.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
+                <div className="p-8 text-center text-content-muted">
                   No sessions available yet.
                 </div>
               ) : (
@@ -369,7 +378,7 @@ const CourseDetail = () => {
                         <div
                           key={session._id}
                           className={`flex items-center gap-4 p-5 transition-colors ${
-                            isLocked ? 'opacity-50' : 'hover:bg-[#1a1a1a]'
+                            isLocked ? 'opacity-50' : 'hover:bg-surface-input'
                           }`}
                         >
                           {/* Number / Status */}
@@ -377,7 +386,7 @@ const CourseDetail = () => {
                             className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold border-2 ${
                               isCompleted
                                 ? 'bg-green-400/10 text-green-400 border-green-400/30'
-                                : 'bg-[#0a0a0a] text-gray-500 border-gray-800'
+                                : 'bg-surface text-content-muted border-border'
                             }`}
                           >
                             {isCompleted ? (
@@ -389,22 +398,22 @@ const CourseDetail = () => {
 
                           {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-white truncate">
+                            <h4 className="font-semibold text-content truncate">
                               {session.title}
                             </h4>
                             <div className="flex items-center gap-3 mt-1">
                               {session.duration && (
-                                <span className="text-xs text-gray-500 flex items-center gap-1">
+                                <span className="text-xs text-content-muted flex items-center gap-1">
                                   <Clock className="w-3 h-3" /> {session.duration}
                                 </span>
                               )}
                               {session.videoUrl && (
-                                <span className="text-xs text-gray-600 flex items-center gap-1">
+                                <span className="text-xs text-content-muted flex items-center gap-1">
                                   <Play className="w-3 h-3" /> Video
                                 </span>
                               )}
                               {session.pdfUrl && (
-                                <span className="text-xs text-gray-600 flex items-center gap-1">
+                                <span className="text-xs text-content-muted flex items-center gap-1">
                                   <FileText className="w-3 h-3" /> PDF
                                 </span>
                               )}
@@ -413,7 +422,7 @@ const CourseDetail = () => {
 
                           {/* Lock or Play */}
                           {isLocked ? (
-                            <Lock className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                            <Lock className="w-5 h-5 text-content-muted flex-shrink-0" />
                           ) : (
                             <Link
                               to={`/courses/${id}/sessions/${session._id}`}
@@ -437,11 +446,11 @@ const CourseDetail = () => {
           <div className="animate-fadeIn">
             {reviews.length === 0 ? (
               <div className="card p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-[#0a0a0a] rounded-2xl border-2 border-gray-800 flex items-center justify-center">
-                  <MessageSquare className="w-8 h-8 text-gray-700" />
+                <div className="w-16 h-16 mx-auto mb-4 bg-surface rounded-2xl border-2 border-border flex items-center justify-center">
+                  <MessageSquare className="w-8 h-8 text-content-muted" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">No reviews yet</h3>
-                <p className="text-gray-500">Be the first to share your experience with this course.</p>
+                <h3 className="text-lg font-bold text-content mb-2">No reviews yet</h3>
+                <p className="text-content-muted">Be the first to share your experience with this course.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -453,7 +462,7 @@ const CourseDetail = () => {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-semibold text-white">
+                          <h4 className="font-semibold text-content">
                             {review.user?.firstName
                               ? `${review.user.firstName} ${review.user.lastName || ''}`
                               : 'Anonymous'}
@@ -465,14 +474,14 @@ const CourseDetail = () => {
                                 <Star
                                   key={j}
                                   className={`w-4 h-4 ${
-                                    j < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-700'
+                                    j < review.rating ? 'text-yellow-400 fill-current' : 'text-content-muted'
                                   }`}
                                 />
                               ))}
                             </div>
                           )}
                         </div>
-                        <p className="text-gray-400 text-sm">{review.comment || review.text}</p>
+                        <p className="text-content-secondary text-sm">{review.comment || review.text}</p>
                       </div>
                     </div>
                   </div>

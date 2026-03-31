@@ -91,12 +91,12 @@ const CourseBrowser = () => {
     filters.search || filters.category !== 'All Categories' || filters.level !== 'All Levels' || filters.price !== 'All';
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-surface">
       {/* Header */}
-      <div className="border-b border-gray-800">
+      <div className="border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-10">
-          <h1 className="text-4xl font-black text-white mb-2">Explore Courses</h1>
-          <p className="text-lg text-gray-500">
+          <h1 className="text-4xl font-black text-content mb-2">Explore Courses</h1>
+          <p className="text-lg text-content-muted">
             Discover courses taught by expert instructors and level up your skills
           </p>
         </div>
@@ -107,9 +107,9 @@ const CourseBrowser = () => {
         <div className="card p-5 mb-8">
           <div className="flex items-center gap-2 mb-4">
             <SlidersHorizontal className="w-4 h-4 text-yellow-400" />
-            <span className="text-sm font-bold text-white">Filters</span>
+            <span className="text-sm font-bold text-content">Filters</span>
             {hasActiveFilters && (
-              <button onClick={clearFilters} className="ml-auto flex items-center gap-1 text-xs text-gray-500 hover:text-yellow-400 transition-colors">
+              <button onClick={clearFilters} className="ml-auto flex items-center gap-1 text-xs text-content-muted hover:text-yellow-400 transition-colors">
                 <X className="w-3 h-3" /> Clear all
               </button>
             )}
@@ -117,7 +117,7 @@ const CourseBrowser = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-muted" />
               <input
                 type="text"
                 placeholder="Search courses..."
@@ -158,7 +158,7 @@ const CourseBrowser = () => {
                   className={`flex-1 px-3 py-3 rounded-xl text-sm font-semibold border-2 transition-all duration-200 ${
                     filters.price === opt
                       ? 'bg-yellow-400 text-black border-black shadow-brutal-sm'
-                      : 'bg-[#1a1a1a] text-gray-400 border-gray-800 hover:border-gray-600'
+                      : 'bg-surface-input text-content-secondary border-border hover:border-gray-600'
                   }`}
                 >
                   {opt === 'All' ? 'All' : opt}
@@ -178,16 +178,16 @@ const CourseBrowser = () => {
         {/* Loading state */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-[3px] border-gray-800 border-t-yellow-400 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-[3px] border-border border-t-yellow-400 rounded-full animate-spin" />
           </div>
         ) : courses.length === 0 ? (
           /* Empty state */
           <div className="text-center py-20">
-            <div className="w-24 h-24 mx-auto mb-6 bg-[#111111] rounded-2xl border-2 border-gray-800 flex items-center justify-center">
-              <BookOpen className="w-10 h-10 text-gray-700" />
+            <div className="w-24 h-24 mx-auto mb-6 bg-surface-card rounded-2xl border-2 border-border flex items-center justify-center">
+              <BookOpen className="w-10 h-10 text-content-muted" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">No courses found</h3>
-            <p className="text-gray-500 mb-6">
+            <h3 className="text-xl font-bold text-content mb-2">No courses found</h3>
+            <p className="text-content-muted mb-6">
               Try adjusting your filters or search terms to find what you're looking for.
             </p>
             <button onClick={clearFilters} className="btn-secondary">
@@ -211,7 +211,7 @@ const CourseBrowser = () => {
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((p) => p - 1)}
-                  className="p-2.5 rounded-xl border-2 border-gray-800 text-gray-400 hover:border-yellow-400/50 hover:text-yellow-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-2.5 rounded-xl border-2 border-border text-content-secondary hover:border-yellow-400/50 hover:text-yellow-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -222,7 +222,7 @@ const CourseBrowser = () => {
                     className={`w-10 h-10 rounded-xl text-sm font-bold transition-all duration-200 border-2 ${
                       currentPage === page
                         ? 'bg-yellow-400 text-black border-black shadow-brutal-sm'
-                        : 'text-gray-500 border-gray-800 hover:border-gray-600 hover:text-white'
+                        : 'text-content-muted border-border hover:border-gray-600 hover:text-content'
                     }`}
                   >
                     {page}
@@ -231,7 +231,7 @@ const CourseBrowser = () => {
                 <button
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((p) => p + 1)}
-                  className="p-2.5 rounded-xl border-2 border-gray-800 text-gray-400 hover:border-yellow-400/50 hover:text-yellow-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-2.5 rounded-xl border-2 border-border text-content-secondary hover:border-yellow-400/50 hover:text-yellow-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>

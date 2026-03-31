@@ -7,7 +7,7 @@ export const getTests = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const tests = await Test.find({ status: 'published' })
-      .populate('createdBy', 'firstName lastName')
+      .populate('createdBy', 'firstName lastName avatar')
       .limit(limit)
       .skip(skip)
       .sort({ createdAt: -1 });
@@ -23,7 +23,7 @@ export const getTests = async (req, res) => {
 
 export const getTest = async (req, res) => {
   try {
-    const test = await Test.findById(req.params.testId).populate('createdBy', 'firstName lastName');
+    const test = await Test.findById(req.params.testId).populate('createdBy', 'firstName lastName avatar');
     if (!test) return res.status(404).json({ error: 'Test not found' });
 
     res.json(test);
@@ -119,23 +119,20 @@ export const startTest = async (req, res) => {
 
     await attempt.save();
 
-    const testQuestions = test.questions.map(q => ({
+    const questionsForStudent = test.questions.map(q => ({
       _id: q._id,
-      type: q.type,
       question: q.question,
-      options: test.settings.shuffleQuestions ? shuffleArray([...q.options]) : q.options,
+      type: q.type,
+      options: q.options,
       points: q.points,
     }));
 
     res.json({
       attemptId: attempt._id,
       sessionId,
-      test: {
-        _id: test._id,
-        title: test.title,
-        questions: testQuestions,
-        duration: test.settings.duration,
-      },
+      questions: questionsForStudent,
+      duration: test.settings?.duration,
+      testTitle: test.title,
     });
   } catch (error) {
     console.error('Start test error:', error);
@@ -158,7 +155,7 @@ export const submitAnswer = async (req, res) => {
     const question = test.questions.id(questionId);
     const isCorrect = question.correctAnswer === answer;
 
-    const existingResponse = attempt.responses.find(r => r.questionId.toString() === questionId);
+    const existingResponse = attempt.responses.find(r => r.questionId?.toString() === questionId);
     if (existingResponse) {
       existingResponse.answer = answer;
       existingResponse.isCorrect = isCorrect;
@@ -176,59 +173,108 @@ export const submitAnswer = async (req, res) => {
 
 export const submitTest = async (req, res) => {
   try {
-    const { attemptId } = req.body;
+    const { attemptId, answers } = req.body;
+    // answers is an object like { "questionIndex": "answer", ... }
 
     const attempt = await TestAttempt.findById(attemptId);
     if (!attempt) return res.status(404).json({ error: 'Attempt not found' });
+    if (attempt.userId.toString() !== req.userId) return res.status(403).json({ error: 'Not authorized' });
+    if (attempt.status === 'completed') return res.status(400).json({ error: 'Test already submitted' });
 
     const test = await Test.findById(attempt.testId);
+    if (!test) return res.status(404).json({ error: 'Test not found' });
 
+    // Normalize answers - support both array [{questionId, answer}] and object {"0":"answer"} formats
+    let answersMap = {};
+    if (Array.isArray(answers)) {
+      answers.forEach(a => { answersMap[a.questionId ?? a.questionIndex ?? ''] = a.answer; });
+    } else if (answers && typeof answers === 'object') {
+      answersMap = answers;
+    }
+
+    // Grade each answer
     let totalPoints = 0;
     let earnedPoints = 0;
+    const responses = [];
 
-    attempt.responses.forEach(response => {
-      const question = test.questions.id(response.questionId);
-      totalPoints += question.points;
-      if (response.isCorrect) earnedPoints += question.points;
+    test.questions.forEach((q, index) => {
+      totalPoints += (q.points || 1);
+      const userAnswer = answersMap[index.toString()] || answersMap[index] || answersMap[q._id?.toString()] || '';
+      const isCorrect = userAnswer.toString().toLowerCase().trim() === q.correctAnswer?.toString().toLowerCase().trim();
+      if (isCorrect) earnedPoints += (q.points || 1);
+
+      responses.push({
+        questionIndex: index,
+        answer: userAnswer,
+        isCorrect,
+        points: isCorrect ? (q.points || 1) : 0,
+      });
     });
 
+    const percentage = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
+    const passed = percentage >= (test.settings?.passingScore || 50);
+
+    attempt.responses = responses;
     attempt.score = earnedPoints;
     attempt.totalPoints = totalPoints;
-    attempt.percentage = Math.round((earnedPoints / totalPoints) * 100);
-    attempt.submittedAt = new Date();
-    attempt.status = 'graded';
-
+    attempt.percentage = percentage;
+    attempt.passed = passed;
+    attempt.status = 'completed';
+    attempt.completedAt = new Date();
     await attempt.save();
-    await Test.findByIdAndUpdate(test._id, { $inc: { totalAttempts: 1 } });
-
-    const passed = attempt.percentage >= test.settings.passingScore;
 
     res.json({
-      message: 'Test submitted',
-      score: attempt.score,
-      totalPoints: attempt.totalPoints,
-      percentage: attempt.percentage,
+      attemptId: attempt._id,
+      score: earnedPoints,
+      totalPoints,
+      percentage,
       passed,
-      results: test.settings.showResults ? attempt.responses : null,
+      responses,
+      testTitle: test.title,
     });
   } catch (error) {
-    console.error('Submit test error:', error);
-    res.status(500).json({ error: 'Failed to submit test' });
+    res.status(500).json({ error: error.message });
   }
 };
 
 export const getAttempt = async (req, res) => {
   try {
-    const attempt = await TestAttempt.findById(req.params.attemptId)
-      .populate('testId')
-      .populate('userId', 'firstName lastName');
-
+    const attempt = await TestAttempt.findById(req.params.attemptId);
     if (!attempt) return res.status(404).json({ error: 'Attempt not found' });
+    if (attempt.userId.toString() !== req.userId) return res.status(403).json({ error: 'Not authorized' });
 
-    res.json(attempt);
+    const test = await Test.findById(attempt.testId);
+
+    // Build detailed results
+    const detailedResults = attempt.responses?.map((r, i) => {
+      const question = test?.questions?.[r.questionIndex || i];
+      return {
+        question: question?.question || `Question ${i + 1}`,
+        type: question?.type,
+        options: question?.options,
+        userAnswer: r.answer,
+        correctAnswer: question?.correctAnswer,
+        isCorrect: r.isCorrect,
+        points: r.points,
+      };
+    }) || [];
+
+    res.json({
+      attempt: {
+        _id: attempt._id,
+        score: attempt.score,
+        totalPoints: attempt.totalPoints,
+        percentage: attempt.percentage,
+        passed: attempt.passed,
+        status: attempt.status,
+        completedAt: attempt.completedAt,
+        createdAt: attempt.createdAt,
+      },
+      testTitle: test?.title || 'Unknown Test',
+      results: detailedResults,
+    });
   } catch (error) {
-    console.error('Get attempt error:', error);
-    res.status(500).json({ error: 'Failed to fetch attempt' });
+    res.status(500).json({ error: error.message });
   }
 };
 

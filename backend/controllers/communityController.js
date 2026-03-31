@@ -31,6 +31,23 @@ export const getPosts = async (req, res) => {
   }
 };
 
+export const getPost = async (req, res) => {
+  try {
+    const post = await CommunityPost.findById(req.params.postId)
+      .populate('authorId', 'firstName lastName avatar')
+      .populate('comments.authorId', 'firstName lastName avatar');
+    if (!post) return res.status(404).json({ error: 'Post not found' });
+
+    // Increment views
+    post.views = (post.views || 0) + 1;
+    await post.save();
+
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const createPost = async (req, res) => {
   try {
     const { title, content, category, tags } = req.body;
@@ -61,17 +78,21 @@ export const updatePost = async (req, res) => {
   try {
     const post = await CommunityPost.findById(req.params.postId);
     if (!post) return res.status(404).json({ error: 'Post not found' });
+    if (post.authorId.toString() !== req.userId) return res.status(403).json({ error: 'Not authorized' });
 
-    if (post.authorId.toString() !== req.userId) {
-      return res.status(403).json({ error: 'Unauthorized' });
-    }
+    const { title, content, category, tags } = req.body;
+    if (title) post.title = title;
+    if (content) post.content = content;
+    if (category) post.category = category;
+    if (tags) post.tags = tags;
 
-    Object.assign(post, req.body);
     await post.save();
-    res.json({ message: 'Post updated', post });
+    const updated = await CommunityPost.findById(post._id)
+      .populate('authorId', 'firstName lastName avatar')
+      .populate('comments.authorId', 'firstName lastName avatar');
+    res.json(updated);
   } catch (error) {
-    console.error('Update post error:', error);
-    res.status(500).json({ error: 'Failed to update post' });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -121,11 +142,8 @@ export const addComment = async (req, res) => {
     if (!post) return res.status(404).json({ error: 'Post not found' });
 
     const comment = {
-      _id: new Date().getTime(),
-      postId: req.params.postId,
       authorId: req.userId,
       content,
-      likes: [],
     };
 
     post.comments.push(comment);

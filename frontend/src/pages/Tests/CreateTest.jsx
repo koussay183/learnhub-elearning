@@ -115,13 +115,13 @@ const CreateTest = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-surface">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-black text-white">Create Test</h1>
-            <p className="mt-1 text-gray-500">Design a new test with questions</p>
+            <h1 className="text-3xl font-black text-content">Create Test</h1>
+            <p className="mt-1 text-content-muted">Design a new test with questions</p>
           </div>
           <button
             onClick={() => navigate('/tests')}
@@ -139,11 +139,11 @@ const CreateTest = () => {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Info */}
-          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-white mb-4">Basic Information</h2>
+          <div className="bg-surface-card border-2 border-border rounded-2xl p-6">
+            <h2 className="text-lg font-bold text-content mb-4">Basic Information</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-content-secondary mb-2">
                   Test Title <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -155,7 +155,7 @@ const CreateTest = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-content-secondary mb-2">
                   Description
                 </label>
                 <textarea
@@ -170,11 +170,11 @@ const CreateTest = () => {
           </div>
 
           {/* Settings */}
-          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-white mb-4">Settings</h2>
+          <div className="bg-surface-card border-2 border-border rounded-2xl p-6">
+            <h2 className="text-lg font-bold text-content mb-4">Settings</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
+                <label className="flex items-center gap-2 text-sm font-semibold text-content-secondary mb-2">
                   <Clock className="w-4 h-4 text-yellow-400" /> Duration (minutes)
                 </label>
                 <input
@@ -186,7 +186,7 @@ const CreateTest = () => {
                 />
               </div>
               <div>
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
+                <label className="flex items-center gap-2 text-sm font-semibold text-content-secondary mb-2">
                   <Target className="w-4 h-4 text-yellow-400" /> Passing Score (%)
                 </label>
                 <input
@@ -199,7 +199,7 @@ const CreateTest = () => {
                 />
               </div>
               <div>
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
+                <label className="flex items-center gap-2 text-sm font-semibold text-content-secondary mb-2">
                   <Calendar className="w-4 h-4 text-yellow-400" /> Scheduled Start Time
                 </label>
                 <input
@@ -210,7 +210,7 @@ const CreateTest = () => {
                 />
               </div>
               <div>
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
+                <label className="flex items-center gap-2 text-sm font-semibold text-content-secondary mb-2">
                   <Calendar className="w-4 h-4 text-yellow-400" /> Scheduled End Time
                 </label>
                 <input
@@ -238,8 +238,8 @@ const CreateTest = () => {
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Shuffle className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-300">Shuffle questions</span>
+                  <Shuffle className="w-4 h-4 text-content-muted" />
+                  <span className="text-sm text-content-secondary">Shuffle questions</span>
                 </div>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
@@ -256,17 +256,17 @@ const CreateTest = () => {
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-300">Show results to students after submission</span>
+                  <Eye className="w-4 h-4 text-content-muted" />
+                  <span className="text-sm text-content-secondary">Show results to students after submission</span>
                 </div>
               </label>
             </div>
           </div>
 
           {/* Questions */}
-          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6">
+          <div className="bg-surface-card border-2 border-border rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-white">
+              <h2 className="text-lg font-bold text-content">
                 Questions ({questions.length})
               </h2>
               <button
@@ -282,7 +282,7 @@ const CreateTest = () => {
               {questions.map((question, qIndex) => (
                 <div
                   key={question.id}
-                  className="border-2 border-gray-800 rounded-xl p-5 relative bg-[#0a0a0a]"
+                  className="border-2 border-border rounded-xl p-5 relative bg-surface"
                 >
                   {/* Question header */}
                   <div className="flex items-center justify-between mb-4">
@@ -303,7 +303,7 @@ const CreateTest = () => {
                   {/* Type & Points */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                     <div>
-                      <label className="block text-xs font-semibold text-gray-400 mb-1">
+                      <label className="block text-xs font-semibold text-content-secondary mb-1">
                         Question Type
                       </label>
                       <select
@@ -316,7 +316,7 @@ const CreateTest = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-400 mb-1">
+                      <label className="block text-xs font-semibold text-content-secondary mb-1">
                         Points
                       </label>
                       <input
@@ -333,7 +333,7 @@ const CreateTest = () => {
 
                   {/* Question text */}
                   <div className="mb-3">
-                    <label className="block text-xs font-semibold text-gray-400 mb-1">
+                    <label className="block text-xs font-semibold text-content-secondary mb-1">
                       Question Text <span className="text-red-400">*</span>
                     </label>
                     <textarea
@@ -348,7 +348,7 @@ const CreateTest = () => {
                   {/* Multiple choice options */}
                   {question.type === 'multiple-choice' && (
                     <div className="space-y-2">
-                      <label className="block text-xs font-semibold text-gray-400">
+                      <label className="block text-xs font-semibold text-content-secondary">
                         Options (select the correct answer)
                       </label>
                       {question.options.map((option, oIndex) => (
@@ -357,7 +357,7 @@ const CreateTest = () => {
                           className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
                             question.correctAnswer === oIndex
                               ? 'border-green-400/50 bg-green-400/5'
-                              : 'border-gray-800 hover:border-gray-700'
+                              : 'border-border hover:border-border-hover'
                           }`}
                         >
                           <input
@@ -376,7 +376,7 @@ const CreateTest = () => {
                               updateOption(qIndex, oIndex, e.target.value)
                             }
                             placeholder={`Option ${oIndex + 1}`}
-                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-white placeholder-gray-600 p-0 focus:outline-none"
+                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-content placeholder-content-muted p-0 focus:outline-none"
                           />
                           {question.correctAnswer === oIndex && (
                             <span className="text-xs text-green-400 font-bold">

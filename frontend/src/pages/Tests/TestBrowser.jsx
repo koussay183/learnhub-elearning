@@ -62,20 +62,20 @@ const TestBrowser = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+      <div className="min-h-screen flex items-center justify-center bg-surface">
         <div className="w-8 h-8 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-black text-white">Online Tests</h1>
-            <p className="mt-1 text-gray-500">Browse and take available tests</p>
+            <h1 className="text-3xl font-black text-content">Online Tests</h1>
+            <p className="mt-1 text-content-muted">Browse and take available tests</p>
           </div>
           {user?.roles?.includes('instructor') || user?.roles?.includes('admin') ? (
             <button
@@ -97,11 +97,11 @@ const TestBrowser = () => {
         {/* Empty state */}
         {!error && tests.length === 0 && (
           <div className="text-center py-20">
-            <div className="w-16 h-16 bg-[#111111] border-2 border-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <FileQuestion className="w-8 h-8 text-gray-600" />
+            <div className="w-16 h-16 bg-surface-card border-2 border-border rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <FileQuestion className="w-8 h-8 text-content-muted" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">No tests available</h3>
-            <p className="text-gray-500">Check back later for new tests.</p>
+            <h3 className="text-xl font-bold text-content mb-2">No tests available</h3>
+            <p className="text-content-muted">Check back later for new tests.</p>
           </div>
         )}
 
@@ -113,22 +113,22 @@ const TestBrowser = () => {
               ref={(el) => (cardsRef.current[index] = el)}
               onClick={() => navigate(`/tests/${test._id}`)}
               style={{ opacity: 0 }}
-              className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6 hover:border-yellow-400/30 transition-all cursor-pointer group"
+              className="bg-surface-card border-2 border-border rounded-2xl p-6 hover:border-yellow-400/30 transition-all cursor-pointer group"
             >
               {/* Title & Description */}
-              <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors mb-2 line-clamp-1">
+              <h3 className="text-lg font-bold text-content group-hover:text-yellow-400 transition-colors mb-2 line-clamp-1">
                 {test.title}
               </h3>
-              <p className="text-gray-500 text-sm mb-4 line-clamp-2">
+              <p className="text-content-muted text-sm mb-4 line-clamp-2">
                 {test.description || 'No description provided.'}
               </p>
 
               {/* Creator */}
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-7 h-7 rounded-full bg-yellow-400/10 flex items-center justify-center text-xs font-bold text-yellow-400">
-                  {test.creator?.name?.charAt(0)?.toUpperCase() || '?'}
+                  {test.createdBy?.firstName?.charAt(0)?.toUpperCase() || test.creator?.name?.charAt(0)?.toUpperCase() || '?'}
                 </div>
-                <span className="text-sm text-gray-400">{test.creator?.name || 'Unknown'}</span>
+                <span className="text-sm text-content-secondary">{test.createdBy?.firstName ? `${test.createdBy.firstName} ${test.createdBy.lastName || ''}` : test.creator?.name || 'Unknown'}</span>
               </div>
 
               {/* Badges */}

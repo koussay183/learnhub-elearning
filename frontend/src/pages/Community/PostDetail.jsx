@@ -65,11 +65,8 @@ const PostDetail = () => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const allData = await api.get('/api/community/posts', { params: { limit: 100 } });
-        const found = allData.data.posts.find((p) => p._id === postId);
-        if (found) {
-          setPost(found);
-        }
+        const { data } = await api.get(`/api/community/posts/${postId}`);
+        setPost(data.post || data);
       } catch (err) {
         console.error('Failed to fetch post:', err);
       } finally {
@@ -117,7 +114,7 @@ const PostDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -125,9 +122,9 @@ const PostDetail = () => {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-400 text-lg mb-4">Post not found</p>
+          <p className="text-content-secondary text-lg mb-4">Post not found</p>
           <button
             onClick={() => navigate('/community')}
             className="text-yellow-400 hover:text-yellow-300 font-medium transition-colors"
@@ -144,31 +141,31 @@ const PostDetail = () => {
   const initial = author.firstName?.charAt(0)?.toUpperCase() || '?';
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-surface">
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Back Button */}
         <button
           onClick={() => navigate('/community')}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-yellow-400 mb-6 transition-colors group"
+          className="flex items-center gap-2 text-sm text-content-muted hover:text-yellow-400 mb-6 transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span>Back to Community</span>
         </button>
 
         {/* Post Card */}
-        <div ref={postCardRef} className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6 mb-6">
+        <div ref={postCardRef} className="bg-surface-card border-2 border-border rounded-2xl p-6 mb-6">
           {/* Author Info */}
           <div className="flex items-start gap-4 mb-5">
             <div className="w-11 h-11 rounded-xl bg-yellow-400/10 flex items-center justify-center text-yellow-400 text-sm font-bold flex-shrink-0">
               {initial}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-white">
+              <p className="font-semibold text-content">
                 {author.firstName} {author.lastName}
               </p>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-content-muted">
                 <span>Joined {formatDate(author.createdAt || post.createdAt)}</span>
-                <span className="text-gray-700">&middot;</span>
+                <span className="text-content-muted">&middot;</span>
                 <Clock className="w-3 h-3" />
                 <span>{timeAgo(post.createdAt)}</span>
               </div>
@@ -186,31 +183,31 @@ const PostDetail = () => {
           </div>
 
           {/* Title */}
-          <h1 className="text-xl font-bold text-white mb-3">{post.title}</h1>
+          <h1 className="text-xl font-bold text-content mb-3">{post.title}</h1>
 
           {/* Content */}
-          <div className="text-gray-300 leading-relaxed whitespace-pre-wrap mb-6 text-sm">
+          <div className="text-content-secondary leading-relaxed whitespace-pre-wrap mb-6 text-sm">
             {post.content}
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-5 pt-4 border-t border-gray-800">
+          <div className="flex items-center gap-5 pt-4 border-t border-border">
             <button
               onClick={handleLike}
               className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                isLiked ? 'text-red-400' : 'text-gray-500 hover:text-red-400'
+                isLiked ? 'text-red-400' : 'text-content-muted hover:text-red-400'
               }`}
             >
               <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
               <span>{post.likes?.length || 0} {post.likes?.length === 1 ? 'Like' : 'Likes'}</span>
             </button>
 
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center gap-2 text-sm text-content-muted">
               <MessageCircle className="w-4 h-4" />
               <span>{post.comments?.length || 0} Comments</span>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center gap-2 text-sm text-content-muted">
               <Eye className="w-4 h-4" />
               <span>{post.views || 0} Views</span>
             </div>
@@ -218,15 +215,15 @@ const PostDetail = () => {
         </div>
 
         {/* Comment Form */}
-        <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-5 mb-6">
-          <h3 className="text-sm font-semibold text-white mb-3">Add a Comment</h3>
+        <div className="bg-surface-card border-2 border-border rounded-2xl p-5 mb-6">
+          <h3 className="text-sm font-semibold text-content mb-3">Add a Comment</h3>
           <form onSubmit={handleComment}>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Share your thoughts..."
               rows={3}
-              className="w-full px-4 py-3 bg-[#1a1a1a] border-2 border-gray-800 rounded-xl text-sm text-white placeholder-gray-600
+              className="w-full px-4 py-3 bg-surface-input border-2 border-border rounded-xl text-sm text-content placeholder-content-muted
                          focus:outline-none focus:border-yellow-400/50 transition-all resize-none mb-3"
               required
             />
@@ -248,14 +245,14 @@ const PostDetail = () => {
 
         {/* Comments List */}
         <div>
-          <h3 className="text-sm font-semibold text-white mb-4">
+          <h3 className="text-sm font-semibold text-content mb-4">
             Comments ({post.comments?.length || 0})
           </h3>
 
           {(!post.comments || post.comments.length === 0) ? (
-            <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6 text-center">
-              <MessageCircle className="w-8 h-8 text-gray-700 mx-auto mb-2" />
-              <p className="text-gray-500 text-sm">No comments yet. Start the conversation!</p>
+            <div className="bg-surface-card border-2 border-border rounded-2xl p-6 text-center">
+              <MessageCircle className="w-8 h-8 text-content-muted mx-auto mb-2" />
+              <p className="text-content-muted text-sm">No comments yet. Start the conversation!</p>
             </div>
           ) : (
             <div ref={commentsRef} className="space-y-3">
@@ -265,7 +262,7 @@ const PostDetail = () => {
                 return (
                   <div
                     key={c._id}
-                    className="bg-[#111111] border-2 border-gray-800 rounded-xl p-4 hover:border-gray-700 transition-colors"
+                    className="bg-surface-card border-2 border-border rounded-xl p-4 hover:border-border-hover transition-colors"
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-8 h-8 rounded-lg bg-yellow-400/10 flex items-center justify-center text-yellow-400 text-xs font-bold flex-shrink-0">
@@ -273,15 +270,15 @@ const PostDetail = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-sm font-medium text-white">
+                          <p className="text-sm font-medium text-content">
                             {cAuthor.firstName} {cAuthor.lastName}
                           </p>
-                          <div className="flex items-center gap-1 text-xs text-gray-600">
+                          <div className="flex items-center gap-1 text-xs text-content-muted">
                             <Clock className="w-3 h-3" />
                             {timeAgo(c.createdAt)}
                           </div>
                         </div>
-                        <p className="text-sm text-gray-400 leading-relaxed">{c.content}</p>
+                        <p className="text-sm text-content-secondary leading-relaxed">{c.content}</p>
                       </div>
                     </div>
                   </div>

@@ -16,9 +16,15 @@ const TestResults = () => {
       try {
         setLoading(true);
         const { data } = await api.get(`/api/tests/attempts/${attemptId}`);
-        setResult(data.attempt || data);
+        // API returns { attempt, testTitle, results }
+        const merged = {
+          ...(data.attempt || data),
+          testTitle: data.testTitle || data.attempt?.testTitle,
+          questions: data.results || data.attempt?.responses || [],
+        };
+        setResult(merged);
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to load results');
+        setError(err.response?.data?.error || 'Failed to load results');
       } finally {
         setLoading(false);
       }
@@ -28,7 +34,7 @@ const TestResults = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+      <div className="min-h-screen flex items-center justify-center bg-surface">
         <div className="w-8 h-8 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
       </div>
     );
@@ -36,8 +42,8 @@ const TestResults = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
-        <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-8 max-w-md text-center">
+      <div className="min-h-screen flex items-center justify-center bg-surface">
+        <div className="bg-surface-card border-2 border-border rounded-2xl p-8 max-w-md text-center">
           <div className="w-14 h-14 bg-red-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <XCircle className="w-7 h-7 text-red-400" />
           </div>
@@ -72,10 +78,10 @@ const TestResults = () => {
   const strokeOffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-surface">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Score Card */}
-        <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-8 text-center mb-8">
+        <div className="bg-surface-card border-2 border-border rounded-2xl p-8 text-center mb-8">
           {/* Score Circle */}
           <div className="relative inline-flex items-center justify-center mb-6">
             <svg width="140" height="140" className="-rotate-90">
@@ -101,7 +107,7 @@ const TestResults = () => {
               />
             </svg>
             <div className="absolute">
-              <span className="text-4xl font-black text-white">{percentage}%</span>
+              <span className="text-4xl font-black text-content">{percentage}%</span>
             </div>
           </div>
 
@@ -118,40 +124,40 @@ const TestResults = () => {
             )}
           </div>
 
-          <h1 className="text-2xl font-black text-white mb-1">
+          <h1 className="text-2xl font-black text-content mb-1">
             {result?.testTitle || result?.test?.title || 'Test Results'}
           </h1>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-4 text-center">
-            <p className="text-2xl font-black text-white">
+          <div className="bg-surface-card border-2 border-border rounded-2xl p-4 text-center">
+            <p className="text-2xl font-black text-content">
               {score}/{totalPoints}
             </p>
-            <p className="text-xs text-gray-500 mt-1">Score</p>
+            <p className="text-xs text-content-muted mt-1">Score</p>
           </div>
-          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-4 text-center">
+          <div className="bg-surface-card border-2 border-border rounded-2xl p-4 text-center">
             <div className="flex items-center justify-center gap-1">
-              <Clock className="w-4 h-4 text-gray-500" />
-              <p className="text-2xl font-black text-white">{timeTaken}</p>
+              <Clock className="w-4 h-4 text-content-muted" />
+              <p className="text-2xl font-black text-content">{timeTaken}</p>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Time Taken</p>
+            <p className="text-xs text-content-muted mt-1">Time Taken</p>
           </div>
-          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-4 text-center">
-            <p className="text-2xl font-black text-white">{answeredCount}</p>
-            <p className="text-xs text-gray-500 mt-1">Answered</p>
+          <div className="bg-surface-card border-2 border-border rounded-2xl p-4 text-center">
+            <p className="text-2xl font-black text-content">{answeredCount}</p>
+            <p className="text-xs text-content-muted mt-1">Answered</p>
           </div>
-          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-4 text-center">
-            <p className="text-2xl font-black text-white">{questions.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Total Questions</p>
+          <div className="bg-surface-card border-2 border-border rounded-2xl p-4 text-center">
+            <p className="text-2xl font-black text-content">{questions.length}</p>
+            <p className="text-xs text-content-muted mt-1">Total Questions</p>
           </div>
         </div>
 
         {/* Detailed Results */}
         {showResults && questions.length > 0 && (
-          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6 mb-8">
-            <h2 className="text-lg font-bold text-white mb-5">Detailed Results</h2>
+          <div className="bg-surface-card border-2 border-border rounded-2xl p-6 mb-8">
+            <h2 className="text-lg font-bold text-content mb-5">Detailed Results</h2>
             <div className="space-y-4">
               {questions.map((q, index) => {
                 const isCorrect = q.isCorrect ?? q.correct ?? false;
@@ -165,7 +171,7 @@ const TestResults = () => {
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <span className="text-sm font-bold text-gray-300">
+                      <span className="text-sm font-bold text-content-secondary">
                         Q{index + 1}. {q.text || q.questionText}
                       </span>
                       {isCorrect ? (
@@ -179,14 +185,14 @@ const TestResults = () => {
                       )}
                     </div>
                     <div className="text-sm space-y-1 mt-2">
-                      <p className="text-gray-400">
+                      <p className="text-content-secondary">
                         <span className="font-medium">Your answer:</span>{' '}
                         <span className={isCorrect ? 'text-green-400' : 'text-red-400'}>
                           {q.userAnswer || q.answer || 'No answer'}
                         </span>
                       </p>
                       {!isCorrect && (
-                        <p className="text-gray-400">
+                        <p className="text-content-secondary">
                           <span className="font-medium">Correct answer:</span>{' '}
                           <span className="text-green-400">
                             {q.correctAnswer || 'N/A'}

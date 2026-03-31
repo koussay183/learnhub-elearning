@@ -71,7 +71,7 @@ export const createCourse = async (req, res) => {
       price,
       thumbnail,
       instructor: req.userId,
-      status: 'draft',
+      status: req.body.status || 'published',
     });
 
     await course.save();
@@ -86,17 +86,17 @@ export const updateCourse = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ error: 'Course not found' });
+    if (course.instructor.toString() !== req.userId) return res.status(403).json({ error: 'Not authorized' });
 
-    if (course.instructor.toString() !== req.userId) {
-      return res.status(403).json({ error: 'Unauthorized' });
-    }
+    const allowed = ['title', 'description', 'category', 'level', 'price', 'thumbnail', 'status'];
+    allowed.forEach(field => {
+      if (req.body[field] !== undefined) course[field] = req.body[field];
+    });
 
-    Object.assign(course, req.body);
     await course.save();
-    res.json({ message: 'Course updated', course });
+    res.json(course);
   } catch (error) {
-    console.error('Update course error:', error);
-    res.status(500).json({ error: 'Failed to update course' });
+    res.status(500).json({ error: error.message });
   }
 };
 
