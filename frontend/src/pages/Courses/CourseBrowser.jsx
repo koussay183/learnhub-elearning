@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
-import { Search, BookOpen, SlidersHorizontal, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Search, BookOpen, SlidersHorizontal, ChevronLeft, ChevronRight, X, Plus } from 'lucide-react';
 import api from '../../utils/api.js';
 import useAuth from '../../hooks/useAuth.js';
 import CourseCard from '../../components/course/CourseCard.jsx';
@@ -94,11 +94,19 @@ const CourseBrowser = () => {
     <div className="min-h-screen bg-surface">
       {/* Header */}
       <div className="border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 py-10">
-          <h1 className="text-4xl font-black text-content mb-2">Explore Courses</h1>
-          <p className="text-lg text-content-muted">
-            Discover courses taught by expert instructors and level up your skills
-          </p>
+        <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-black text-content mb-2">Explore Courses</h1>
+            <p className="text-lg text-content-muted">
+              Discover courses taught by expert instructors and level up your skills
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/courses/create')}
+            className="btn-primary inline-flex items-center gap-2 whitespace-nowrap"
+          >
+            <Plus className="w-4 h-4" /> Create Course
+          </button>
         </div>
       </div>
 

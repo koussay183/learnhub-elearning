@@ -145,7 +145,7 @@ const CourseDetail = () => {
               alt={course.title}
               className="w-full h-full object-cover opacity-10"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#111111] to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--surface-card)] to-transparent" />
           </div>
         )}
         <div className="relative max-w-7xl mx-auto px-6 py-12">
@@ -285,7 +285,7 @@ const CourseDetail = () => {
       {/* Stats Row */}
       <div className="border-b border-border">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-800">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
             <div className="py-5 text-center">
               <p className="text-2xl font-black text-content">{course.enrollmentCount || 0}</p>
               <p className="text-sm text-content-muted">Students</p>
@@ -368,7 +368,7 @@ const CourseDetail = () => {
                   No sessions available yet.
                 </div>
               ) : (
-                <div className="divide-y divide-gray-800/50">
+                <div className="divide-y divide-border">
                   {sessions
                     .sort((a, b) => (a.order || 0) - (b.order || 0))
                     .map((session, index) => {

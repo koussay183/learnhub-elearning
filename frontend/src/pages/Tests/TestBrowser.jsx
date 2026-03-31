@@ -111,7 +111,7 @@ const TestBrowser = () => {
             <div
               key={test._id}
               ref={(el) => (cardsRef.current[index] = el)}
-              onClick={() => navigate(`/tests/${test._id}`)}
+              onClick={() => navigate(`/tests/${test._id}/take`)}
               style={{ opacity: 0 }}
               className="bg-surface-card border-2 border-border rounded-2xl p-6 hover:border-yellow-400/30 transition-all cursor-pointer group"
             >

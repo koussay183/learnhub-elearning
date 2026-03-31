@@ -172,7 +172,7 @@ const ContentModeration = () => {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-800/50">
+                  <tbody className="divide-y divide-border">
                     {courses.map((course) => (
                       <tr key={course._id} className="hover:bg-surface-input transition-colors">
                         <td className="px-6 py-4">
@@ -254,7 +254,7 @@ const ContentModeration = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800/50">
+                <tbody className="divide-y divide-border">
                   {posts.map((post) => (
                     <tr key={post._id} className="hover:bg-surface-input transition-colors">
                       <td className="px-6 py-4">

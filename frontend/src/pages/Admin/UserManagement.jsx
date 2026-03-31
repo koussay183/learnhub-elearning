@@ -211,7 +211,7 @@ const UserManagement = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800/50">
+                <tbody className="divide-y divide-border">
                   {users.map((user) => (
                     <tr key={user._id} className="hover:bg-surface-input transition-colors">
                       <td className="px-6 py-4">

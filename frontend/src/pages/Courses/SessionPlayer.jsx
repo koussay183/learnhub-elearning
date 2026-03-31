@@ -315,7 +315,7 @@ const SessionPlayer = () => {
             </p>
           </div>
 
-          <div className="divide-y divide-gray-800/50">
+          <div className="divide-y divide-border">
             {sessions.map((session, index) => {
               const isActive = session._id === currentSession?._id;
               const isCompleted = completedSessions.has(session._id);
