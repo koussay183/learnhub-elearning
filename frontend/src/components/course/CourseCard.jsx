@@ -1,60 +1,62 @@
-import { useState, useEffect } from 'react';
-import api from '../utils/api.js';
-import { Button } from './Button.jsx';
-import { LoadingSpinner } from './LoadingSpinner.jsx';
+import { useNavigate } from 'react-router-dom';
+import { Clock, BookOpen, Star, Users } from 'lucide-react';
 
-export const CourseCard = ({ course, onEnroll, isEnrolled }) => {
-  const [loading, setLoading] = useState(false);
-
-  const handleEnroll = async () => {
-    setLoading(true);
-    try {
-      await onEnroll(course._id);
-    } finally {
-      setLoading(false);
-    }
-  };
+const CourseCard = ({ course, onClick }) => {
+  const navigate = useNavigate();
 
   return (
-    <div className="card p-6 hover:shadow-lg transition-shadow">
-      {course.thumbnail && (
-        <img
-          src={course.thumbnail}
-          alt={course.title}
-          className="w-full h-40 object-cover rounded-lg mb-4"
-        />
-      )}
-      <div className="mb-3">
-        <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded">
-          {course.level}
-        </span>
-      </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{course.title}</h3>
-      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{course.description}</p>
-
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-lg font-bold text-blue-500">
-          {course.price === 0 ? 'Free' : `$${course.price}`}
-        </span>
-        <span className="text-sm text-gray-500">{course.totalSessions} sessions</span>
-      </div>
-
-      <div className="pt-4 border-t border-gray-200">
-        {isEnrolled ? (
-          <Button variant="secondary" className="w-full" disabled>
-            Enrolled
-          </Button>
+    <div
+      onClick={() => onClick ? onClick() : navigate(`/courses/${course._id}`)}
+      className="card p-5 cursor-pointer group hover:shadow-brutal transition-all duration-300"
+    >
+      {/* Thumbnail or placeholder */}
+      <div className="relative h-40 rounded-xl bg-[#0a0a0a] border border-gray-800 mb-4 overflow-hidden flex items-center justify-center">
+        {course.thumbnail ? (
+          <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
         ) : (
-          <Button
-            variant="primary"
-            className="w-full"
-            onClick={handleEnroll}
-            disabled={loading}
-          >
-            {loading ? <LoadingSpinner size="sm" /> : 'Enroll Now'}
-          </Button>
+          <BookOpen className="w-10 h-10 text-gray-700" />
         )}
+        {/* Price badge */}
+        <div className="absolute top-3 right-3">
+          <span className={`px-3 py-1 text-xs font-bold rounded-lg border-2 ${
+            course.price === 0
+              ? 'bg-green-400/10 text-green-400 border-green-400/30'
+              : 'bg-yellow-400 text-black border-black'
+          }`}>
+            {course.price === 0 ? 'Free' : `$${course.price}`}
+          </span>
+        </div>
+      </div>
+
+      {/* Level badge */}
+      <div className="mb-2">
+        <span className="badge badge-accent">{course.level || 'Beginner'}</span>
+      </div>
+
+      {/* Title */}
+      <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors mb-2 line-clamp-1">
+        {course.title}
+      </h3>
+      <p className="text-gray-500 text-sm mb-4 line-clamp-2">{course.description}</p>
+
+      {/* Meta */}
+      <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
+        <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" /> {course.totalSessions || 0} sessions</span>
+        <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {course.totalEnrollments || 0}</span>
+        {course.rating > 0 && (
+          <span className="flex items-center gap-1 text-yellow-400"><Star className="w-3.5 h-3.5 fill-current" /> {course.rating?.toFixed(1)}</span>
+        )}
+      </div>
+
+      {/* Instructor */}
+      <div className="flex items-center gap-2 pt-3 border-t border-gray-800">
+        <div className="w-6 h-6 rounded-md bg-yellow-400/10 flex items-center justify-center text-yellow-400 text-[10px] font-bold">
+          {course.instructor?.firstName?.charAt(0) || '?'}
+        </div>
+        <span className="text-xs text-gray-400">{course.instructor?.firstName} {course.instructor?.lastName}</span>
       </div>
     </div>
   );
 };
+
+export default CourseCard;

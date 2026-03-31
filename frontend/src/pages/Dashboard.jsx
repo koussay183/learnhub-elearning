@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { gsap } from 'gsap';
+import { BookOpen, TrendingUp, Award, PlusCircle, Search, MessageSquare, ClipboardCheck, ArrowRight, Users, Zap } from 'lucide-react';
 import useAuth from '../hooks/useAuth.js';
-import useAuthStore from '../context/authStore.js';
 import api from '../utils/api.js';
 
 const Dashboard = () => {
@@ -11,6 +12,7 @@ const Dashboard = () => {
   const [createdCourses, setCreatedCourses] = useState([]);
   const [recentPosts, setRecentPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -30,117 +32,149 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-
     fetchDashboardData();
   }, []);
+
+  // GSAP entrance animation
+  useEffect(() => {
+    if (!loading && containerRef.current) {
+      const ctx = gsap.context(() => {
+        gsap.from('.stat-card', {
+          y: 30,
+          opacity: 0,
+          duration: 0.5,
+          stagger: 0.1,
+          ease: 'power3.out',
+        });
+        gsap.from('.content-section', {
+          y: 40,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.15,
+          ease: 'power3.out',
+          delay: 0.3,
+        });
+      }, containerRef);
+      return () => ctx.revert();
+    }
+  }, [loading]);
 
   const activeCourses = enrolledCourses.filter(c => c.status === 'active');
   const completedCourses = enrolledCourses.filter(c => c.status === 'completed');
 
+  const stats = [
+    { label: 'Enrolled', value: enrolledCourses.length, icon: BookOpen, color: 'yellow' },
+    { label: 'In Progress', value: activeCourses.length, icon: TrendingUp, color: 'blue' },
+    { label: 'Completed', value: completedCourses.length, icon: Award, color: 'green' },
+    { label: 'Teaching', value: createdCourses.length, icon: Users, color: 'purple' },
+  ];
+
+  const colorMap = {
+    yellow: { bg: 'bg-yellow-400/10', text: 'text-yellow-400', border: 'border-yellow-400/20' },
+    blue: { bg: 'bg-blue-400/10', text: 'text-blue-400', border: 'border-blue-400/20' },
+    green: { bg: 'bg-green-400/10', text: 'text-green-400', border: 'border-green-400/20' },
+    purple: { bg: 'bg-purple-400/10', text: 'text-purple-400', border: 'border-purple-400/20' },
+  };
+
+  const quickActions = [
+    { label: 'Browse Courses', icon: Search, to: '/courses', color: 'hover:bg-yellow-400/5 hover:text-yellow-400' },
+    { label: 'Create Course', icon: PlusCircle, to: '/courses/create', color: 'hover:bg-green-400/5 hover:text-green-400' },
+    { label: 'Community', icon: MessageSquare, to: '/community', color: 'hover:bg-blue-400/5 hover:text-blue-400' },
+    { label: 'Take a Test', icon: ClipboardCheck, to: '/tests', color: 'hover:bg-purple-400/5 hover:text-purple-400' },
+  ];
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-20 skeleton w-72" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => <div key={i} className="h-28 skeleton" />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 h-64 skeleton" />
+          <div className="h-64 skeleton" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="animate-fadeIn">
-      {/* Welcome header */}
+    <div ref={containerRef}>
+      {/* Welcome */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Welcome back, {user?.firstName}! 👋
+        <h1 className="text-3xl font-black text-white">
+          Welcome back, <span className="text-yellow-400">{user?.firstName}</span>
         </h1>
-        <p className="text-gray-500 mt-1">Here's what's happening with your learning journey.</p>
+        <p className="text-gray-500 mt-1">Here's your learning overview.</p>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="card p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-2xl">📚</span>
-            <span className="text-xs font-medium text-blue-500 bg-blue-50 px-2 py-1 rounded">Enrolled</span>
-          </div>
-          <p className="text-3xl font-bold text-gray-900">{enrolledCourses.length}</p>
-          <p className="text-sm text-gray-500 mt-1">Total Courses</p>
-        </div>
-
-        <div className="card p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-2xl">🔄</span>
-            <span className="text-xs font-medium text-yellow-600 bg-yellow-50 px-2 py-1 rounded">Active</span>
-          </div>
-          <p className="text-3xl font-bold text-gray-900">{activeCourses.length}</p>
-          <p className="text-sm text-gray-500 mt-1">In Progress</p>
-        </div>
-
-        <div className="card p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-2xl">✅</span>
-            <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded">Done</span>
-          </div>
-          <p className="text-3xl font-bold text-gray-900">{completedCourses.length}</p>
-          <p className="text-sm text-gray-500 mt-1">Completed</p>
-        </div>
-
-        <div className="card p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-2xl">🎓</span>
-            <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded">Teaching</span>
-          </div>
-          <p className="text-3xl font-bold text-gray-900">{createdCourses.length}</p>
-          <p className="text-sm text-gray-500 mt-1">Courses Created</p>
-        </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {stats.map((stat, i) => {
+          const c = colorMap[stat.color];
+          const Icon = stat.icon;
+          return (
+            <div key={i} className="stat-card card p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center`}>
+                  <Icon className={`w-5 h-5 ${c.text}`} />
+                </div>
+                <span className={`badge ${c.bg} ${c.text} border ${c.border}`}>{stat.label}</span>
+              </div>
+              <p className="text-3xl font-black text-white">{stat.value}</p>
+            </div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Continue learning */}
-        <div className="lg:col-span-2">
+        {/* Continue Learning */}
+        <div className="lg:col-span-2 content-section">
           <div className="card p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Continue Learning</h2>
-              <Link to="/courses/my" className="text-sm text-blue-500 hover:text-blue-600">
-                View all
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Zap className="w-5 h-5 text-yellow-400" /> Continue Learning
+              </h2>
+              <Link to="/courses/my" className="text-sm text-yellow-400 hover:text-yellow-300 flex items-center gap-1">
+                View all <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
 
-            {loading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-20 bg-gray-100 rounded-lg animate-pulse" />
-                ))}
-              </div>
-            ) : activeCourses.length > 0 ? (
-              <div className="space-y-4">
+            {activeCourses.length > 0 ? (
+              <div className="space-y-3">
                 {activeCourses.slice(0, 4).map(course => (
                   <div
                     key={course._id}
-                    className="flex items-center gap-4 p-4 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="flex items-center gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-gray-800/50
+                               hover:border-yellow-400/20 cursor-pointer transition-all group"
                     onClick={() => navigate(`/courses/${course._id}`)}
                   >
-                    {course.thumbnail ? (
-                      <img src={course.thumbnail} alt="" className="w-16 h-16 rounded-lg object-cover" />
-                    ) : (
-                      <div className="w-16 h-16 rounded-lg bg-blue-100 flex items-center justify-center text-2xl">
-                        📖
-                      </div>
-                    )}
+                    <div className="w-14 h-14 rounded-xl bg-yellow-400/10 flex items-center justify-center text-yellow-400 flex-shrink-0">
+                      <BookOpen className="w-6 h-6" />
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 truncate">{course.title}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <h3 className="font-semibold text-white truncate group-hover:text-yellow-400 transition-colors">
+                        {course.title}
+                      </h3>
+                      <div className="flex items-center gap-3 mt-2">
+                        <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-blue-500 rounded-full transition-all"
+                            className="h-full bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full transition-all"
                             style={{ width: `${course.progress || 0}%` }}
                           />
                         </div>
-                        <span className="text-sm text-gray-500 whitespace-nowrap">{course.progress || 0}%</span>
+                        <span className="text-sm font-bold text-yellow-400 whitespace-nowrap">{course.progress || 0}%</span>
                       </div>
                     </div>
+                    <ArrowRight className="w-5 h-5 text-gray-600 group-hover:text-yellow-400 transition-colors" />
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-4xl mb-3">📚</p>
+                <BookOpen className="w-12 h-12 text-gray-700 mx-auto mb-3" />
                 <p className="text-gray-500 mb-4">No courses yet. Start learning today!</p>
-                <button
-                  onClick={() => navigate('/courses')}
-                  className="btn-primary"
-                >
+                <button onClick={() => navigate('/courses')} className="btn-primary">
                   Browse Courses
                 </button>
               </div>
@@ -148,75 +182,48 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Quick actions + recent posts */}
+        {/* Right column */}
         <div className="space-y-6">
-          {/* Quick actions */}
-          <div className="card p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-            <div className="space-y-3">
-              <button
-                onClick={() => navigate('/courses')}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 text-left transition-colors"
-              >
-                <span className="text-xl">🔍</span>
-                <span className="font-medium text-gray-700">Browse Courses</span>
-              </button>
-              <button
-                onClick={() => navigate('/courses/create')}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-green-50 text-left transition-colors"
-              >
-                <span className="text-xl">➕</span>
-                <span className="font-medium text-gray-700">Create Course</span>
-              </button>
-              <button
-                onClick={() => navigate('/community')}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-purple-50 text-left transition-colors"
-              >
-                <span className="text-xl">💬</span>
-                <span className="font-medium text-gray-700">Community Feed</span>
-              </button>
-              <button
-                onClick={() => navigate('/tests')}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-yellow-50 text-left transition-colors"
-              >
-                <span className="text-xl">📝</span>
-                <span className="font-medium text-gray-700">Take a Test</span>
-              </button>
-              <button
-                onClick={() => navigate('/chat')}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-pink-50 text-left transition-colors"
-              >
-                <span className="text-xl">✉️</span>
-                <span className="font-medium text-gray-700">Chat</span>
-              </button>
+          {/* Quick Actions */}
+          <div className="content-section card p-5">
+            <h2 className="text-lg font-bold text-white mb-4">Quick Actions</h2>
+            <div className="space-y-2">
+              {quickActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <button key={action.to} onClick={() => navigate(action.to)}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-400 transition-all ${action.color}`}>
+                    <Icon className="w-5 h-5" />
+                    <span className="font-medium text-sm">{action.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Recent community activity */}
-          <div className="card p-6">
+          {/* Recent Posts */}
+          <div className="content-section card p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Community</h2>
-              <Link to="/community" className="text-sm text-blue-500 hover:text-blue-600">
-                View all
+              <h2 className="text-lg font-bold text-white">Community</h2>
+              <Link to="/community" className="text-xs text-yellow-400 hover:text-yellow-300 flex items-center gap-1">
+                View all <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
             {recentPosts.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {recentPosts.slice(0, 3).map(post => (
-                  <div
-                    key={post._id}
-                    className="p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                    onClick={() => navigate(`/community/${post._id}`)}
-                  >
-                    <p className="font-medium text-gray-900 text-sm truncate">{post.title}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                  <div key={post._id}
+                    className="p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-all"
+                    onClick={() => navigate(`/community/${post._id}`)}>
+                    <p className="font-medium text-gray-300 text-sm truncate">{post.title}</p>
+                    <p className="text-xs text-gray-600 mt-1">
                       {post.likes?.length || 0} likes · {post.comments?.length || 0} comments
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm text-center py-4">No posts yet</p>
+              <p className="text-gray-600 text-sm text-center py-4">No posts yet</p>
             )}
           </div>
         </div>

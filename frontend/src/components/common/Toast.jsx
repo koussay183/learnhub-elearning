@@ -1,38 +1,40 @@
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
+import { CheckCircle, XCircle, Info, AlertTriangle, X } from 'lucide-react';
 
 // --- Individual Toast component ---
 
-const typeStyles = {
+const typeConfig = {
   success: {
-    bg: 'bg-green-50 border-green-200',
-    icon: 'text-green-500',
-    text: 'text-green-800',
-    iconPath: 'M5 13l4 4L19 7',
+    bg: 'bg-green-400/10 border-green-400/20',
+    icon: CheckCircle,
+    iconColor: 'text-green-400',
+    textColor: 'text-green-400',
   },
   error: {
-    bg: 'bg-red-50 border-red-200',
-    icon: 'text-red-500',
-    text: 'text-red-800',
-    iconPath: 'M6 18L18 6M6 6l12 12',
+    bg: 'bg-red-400/10 border-red-400/20',
+    icon: XCircle,
+    iconColor: 'text-red-400',
+    textColor: 'text-red-400',
   },
   info: {
-    bg: 'bg-blue-50 border-blue-200',
-    icon: 'text-blue-500',
-    text: 'text-blue-800',
-    iconPath: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+    bg: 'bg-blue-400/10 border-blue-400/20',
+    icon: Info,
+    iconColor: 'text-blue-400',
+    textColor: 'text-blue-400',
   },
   warning: {
-    bg: 'bg-yellow-50 border-yellow-200',
-    icon: 'text-yellow-500',
-    text: 'text-yellow-800',
-    iconPath: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
+    bg: 'bg-yellow-400/10 border-yellow-400/20',
+    icon: AlertTriangle,
+    iconColor: 'text-yellow-400',
+    textColor: 'text-yellow-400',
   },
 };
 
 const Toast = ({ message, type = 'info', onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
 
-  const style = typeStyles[type] || typeStyles.info;
+  const config = typeConfig[type] || typeConfig.info;
+  const IconComponent = config.icon;
 
   useEffect(() => {
     // Trigger slide-in
@@ -49,17 +51,15 @@ const Toast = ({ message, type = 'info', onClose }) => {
 
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg transition-all duration-300 ${style.bg} ${
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg backdrop-blur-sm transition-all duration-300 ${config.bg} ${
         isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
       }`}
     >
       {/* Icon */}
-      <svg className={`w-5 h-5 flex-shrink-0 ${style.icon}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={style.iconPath} />
-      </svg>
+      <IconComponent className={`w-5 h-5 flex-shrink-0 ${config.iconColor}`} />
 
       {/* Message */}
-      <p className={`text-sm font-medium flex-1 ${style.text}`}>{message}</p>
+      <p className={`text-sm font-semibold flex-1 ${config.textColor}`}>{message}</p>
 
       {/* Close button */}
       <button
@@ -67,11 +67,9 @@ const Toast = ({ message, type = 'info', onClose }) => {
           setIsVisible(false);
           setTimeout(onClose, 300);
         }}
-        className={`p-1 rounded-lg hover:bg-black/5 transition-colors ${style.text}`}
+        className={`p-1 rounded-lg hover:bg-white/5 transition-colors ${config.textColor}`}
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <X className="w-4 h-4" />
       </button>
     </div>
   );

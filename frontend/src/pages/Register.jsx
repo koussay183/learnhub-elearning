@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { UserPlus, Mail, Lock, User } from 'lucide-react';
 import useAuthStore from '../context/authStore.js';
-import { Button } from '../components/Button.jsx';
-import { Input } from '../components/Input.jsx';
-import { LoadingSpinner } from '../components/LoadingSpinner.jsx';
 
 export const Register = () => {
   const navigate = useNavigate();
@@ -62,94 +60,125 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 mb-4">
+            <div className="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center rotate-[-3deg] border-[3px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <span className="text-black font-black text-lg">L</span>
+            </div>
+            <span className="text-2xl font-black text-white">Learn<span className="text-yellow-400">Hub</span></span>
+          </div>
+        </div>
+
         <div className="card p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
-            Create Account
-          </h1>
-          <p className="text-gray-600 text-center mb-8">
-            Join our learning community today
-          </p>
+          <h1 className="text-2xl font-black text-white mb-1 text-center">Create Account</h1>
+          <p className="text-gray-500 text-center mb-6">Join our learning community today</p>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-700 text-sm">{error}</p>
+            <div className="mb-4 p-3 bg-red-400/10 border border-red-400/20 rounded-xl text-red-400 text-sm">
+              {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="First Name"
-                type="text"
-                name="firstName"
-                placeholder="John"
-                value={formData.firstName}
-                onChange={handleChange}
-                error={errors.firstName}
-                required
-              />
-              <Input
-                label="Last Name"
-                type="text"
-                name="lastName"
-                placeholder="Doe"
-                value={formData.lastName}
-                onChange={handleChange}
-                error={errors.lastName}
-                required
-              />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">First Name</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                  <input
+                    type="text"
+                    name="firstName"
+                    placeholder="John"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    className={`input-field pl-10 ${errors.firstName ? 'border-red-500' : ''}`}
+                  />
+                </div>
+                {errors.firstName && <p className="text-red-400 text-sm mt-1">{errors.firstName}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">Last Name</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                  <input
+                    type="text"
+                    name="lastName"
+                    placeholder="Doe"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    className={`input-field pl-10 ${errors.lastName ? 'border-red-500' : ''}`}
+                  />
+                </div>
+                {errors.lastName && <p className="text-red-400 text-sm mt-1">{errors.lastName}</p>}
+              </div>
             </div>
 
-            <Input
-              label="Email"
-              type="email"
-              name="email"
-              placeholder="you@example.com"
-              value={formData.email}
-              onChange={handleChange}
-              error={errors.email}
-              required
-            />
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`input-field pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                />
+              </div>
+              {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
+            </div>
 
-            <Input
-              label="Password"
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              error={errors.password}
-              required
-            />
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="--------"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`input-field pl-10 ${errors.password ? 'border-red-500' : ''}`}
+                />
+              </div>
+              {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
+            </div>
 
-            <Input
-              label="Confirm Password"
-              type="password"
-              name="confirmPassword"
-              placeholder="••••••••"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              error={errors.confirmPassword}
-              required
-            />
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">Confirm Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="--------"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={`input-field pl-10 ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                />
+              </div>
+              {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
+            </div>
 
-            <Button
-              type="submit"
-              variant="primary"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? <LoadingSpinner size="sm" /> : 'Create Account'}
-            </Button>
+            <button type="submit" disabled={isLoading} className="btn-primary w-full py-3">
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                  Creating account...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2"><UserPlus className="w-4 h-4" /> Create Account</span>
+              )}
+            </button>
           </form>
 
-          <p className="text-center text-gray-600 mt-6">
+          <p className="text-center text-gray-500 mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-500 hover:text-blue-600 font-medium">
-              Sign in
-            </Link>
+            <Link to="/login" className="text-yellow-400 hover:text-yellow-300 font-semibold">Sign in</Link>
           </p>
         </div>
       </div>

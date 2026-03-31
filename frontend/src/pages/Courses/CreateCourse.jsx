@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { gsap } from 'gsap';
+import {
+  ArrowLeft, Plus, ChevronUp, ChevronDown, Trash2,
+  BookOpen, Image, DollarSign, Globe, Layers, GripVertical
+} from 'lucide-react';
 import api from '../../utils/api.js';
 import useAuth from '../../hooks/useAuth.js';
-import { Button } from '../../components/Button.jsx';
-import { Input } from '../../components/Input.jsx';
-import { LoadingSpinner } from '../../components/LoadingSpinner.jsx';
 
 const CATEGORIES = [
   'Development',
@@ -23,6 +25,7 @@ const emptySession = { title: '', videoUrl: '', pdfUrl: '', order: 1 };
 const CreateCourse = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const formRef = useRef(null);
 
   const [form, setForm] = useState({
     title: '',
@@ -38,6 +41,13 @@ const CreateCourse = () => {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+
+  // GSAP entrance
+  useEffect(() => {
+    if (formRef.current) {
+      gsap.from(formRef.current, { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -127,152 +137,182 @@ const CreateCourse = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0a0a0a]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100">
+      <div className="border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Create New Course</h1>
+            <h1 className="text-2xl font-black text-white">Create New Course</h1>
             <p className="text-gray-500 mt-1">Share your knowledge with the community</p>
           </div>
-          <Button variant="ghost" onClick={() => navigate(-1)}>
+          <button onClick={() => navigate(-1)} className="btn-ghost flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" />
             Cancel
-          </Button>
+          </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div ref={formRef} className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Form */}
           <div className="lg:col-span-2">
             <form onSubmit={handleSubmit} className="space-y-6">
               {submitError && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-700 text-sm">{submitError}</p>
+                <div className="p-4 bg-red-400/10 border border-red-400/20 rounded-xl">
+                  <p className="text-red-400 text-sm">{submitError}</p>
                 </div>
               )}
 
               {/* Course Details Card */}
               <div className="card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-5">Course Details</h2>
+                <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-yellow-400" />
+                  Course Details
+                </h2>
 
-                <Input
-                  label="Course Title"
-                  name="title"
-                  placeholder="e.g. Introduction to Web Development"
-                  value={form.title}
-                  onChange={handleChange}
-                  error={errors.title}
-                  required
-                />
-
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description <span className="text-red-500 ml-1">*</span>
-                  </label>
-                  <textarea
-                    name="description"
-                    rows={5}
-                    placeholder="Describe what students will learn in this course..."
-                    value={form.description}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 rounded-lg border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 placeholder-gray-400 transition-colors resize-none ${
-                      errors.description ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {errors.description && (
-                    <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                    <select
-                      name="category"
-                      value={form.category}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-700 bg-white transition-colors"
-                    >
-                      {CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Level</label>
-                    <select
-                      name="level"
-                      value={form.level}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-700 bg-white transition-colors"
-                    >
-                      {LEVELS.map((lvl) => (
-                        <option key={lvl} value={lvl}>{lvl}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Price ($)"
-                    name="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="0"
-                    value={form.price}
-                    onChange={handleChange}
-                    error={errors.price}
-                  />
-
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                <div className="space-y-4">
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
+                      Course Title <span className="text-red-400 ml-1">*</span>
+                    </label>
                     <input
-                      name="language"
-                      value={form.language}
+                      name="title"
+                      placeholder="e.g. Introduction to Web Development"
+                      value={form.title}
                       onChange={handleChange}
-                      placeholder="English"
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 placeholder-gray-400 transition-colors"
+                      className={`input-field ${errors.title ? 'border-red-400' : ''}`}
+                    />
+                    {errors.title && (
+                      <p className="text-red-400 text-sm mt-1">{errors.title}</p>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
+                      Description <span className="text-red-400 ml-1">*</span>
+                    </label>
+                    <textarea
+                      name="description"
+                      rows={5}
+                      placeholder="Describe what students will learn in this course..."
+                      value={form.description}
+                      onChange={handleChange}
+                      className={`input-field resize-none ${errors.description ? 'border-red-400' : ''}`}
+                    />
+                    {errors.description && (
+                      <p className="text-red-400 text-sm mt-1">{errors.description}</p>
+                    )}
+                  </div>
+
+                  {/* Category & Level */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">Category</label>
+                      <select
+                        name="category"
+                        value={form.category}
+                        onChange={handleChange}
+                        className="input-field"
+                      >
+                        {CATEGORIES.map((cat) => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">Level</label>
+                      <select
+                        name="level"
+                        value={form.level}
+                        onChange={handleChange}
+                        className="input-field"
+                      >
+                        {LEVELS.map((lvl) => (
+                          <option key={lvl} value={lvl}>{lvl}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Price & Language */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-1">
+                        <DollarSign className="w-4 h-4 text-yellow-400" />
+                        Price ($)
+                      </label>
+                      <input
+                        name="price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0"
+                        value={form.price}
+                        onChange={handleChange}
+                        className={`input-field ${errors.price ? 'border-red-400' : ''}`}
+                      />
+                      {errors.price && (
+                        <p className="text-red-400 text-sm mt-1">{errors.price}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-1">
+                        <Globe className="w-4 h-4 text-yellow-400" />
+                        Language
+                      </label>
+                      <input
+                        name="language"
+                        value={form.language}
+                        onChange={handleChange}
+                        placeholder="English"
+                        className="input-field"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Thumbnail */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2 flex items-center gap-1">
+                      <Image className="w-4 h-4 text-yellow-400" />
+                      Thumbnail URL
+                    </label>
+                    <input
+                      name="thumbnail"
+                      placeholder="https://example.com/image.jpg"
+                      value={form.thumbnail}
+                      onChange={handleChange}
+                      className="input-field"
                     />
                   </div>
                 </div>
-
-                <Input
-                  label="Thumbnail URL"
-                  name="thumbnail"
-                  placeholder="https://example.com/image.jpg"
-                  value={form.thumbnail}
-                  onChange={handleChange}
-                />
               </div>
 
               {/* Sessions Card */}
               <div className="card p-6">
                 <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Layers className="w-5 h-5 text-yellow-400" />
                     Sessions ({sessions.length})
                   </h2>
-                  <Button variant="ghost" onClick={addSession} type="button">
-                    <span className="flex items-center gap-1.5">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                      Add Session
-                    </span>
-                  </Button>
+                  <button type="button" onClick={addSession} className="btn-secondary flex items-center gap-1.5 text-sm">
+                    <Plus className="w-4 h-4" />
+                    Add Session
+                  </button>
                 </div>
 
                 <div className="space-y-4">
                   {sessions.map((session, index) => (
                     <div
                       key={index}
-                      className="p-5 bg-gray-50 rounded-lg border border-gray-200 animate-fadeIn"
+                      className="p-5 bg-[#0a0a0a] rounded-xl border-2 border-gray-800 animate-fadeIn"
                     >
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-semibold text-gray-700">
+                        <h3 className="text-sm font-bold text-yellow-400 flex items-center gap-2">
+                          <GripVertical className="w-4 h-4 text-gray-600" />
                           Session {index + 1}
                         </h3>
                         <div className="flex items-center gap-1">
@@ -280,34 +320,28 @@ const CreateCourse = () => {
                             type="button"
                             onClick={() => moveSession(index, -1)}
                             disabled={index === 0}
-                            className="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-200 disabled:opacity-30 transition-colors"
+                            className="p-1.5 rounded-lg text-gray-500 hover:text-yellow-400 hover:bg-yellow-400/5 disabled:opacity-30 transition-colors"
                             title="Move up"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                            </svg>
+                            <ChevronUp className="w-4 h-4" />
                           </button>
                           <button
                             type="button"
                             onClick={() => moveSession(index, 1)}
                             disabled={index === sessions.length - 1}
-                            className="p-1.5 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-200 disabled:opacity-30 transition-colors"
+                            className="p-1.5 rounded-lg text-gray-500 hover:text-yellow-400 hover:bg-yellow-400/5 disabled:opacity-30 transition-colors"
                             title="Move down"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
+                            <ChevronDown className="w-4 h-4" />
                           </button>
                           {sessions.length > 1 && (
                             <button
                               type="button"
                               onClick={() => removeSession(index)}
-                              className="p-1.5 rounded text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors ml-1"
+                              className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/5 transition-colors ml-1"
                               title="Remove session"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           )}
                         </div>
@@ -319,12 +353,10 @@ const CreateCourse = () => {
                             placeholder="Session title"
                             value={session.title}
                             onChange={(e) => handleSessionChange(index, 'title', e.target.value)}
-                            className={`w-full px-4 py-2 rounded-lg border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 placeholder-gray-400 transition-colors bg-white ${
-                              errors[`session_${index}_title`] ? 'border-red-500' : 'border-gray-300'
-                            }`}
+                            className={`input-field ${errors[`session_${index}_title`] ? 'border-red-400' : ''}`}
                           />
                           {errors[`session_${index}_title`] && (
-                            <p className="text-red-500 text-xs mt-1">
+                            <p className="text-red-400 text-xs mt-1">
                               {errors[`session_${index}_title`]}
                             </p>
                           )}
@@ -333,13 +365,13 @@ const CreateCourse = () => {
                           placeholder="Video URL (YouTube, Vimeo, etc.)"
                           value={session.videoUrl}
                           onChange={(e) => handleSessionChange(index, 'videoUrl', e.target.value)}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 placeholder-gray-400 transition-colors bg-white"
+                          className="input-field"
                         />
                         <input
                           placeholder="PDF URL (optional)"
                           value={session.pdfUrl}
                           onChange={(e) => handleSessionChange(index, 'pdfUrl', e.target.value)}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 placeholder-gray-400 transition-colors bg-white"
+                          className="input-field"
                         />
                       </div>
                     </div>
@@ -349,22 +381,27 @@ const CreateCourse = () => {
 
               {/* Submit */}
               <div className="flex items-center gap-4">
-                <Button
+                <button
                   type="submit"
-                  variant="primary"
-                  className="px-8 py-3 text-base"
+                  className="btn-primary px-8 py-3 text-base"
                   disabled={submitting}
                 >
-                  {submitting ? <LoadingSpinner size="sm" /> : 'Create Course'}
-                </Button>
-                <Button
+                  {submitting ? (
+                    <span className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                      Creating...
+                    </span>
+                  ) : (
+                    'Create Course'
+                  )}
+                </button>
+                <button
                   type="button"
-                  variant="secondary"
                   onClick={() => navigate(-1)}
-                  className="px-8 py-3 text-base"
+                  className="btn-secondary px-8 py-3 text-base"
                 >
                   Cancel
-                </Button>
+                </button>
               </div>
             </form>
           </div>
@@ -372,12 +409,12 @@ const CreateCourse = () => {
           {/* Preview Card */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">
                 Preview
               </h3>
-              <div className="card overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="card overflow-hidden hover:shadow-brutal transition-all duration-300">
                 {/* Thumbnail */}
-                <div className="h-44 bg-gradient-to-br from-blue-100 to-blue-50 overflow-hidden">
+                <div className="h-44 bg-[#0a0a0a] border-b border-gray-800 overflow-hidden flex items-center justify-center">
                   {form.thumbnail ? (
                     <img
                       src={form.thumbnail}
@@ -386,25 +423,17 @@ const CreateCourse = () => {
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <svg className="w-12 h-12 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
+                    <Image className="w-12 h-12 text-gray-700" />
                   )}
                 </div>
 
                 <div className="p-5">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-50 text-blue-600 rounded-full">
-                      {form.level}
-                    </span>
-                    <span className="px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
-                      {form.category}
-                    </span>
+                    <span className="badge badge-accent">{form.level}</span>
+                    <span className="badge badge-blue">{form.category}</span>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1.5 line-clamp-1">
+                  <h3 className="text-lg font-bold text-white mb-1.5 line-clamp-1">
                     {form.title || 'Course Title'}
                   </h3>
                   <p className="text-gray-500 text-sm mb-4 line-clamp-2">
@@ -412,7 +441,7 @@ const CreateCourse = () => {
                   </p>
 
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-lg font-bold text-blue-500">
+                    <span className="text-lg font-black text-yellow-400">
                       {form.price === 0 ? 'Free' : `$${form.price}`}
                     </span>
                     <span className="text-sm text-gray-500">
@@ -420,11 +449,11 @@ const CreateCourse = () => {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
+                  <div className="flex items-center gap-2 pt-3 border-t border-gray-800">
+                    <div className="w-6 h-6 rounded-md bg-yellow-400/10 flex items-center justify-center text-yellow-400 text-[10px] font-bold">
                       {(user?.firstName || 'Y')[0]}
                     </div>
-                    <span>
+                    <span className="text-xs text-gray-400">
                       {user?.firstName
                         ? `${user.firstName} ${user.lastName || ''}`
                         : 'You'}

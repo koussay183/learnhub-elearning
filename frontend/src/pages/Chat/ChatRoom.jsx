@@ -5,17 +5,23 @@ import api from '../../utils/api';
 import ChatBubble from '../../components/chat/ChatBubble';
 import MessageInput from '../../components/chat/MessageInput';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
+import { MessageCircle, Send, Users, Hash, Search, Plus, X, User, ChevronDown } from 'lucide-react';
 
 const ChatRoom = () => {
   const { user } = useAuth();
   const socket = useSocket();
 
   const [rooms, setRooms] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [activeRoom, setActiveRoom] = useState('general');
+  const [activeRoomLabel, setActiveRoomLabel] = useState('General');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [typingUser, setTypingUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState('rooms'); // 'rooms' | 'users'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dmRooms, setDmRooms] = useState([]); // tracked DM rooms
 
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -24,17 +30,48 @@ const ChatRoom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Generate consistent DM room ID (sorted)
+  const getDmRoomId = (userId1, userId2) => {
+    const sorted = [userId1, userId2].sort();
+    return `${sorted[0]}_dm_${sorted[1]}`;
+  };
+
+  // Check if a room ID is a DM
+  const isDmRoom = (roomId) => roomId.includes('_dm_');
+
+  // Get the other user's info from a DM room
+  const getDmPartner = (roomId) => {
+    if (!isDmRoom(roomId) || !user) return null;
+    const parts = roomId.split('_dm_');
+    const partnerId = parts[0] === user._id ? parts[1] : parts[0];
+    return allUsers.find((u) => u._id === partnerId);
+  };
+
+  // Format room display name
+  const formatRoomName = (roomId) => {
+    if (isDmRoom(roomId)) {
+      const partner = getDmPartner(roomId);
+      if (partner) return `${partner.firstName} ${partner.lastName}`;
+      return 'Direct Message';
+    }
+    if (roomId === 'general') return 'General';
+    return roomId.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
   // Fetch rooms
   useEffect(() => {
     const fetchRooms = async () => {
       try {
         const { data } = await api.get('/api/chat/rooms');
         const roomList = data.rooms || [];
-        // Ensure "general" is always in the list
         if (!roomList.includes('general')) {
           roomList.unshift('general');
         }
-        setRooms(roomList);
+        // Separate DM rooms from group rooms
+        const groupRooms = roomList.filter((r) => !isDmRoom(r));
+        const dmList = roomList.filter((r) => isDmRoom(r));
+        setRooms(groupRooms);
+        setDmRooms(dmList);
       } catch (err) {
         console.error('Failed to fetch rooms:', err);
         setRooms(['general']);
@@ -42,6 +79,20 @@ const ChatRoom = () => {
     };
     fetchRooms();
   }, []);
+
+  // Fetch users for DM
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const { data } = await api.get('/api/chat/users');
+        const usersList = data.users || data || [];
+        setAllUsers(usersList.filter((u) => u._id !== user?._id));
+      } catch (err) {
+        console.error('Failed to fetch users:', err);
+      }
+    };
+    if (user) fetchUsers();
+  }, [user]);
 
   // Fetch messages when room changes
   const fetchMessages = useCallback(async () => {
@@ -59,11 +110,15 @@ const ChatRoom = () => {
 
   useEffect(() => {
     fetchMessages();
-  }, [fetchMessages]);
+    setActiveRoomLabel(formatRoomName(activeRoom));
+  }, [fetchMessages, activeRoom]);
 
   // Socket events
   useEffect(() => {
     if (!socket || !user) return;
+
+    // Identify user to server
+    socket.emit('user:identify', { userId: user._id });
 
     // Join room
     socket.emit('chat:join-room', { roomId: activeRoom, userId: user._id });
@@ -76,20 +131,20 @@ const ChatRoom = () => {
     };
 
     // Typing indicator
-    const handleTyping = ({ userId, roomId }) => {
+    const handleTyping = ({ userId, roomId, userName }) => {
       if (roomId === activeRoom && userId !== user._id) {
-        setTypingUser('Someone');
+        setTypingUser(userName || 'Someone');
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
         typingTimeoutRef.current = setTimeout(() => setTypingUser(null), 2000);
       }
     };
 
     socket.on('chat:receive-message', handleReceiveMessage);
-    socket.on('chat:user-typing', handleTyping);
+    socket.on('chat:typing', handleTyping);
 
     return () => {
       socket.off('chat:receive-message', handleReceiveMessage);
-      socket.off('chat:user-typing', handleTyping);
+      socket.off('chat:typing', handleTyping);
       socket.emit('chat:leave-room', { roomId: activeRoom, userId: user._id });
     };
   }, [socket, activeRoom, user]);
@@ -102,16 +157,28 @@ const ChatRoom = () => {
   const handleSend = (content) => {
     if (!socket || !user) return;
 
-    socket.emit('chat:send-message', {
-      roomId: activeRoom,
-      content,
-      userId: user._id,
-    });
+    if (isDmRoom(activeRoom)) {
+      socket.emit('chat:send-dm', {
+        roomId: activeRoom,
+        content,
+        userId: user._id,
+      });
+    } else {
+      socket.emit('chat:send-message', {
+        roomId: activeRoom,
+        content,
+        userId: user._id,
+      });
+    }
   };
 
   const handleTyping = () => {
     if (!socket || !user) return;
-    socket.emit('chat:typing', { roomId: activeRoom, userId: user._id });
+    socket.emit('chat:typing', {
+      roomId: activeRoom,
+      userId: user._id,
+      userName: `${user.firstName}`,
+    });
   };
 
   const switchRoom = (roomId) => {
@@ -120,70 +187,189 @@ const ChatRoom = () => {
     setSidebarOpen(false);
   };
 
-  const formatRoomName = (roomId) => {
-    if (roomId === 'general') return 'General';
-    return roomId.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  const startDm = (targetUser) => {
+    const dmRoomId = getDmRoomId(user._id, targetUser._id);
+    // Add to DM rooms if not already there
+    if (!dmRooms.includes(dmRoomId)) {
+      setDmRooms((prev) => [...prev, dmRoomId]);
+    }
+    switchRoom(dmRoomId);
+    setSidebarTab('rooms');
   };
 
+  // Filtered users for search
+  const filteredUsers = allUsers.filter((u) => {
+    if (!searchQuery.trim()) return true;
+    const fullName = `${u.firstName} ${u.lastName}`.toLowerCase();
+    return fullName.includes(searchQuery.toLowerCase());
+  });
+
   return (
-    <div className="h-screen bg-gray-50 flex">
+    <div className="h-screen bg-[#0a0a0a] flex overflow-hidden">
       {/* Mobile Sidebar Toggle */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-xl shadow-md border border-gray-200 text-sm"
+        className="md:hidden fixed top-4 left-4 z-50 bg-[#111111] border-2 border-gray-800 p-2.5 rounded-xl text-gray-400 hover:text-yellow-400 transition-colors"
       >
-        {sidebarOpen ? 'x' : '☰'}
+        {sidebarOpen ? <X className="w-4 h-4" /> : <MessageCircle className="w-4 h-4" />}
       </button>
 
       {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 fixed md:relative z-40 w-72 h-full bg-white border-r border-gray-100 flex flex-col transition-transform duration-200`}
+        } md:translate-x-0 fixed md:relative z-40 w-72 h-full bg-[#111111] border-r-2 border-gray-800 flex flex-col transition-transform duration-200`}
       >
         {/* Sidebar Header */}
-        <div className="p-5 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900">Chat</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Real-time messaging</p>
+        <div className="p-5 border-b border-gray-800">
+          <div className="flex items-center gap-2 mb-1">
+            <MessageCircle className="w-5 h-5 text-yellow-400" />
+            <h2 className="text-lg font-bold text-white">Chat</h2>
+          </div>
+          <p className="text-xs text-gray-600 ml-7">Real-time messaging</p>
         </div>
 
-        {/* Room List */}
-        <div className="flex-1 overflow-y-auto p-3">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">
-            Rooms
-          </p>
-          {rooms.map((roomId) => (
-            <button
-              key={roomId}
-              onClick={() => switchRoom(roomId)}
-              className={`w-full text-left px-4 py-3 rounded-xl mb-1 text-sm font-medium transition-colors flex items-center gap-3 ${
-                activeRoom === roomId
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <span
-                className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                  activeRoom === roomId ? 'bg-green-400' : 'bg-gray-300'
-                }`}
-              />
-              <span className="truncate">{formatRoomName(roomId)}</span>
-            </button>
-          ))}
+        {/* Tab Switcher */}
+        <div className="flex border-b border-gray-800">
+          <button
+            onClick={() => setSidebarTab('rooms')}
+            className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 ${
+              sidebarTab === 'rooms'
+                ? 'text-yellow-400 border-b-2 border-yellow-400'
+                : 'text-gray-500 hover:text-gray-400'
+            }`}
+          >
+            <Hash className="w-3.5 h-3.5" />
+            Channels
+          </button>
+          <button
+            onClick={() => setSidebarTab('users')}
+            className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 ${
+              sidebarTab === 'users'
+                ? 'text-yellow-400 border-b-2 border-yellow-400'
+                : 'text-gray-500 hover:text-gray-400'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            Users
+          </button>
+        </div>
+
+        {/* Sidebar Content */}
+        <div className="flex-1 overflow-y-auto">
+          {sidebarTab === 'rooms' ? (
+            <div className="p-3">
+              {/* Group Rooms */}
+              <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest px-3 mb-2 mt-1">
+                Rooms
+              </p>
+              {rooms.map((roomId) => (
+                <button
+                  key={roomId}
+                  onClick={() => switchRoom(roomId)}
+                  className={`w-full text-left px-3 py-2.5 rounded-xl mb-1 text-sm font-medium transition-all flex items-center gap-3 ${
+                    activeRoom === roomId
+                      ? 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20'
+                      : 'text-gray-400 hover:bg-[#1a1a1a] hover:text-gray-300 border border-transparent'
+                  }`}
+                >
+                  <Hash className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{formatRoomName(roomId)}</span>
+                </button>
+              ))}
+
+              {/* DM Rooms */}
+              {dmRooms.length > 0 && (
+                <>
+                  <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest px-3 mb-2 mt-4">
+                    Direct Messages
+                  </p>
+                  {dmRooms.map((roomId) => {
+                    const partner = getDmPartner(roomId);
+                    const partnerInitial = partner?.firstName?.charAt(0)?.toUpperCase() || '?';
+                    return (
+                      <button
+                        key={roomId}
+                        onClick={() => switchRoom(roomId)}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl mb-1 text-sm font-medium transition-all flex items-center gap-3 ${
+                          activeRoom === roomId
+                            ? 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20'
+                            : 'text-gray-400 hover:bg-[#1a1a1a] hover:text-gray-300 border border-transparent'
+                        }`}
+                      >
+                        <div className="w-6 h-6 rounded-md bg-yellow-400/10 flex items-center justify-center text-yellow-400 text-[10px] font-bold flex-shrink-0">
+                          {partnerInitial}
+                        </div>
+                        <span className="truncate">{formatRoomName(roomId)}</span>
+                      </button>
+                    );
+                  })}
+                </>
+              )}
+            </div>
+          ) : (
+            /* Users Tab */
+            <div className="p-3">
+              {/* Search */}
+              <div className="relative mb-3">
+                <Search className="w-4 h-4 text-gray-600 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search users..."
+                  className="w-full pl-10 pr-4 py-2.5 bg-[#0a0a0a] border-2 border-gray-800 rounded-xl text-sm text-white placeholder-gray-600
+                             focus:outline-none focus:border-yellow-400/50 transition-all"
+                />
+              </div>
+
+              <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest px-3 mb-2">
+                All Users ({filteredUsers.length})
+              </p>
+
+              {filteredUsers.length === 0 ? (
+                <p className="text-gray-600 text-sm text-center py-6">No users found</p>
+              ) : (
+                filteredUsers.map((u) => {
+                  const uInitial = u.firstName?.charAt(0)?.toUpperCase() || '?';
+                  return (
+                    <button
+                      key={u._id}
+                      onClick={() => startDm(u)}
+                      className="w-full text-left px-3 py-2.5 rounded-xl mb-1 text-sm transition-all flex items-center gap-3
+                                 text-gray-400 hover:bg-[#1a1a1a] hover:text-gray-300 border border-transparent group"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-yellow-400/10 flex items-center justify-center text-yellow-400 text-xs font-bold flex-shrink-0">
+                        {uInitial}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{u.firstName} {u.lastName}</p>
+                        <p className="text-[10px] text-gray-600">{u.role || 'Student'}</p>
+                      </div>
+                      <MessageCircle className="w-4 h-4 text-gray-700 group-hover:text-yellow-400 transition-colors flex-shrink-0" />
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          )}
         </div>
 
         {/* Current User */}
         {user && (
-          <div className="p-4 border-t border-gray-100">
+          <div className="p-4 border-t border-gray-800">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold">
-                {user.firstName?.[0]}{user.lastName?.[0]}
+              <div className="w-9 h-9 rounded-lg bg-yellow-400/10 text-yellow-400 flex items-center justify-center text-xs font-bold">
+                {user.firstName?.[0]?.toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-white truncate">
                   {user.firstName} {user.lastName}
                 </p>
-                <p className="text-xs text-green-500">Online</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-green-400" />
+                  <p className="text-xs text-green-400">Online</p>
+                </div>
               </div>
             </div>
           </div>
@@ -194,18 +380,33 @@ const ChatRoom = () => {
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-black/20 z-30 md:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden"
         />
       )}
 
       {/* Chat Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Chat Header */}
-        <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-3">
-          <span className="w-3 h-3 rounded-full bg-green-400" />
-          <h3 className="text-base font-semibold text-gray-900">
-            {formatRoomName(activeRoom)}
-          </h3>
+        <div className="bg-[#111111] border-b-2 border-gray-800 px-6 py-4 flex items-center gap-3">
+          {isDmRoom(activeRoom) ? (
+            <>
+              <div className="w-8 h-8 rounded-lg bg-yellow-400/10 flex items-center justify-center text-yellow-400 text-xs font-bold">
+                {getDmPartner(activeRoom)?.firstName?.charAt(0)?.toUpperCase() || '?'}
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-white">{activeRoomLabel}</h3>
+                <p className="text-[10px] text-gray-600">Direct Message</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <Hash className="w-5 h-5 text-yellow-400" />
+              <div>
+                <h3 className="text-base font-semibold text-white">{activeRoomLabel}</h3>
+                <p className="text-[10px] text-gray-600">Group Channel</p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Messages */}
@@ -217,8 +418,9 @@ const ChatRoom = () => {
           ) : messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <p className="text-gray-400 text-sm mb-1">No messages yet</p>
-                <p className="text-gray-300 text-xs">Be the first to say something!</p>
+                <MessageCircle className="w-10 h-10 text-gray-800 mx-auto mb-3" />
+                <p className="text-gray-500 text-sm mb-1">No messages yet</p>
+                <p className="text-gray-700 text-xs">Be the first to say something!</p>
               </div>
             </div>
           ) : (

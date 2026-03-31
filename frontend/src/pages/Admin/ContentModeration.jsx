@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
+import { BookOpen, MessageSquare, CheckCircle, XCircle, Trash2, X } from 'lucide-react';
 import api from '../../utils/api.js';
-import { LoadingSpinner } from '../../components/LoadingSpinner.jsx';
 
 const ContentModeration = () => {
   const [activeTab, setActiveTab] = useState('courses');
@@ -84,107 +84,105 @@ const ContentModeration = () => {
 
   const statusBadge = (status) => {
     const map = {
-      published: 'bg-green-100 text-green-700',
-      draft: 'bg-gray-100 text-gray-700',
-      pending: 'bg-amber-100 text-amber-700',
-      rejected: 'bg-red-100 text-red-700',
+      published: 'badge-green',
+      draft: 'badge-accent',
+      pending: 'badge-accent',
+      rejected: 'badge-red',
     };
-    return map[status] || 'bg-gray-100 text-gray-700';
+    return map[status] || 'badge-accent';
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Content Moderation</h1>
+          <h1 className="text-3xl font-black text-white">Content Moderation</h1>
           <p className="mt-1 text-gray-500">Review and moderate platform content</p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center justify-between">
+          <div className="mb-6 p-3 bg-red-400/10 border border-red-400/20 rounded-xl text-red-400 text-sm flex items-center justify-between">
             <span>{error}</span>
-            <button onClick={() => setError('')} className="text-red-400 hover:text-red-600">
-              x
+            <button onClick={() => setError('')} className="text-red-400 hover:text-red-300 transition-colors">
+              <X className="w-4 h-4" />
             </button>
           </div>
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-gray-200 rounded-xl p-1 mb-6 w-fit">
+        <div className="flex gap-1 bg-[#111111] border-2 border-gray-800 rounded-xl p-1 mb-6 w-fit">
           <button
             onClick={() => setActiveTab('courses')}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
               activeTab === 'courses'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-yellow-400 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                : 'text-gray-500 hover:text-white'
             }`}
           >
-            📚 Courses
+            <BookOpen className="w-4 h-4" /> Courses
           </button>
           <button
             onClick={() => setActiveTab('posts')}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
               activeTab === 'posts'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-yellow-400 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                : 'text-gray-500 hover:text-white'
             }`}
           >
-            💬 Community Posts
+            <MessageSquare className="w-4 h-4" /> Community Posts
           </button>
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <LoadingSpinner />
+              <div className="w-8 h-8 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
             </div>
           ) : activeTab === 'courses' ? (
             /* Courses Tab */
             courses.length === 0 ? (
               <div className="text-center py-20">
-                <span className="text-4xl block mb-3">📚</span>
+                <div className="w-14 h-14 bg-[#1a1a1a] border-2 border-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="w-7 h-7 text-gray-600" />
+                </div>
                 <p className="text-gray-500">No courses to moderate.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <tr className="bg-[#0a0a0a] border-b-2 border-gray-800">
+                      <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
                         Title
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
                         Instructor
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
                         Date
                       </th>
-                      <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      <th className="text-right px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-800/50">
                     {courses.map((course) => (
-                      <tr key={course._id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={course._id} className="hover:bg-[#1a1a1a] transition-colors">
                         <td className="px-6 py-4">
-                          <span className="font-medium text-gray-900">{course.title}</span>
+                          <span className="font-semibold text-white">{course.title}</span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">
+                        <td className="px-6 py-4 text-sm text-gray-400">
                           {course.instructor?.name || 'Unknown'}
                         </td>
                         <td className="px-6 py-4">
-                          <span
-                            className={`text-xs font-medium px-2.5 py-0.5 rounded-full capitalize ${statusBadge(
-                              course.status
-                            )}`}
-                          >
+                          <span className={`badge ${statusBadge(course.status)} capitalize`}>
                             {course.status || 'draft'}
                           </span>
                         </td>
@@ -196,24 +194,27 @@ const ContentModeration = () => {
                             {course.status !== 'published' && (
                               <button
                                 onClick={() => approveCourse(course._id)}
-                                className="text-xs font-medium px-3 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
+                                className="p-2 rounded-lg bg-green-400/10 text-green-400 hover:bg-green-400/20 transition-colors"
+                                title="Approve"
                               >
-                                Approve
+                                <CheckCircle className="w-3.5 h-3.5" />
                               </button>
                             )}
                             {course.status !== 'rejected' && (
                               <button
                                 onClick={() => rejectCourse(course._id)}
-                                className="text-xs font-medium px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+                                className="p-2 rounded-lg bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors"
+                                title="Reject"
                               >
-                                Reject
+                                <XCircle className="w-3.5 h-3.5" />
                               </button>
                             )}
                             <button
                               onClick={() => deleteCourse(course._id)}
-                              className="text-xs font-medium px-3 py-1.5 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+                              className="p-2 rounded-lg bg-red-400/10 text-red-400 hover:bg-red-400/20 transition-colors"
+                              title="Delete"
                             >
-                              Delete
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </td>
@@ -226,44 +227,46 @@ const ContentModeration = () => {
           ) : /* Posts Tab */
           posts.length === 0 ? (
             <div className="text-center py-20">
-              <span className="text-4xl block mb-3">💬</span>
+              <div className="w-14 h-14 bg-[#1a1a1a] border-2 border-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="w-7 h-7 text-gray-600" />
+              </div>
               <p className="text-gray-500">No posts to moderate.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <tr className="bg-[#0a0a0a] border-b-2 border-gray-800">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
                       Title
                     </th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
                       Author
                     </th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
                       Category
                     </th>
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th className="text-right px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-800/50">
                   {posts.map((post) => (
-                    <tr key={post._id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={post._id} className="hover:bg-[#1a1a1a] transition-colors">
                       <td className="px-6 py-4">
-                        <span className="font-medium text-gray-900 line-clamp-1">
+                        <span className="font-semibold text-white line-clamp-1">
                           {post.title || post.content?.substring(0, 50) || 'Untitled'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-6 py-4 text-sm text-gray-400">
                         {post.author?.name || 'Unknown'}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 capitalize">
+                        <span className="badge badge-blue capitalize">
                           {post.category || 'general'}
                         </span>
                       </td>
@@ -273,9 +276,10 @@ const ContentModeration = () => {
                       <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => removePost(post._id)}
-                          className="text-xs font-medium px-3 py-1.5 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+                          className="p-2 rounded-lg bg-red-400/10 text-red-400 hover:bg-red-400/20 transition-colors"
+                          title="Remove"
                         >
-                          Remove
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </td>
                     </tr>

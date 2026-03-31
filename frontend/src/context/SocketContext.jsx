@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import useAuthStore from './authStore.js';
 
 const SocketContext = createContext(null);
 
@@ -7,6 +8,7 @@ const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
     const newSocket = io(SOCKET_URL, {
@@ -18,6 +20,11 @@ export const SocketProvider = ({ children }) => {
 
     newSocket.on('connect', () => {
       console.log('Socket connected:', newSocket.id);
+      // Identify user for targeted notifications
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser?._id) {
+        newSocket.emit('user:identify', currentUser._id);
+      }
     });
 
     newSocket.on('disconnect', (reason) => {
@@ -34,6 +41,13 @@ export const SocketProvider = ({ children }) => {
       newSocket.disconnect();
     };
   }, []);
+
+  // Re-identify when user logs in
+  useEffect(() => {
+    if (socket?.connected && user?._id) {
+      socket.emit('user:identify', user._id);
+    }
+  }, [socket, user]);
 
   return (
     <SocketContext.Provider value={socket}>

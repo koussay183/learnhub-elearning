@@ -39,6 +39,9 @@ import ContentModeration from './pages/Admin/ContentModeration.jsx';
 // Settings
 import Profile from './pages/Settings/Profile.jsx';
 
+// Checkout
+import Checkout from './pages/Checkout.jsx';
+
 // Landing
 import LandingPage from './pages/LandingPage.jsx';
 
@@ -47,7 +50,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-screen bg-[#0a0a0a] flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -89,6 +92,11 @@ function App() {
           <Route path="/courses/:id" element={<AppLayout activePage="courses"><CourseDetail /></AppLayout>} />
           <Route path="/courses/:courseId/sessions/:sessionId" element={
             <ProtectedRoute><SessionPlayer /></ProtectedRoute>
+          } />
+
+          {/* Checkout */}
+          <Route path="/checkout/:courseId" element={
+            <ProtectedRoute><Checkout /></ProtectedRoute>
           } />
 
           {/* Community */}

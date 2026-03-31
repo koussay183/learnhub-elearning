@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Trophy, XCircle, Clock, CheckCircle, HelpCircle, ArrowLeft, Check, X } from 'lucide-react';
 import api from '../../utils/api.js';
-import { LoadingSpinner } from '../../components/LoadingSpinner.jsx';
 
 const TestResults = () => {
   const { testId, attemptId } = useParams();
@@ -28,21 +28,23 @@ const TestResults = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+        <div className="w-8 h-8 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-md text-center">
-          <span className="text-4xl block mb-3">⚠️</span>
-          <p className="text-red-600 font-medium mb-4">{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+        <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-8 max-w-md text-center">
+          <div className="w-14 h-14 bg-red-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <XCircle className="w-7 h-7 text-red-400" />
+          </div>
+          <p className="text-red-400 font-medium mb-4">{error}</p>
           <button
             onClick={() => navigate('/tests')}
-            className="px-5 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+            className="btn-primary"
           >
             Back to Tests
           </button>
@@ -70,18 +72,18 @@ const TestResults = () => {
   const strokeOffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Score Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center mb-8">
+        <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-8 text-center mb-8">
           {/* Score Circle */}
-          <div className="inline-flex items-center justify-center mb-6">
+          <div className="relative inline-flex items-center justify-center mb-6">
             <svg width="140" height="140" className="-rotate-90">
               <circle
                 cx="70"
                 cy="70"
                 r={radius}
-                stroke="#E5E7EB"
+                stroke="#1f2937"
                 strokeWidth="10"
                 fill="none"
               />
@@ -89,7 +91,7 @@ const TestResults = () => {
                 cx="70"
                 cy="70"
                 r={radius}
-                stroke={passed ? '#22C55E' : '#EF4444'}
+                stroke={passed ? '#FACC15' : '#EF4444'}
                 strokeWidth="10"
                 fill="none"
                 strokeLinecap="round"
@@ -99,54 +101,57 @@ const TestResults = () => {
               />
             </svg>
             <div className="absolute">
-              <span className="text-4xl font-bold text-gray-900">{percentage}%</span>
+              <span className="text-4xl font-black text-white">{percentage}%</span>
             </div>
           </div>
 
           {/* Pass/Fail Badge */}
           <div className="mb-4">
-            <span
-              className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold ${
-                passed
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-red-100 text-red-700'
-              }`}
-            >
-              {passed ? '🎉 Passed' : '❌ Failed'}
-            </span>
+            {passed ? (
+              <span className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
+                <Trophy className="w-4 h-4" /> Passed
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold bg-red-400/10 text-red-400 border border-red-400/20">
+                <XCircle className="w-4 h-4" /> Failed
+              </span>
+            )}
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">
+          <h1 className="text-2xl font-black text-white mb-1">
             {result?.testTitle || result?.test?.title || 'Test Results'}
           </h1>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
-            <p className="text-2xl font-bold text-gray-900">
+          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-4 text-center">
+            <p className="text-2xl font-black text-white">
               {score}/{totalPoints}
             </p>
             <p className="text-xs text-gray-500 mt-1">Score</p>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
-            <p className="text-2xl font-bold text-gray-900">{timeTaken}</p>
+          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-4 text-center">
+            <div className="flex items-center justify-center gap-1">
+              <Clock className="w-4 h-4 text-gray-500" />
+              <p className="text-2xl font-black text-white">{timeTaken}</p>
+            </div>
             <p className="text-xs text-gray-500 mt-1">Time Taken</p>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
-            <p className="text-2xl font-bold text-gray-900">{answeredCount}</p>
+          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-4 text-center">
+            <p className="text-2xl font-black text-white">{answeredCount}</p>
             <p className="text-xs text-gray-500 mt-1">Answered</p>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
-            <p className="text-2xl font-bold text-gray-900">{questions.length}</p>
+          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-4 text-center">
+            <p className="text-2xl font-black text-white">{questions.length}</p>
             <p className="text-xs text-gray-500 mt-1">Total Questions</p>
           </div>
         </div>
 
         {/* Detailed Results */}
         {showResults && questions.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-5">Detailed Results</h2>
+          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6 mb-8">
+            <h2 className="text-lg font-bold text-white mb-5">Detailed Results</h2>
             <div className="space-y-4">
               {questions.map((q, index) => {
                 const isCorrect = q.isCorrect ?? q.correct ?? false;
@@ -154,34 +159,36 @@ const TestResults = () => {
                   <div
                     key={q._id || q.questionId || index}
                     className={`border-2 rounded-xl p-4 ${
-                      isCorrect ? 'border-green-200 bg-green-50/50' : 'border-red-200 bg-red-50/50'
+                      isCorrect
+                        ? 'border-green-400/30 bg-green-400/5'
+                        : 'border-red-400/30 bg-red-400/5'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <span className="text-sm font-bold text-gray-700">
+                      <span className="text-sm font-bold text-gray-300">
                         Q{index + 1}. {q.text || q.questionText}
                       </span>
-                      <span
-                        className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                          isCorrect
-                            ? 'bg-green-200 text-green-800'
-                            : 'bg-red-200 text-red-800'
-                        }`}
-                      >
-                        {isCorrect ? 'Correct' : 'Wrong'}
-                      </span>
+                      {isCorrect ? (
+                        <span className="badge badge-green inline-flex items-center gap-1">
+                          <Check className="w-3 h-3" /> Correct
+                        </span>
+                      ) : (
+                        <span className="badge badge-red inline-flex items-center gap-1">
+                          <X className="w-3 h-3" /> Wrong
+                        </span>
+                      )}
                     </div>
                     <div className="text-sm space-y-1 mt-2">
-                      <p className="text-gray-600">
+                      <p className="text-gray-400">
                         <span className="font-medium">Your answer:</span>{' '}
-                        <span className={isCorrect ? 'text-green-700' : 'text-red-700'}>
+                        <span className={isCorrect ? 'text-green-400' : 'text-red-400'}>
                           {q.userAnswer || q.answer || 'No answer'}
                         </span>
                       </p>
                       {!isCorrect && (
-                        <p className="text-gray-600">
+                        <p className="text-gray-400">
                           <span className="font-medium">Correct answer:</span>{' '}
-                          <span className="text-green-700">
+                          <span className="text-green-400">
                             {q.correctAnswer || 'N/A'}
                           </span>
                         </p>
@@ -198,9 +205,9 @@ const TestResults = () => {
         <div className="text-center">
           <button
             onClick={() => navigate('/tests')}
-            className="px-8 py-3 bg-blue-500 text-white font-semibold rounded-xl hover:bg-blue-600 transition-colors shadow-sm"
+            className="btn-primary inline-flex items-center gap-2"
           >
-            Back to Tests
+            <ArrowLeft className="w-4 h-4" /> Back to Tests
           </button>
         </div>
       </div>

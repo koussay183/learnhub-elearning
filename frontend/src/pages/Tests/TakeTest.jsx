@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
+import { Clock, HelpCircle, AlertTriangle, ChevronLeft, ChevronRight, Send, WifiOff, Play } from 'lucide-react';
 import api from '../../utils/api.js';
 import useAuth from '../../hooks/useAuth.js';
 import useTimer from '../../hooks/useTimer.js';
-import { LoadingSpinner } from '../../components/LoadingSpinner.jsx';
 
 const ANSWERS_KEY = 'test_answers';
 const ATTEMPT_KEY = 'test_attempt';
@@ -185,11 +185,15 @@ const TakeTest = () => {
   const answeredCount = Object.keys(answers).length;
   const isLowTime = timeRemaining < 60000 && timeRemaining > 0;
 
+  // Timer progress percentage
+  const totalDuration = test?.duration ? test.duration * 60 * 1000 : 1;
+  const timerProgress = Math.max(0, Math.min(100, (timeRemaining / totalDuration) * 100));
+
   // Loading state
   if (loading && !test) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+        <div className="w-8 h-8 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
       </div>
     );
   }
@@ -197,13 +201,15 @@ const TakeTest = () => {
   // Error state
   if (error && !test) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-md text-center">
-          <span className="text-4xl block mb-3">⚠️</span>
-          <p className="text-red-600 font-medium mb-4">{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+        <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-8 max-w-md text-center">
+          <div className="w-14 h-14 bg-red-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-7 h-7 text-red-400" />
+          </div>
+          <p className="text-red-400 font-medium mb-4">{error}</p>
           <button
             onClick={() => navigate('/tests')}
-            className="px-5 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+            className="btn-primary"
           >
             Back to Tests
           </button>
@@ -215,23 +221,25 @@ const TakeTest = () => {
   // Start screen
   if (!started) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-lg w-full text-center">
-          <span className="text-5xl block mb-4">📝</span>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{test?.title}</h1>
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
+        <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-8 max-w-lg w-full text-center">
+          <div className="w-16 h-16 bg-yellow-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <HelpCircle className="w-8 h-8 text-yellow-400" />
+          </div>
+          <h1 className="text-2xl font-black text-white mb-2">{test?.title}</h1>
           <p className="text-gray-500 mb-6">{test?.description || 'Good luck!'}</p>
 
-          <div className="flex justify-center gap-4 mb-8">
-            <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-xl text-sm font-medium">
-              ⏱ {test?.duration || 30} minutes
-            </div>
-            <div className="bg-purple-50 text-purple-700 px-4 py-2 rounded-xl text-sm font-medium">
-              ❓ {test?.questions?.length || test?.questionCount || '?'} questions
-            </div>
+          <div className="flex justify-center gap-3 mb-8">
+            <span className="badge badge-accent inline-flex items-center gap-1">
+              <Clock className="w-3 h-3" /> {test?.duration || 30} minutes
+            </span>
+            <span className="badge badge-purple inline-flex items-center gap-1">
+              <HelpCircle className="w-3 h-3" /> {test?.questions?.length || test?.questionCount || '?'} questions
+            </span>
           </div>
 
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-xl text-sm">
+            <div className="mb-4 p-3 bg-red-400/10 border border-red-400/20 rounded-xl text-red-400 text-sm">
               {error}
             </div>
           )}
@@ -239,14 +247,16 @@ const TakeTest = () => {
           <button
             onClick={handleStart}
             disabled={loading}
-            className="w-full py-3 bg-blue-500 text-white font-semibold rounded-xl hover:bg-blue-600 transition-colors shadow-sm disabled:opacity-50"
+            className="btn-primary w-full py-3"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <LoadingSpinner size="sm" /> Starting...
+                <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" /> Starting...
               </span>
             ) : (
-              'Start Test'
+              <span className="flex items-center justify-center gap-2">
+                <Play className="w-4 h-4" /> Start Test
+              </span>
             )}
           </button>
         </div>
@@ -256,32 +266,41 @@ const TakeTest = () => {
 
   // Test view
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0a0a0a]">
       {/* Reconnection notice */}
       {showReconnectNotice && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-white text-center py-2 text-sm font-medium">
-          Connection lost. Reconnecting... Your answers are saved locally.
+        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500/90 text-black text-center py-2 text-sm font-bold flex items-center justify-center gap-2">
+          <WifiOff className="w-4 h-4" /> Connection lost. Reconnecting... Your answers are saved locally.
         </div>
       )}
 
       {/* Timer bar */}
       <div
-        className={`sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm ${
+        className={`sticky top-0 z-40 bg-[#111111] border-b-2 border-gray-800 ${
           showReconnectNotice ? 'mt-10' : ''
         }`}
       >
+        {/* Yellow gradient progress bar */}
+        <div className="h-1 bg-gray-800">
+          <div
+            className={`h-full transition-all duration-1000 ease-linear ${
+              isLowTime ? 'bg-red-500 animate-pulse' : 'bg-gradient-to-r from-yellow-400 to-yellow-500'
+            }`}
+            style={{ width: `${timerProgress}%` }}
+          />
+        </div>
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-700 truncate max-w-xs">
+          <h2 className="text-sm font-bold text-gray-300 truncate max-w-xs">
             {test?.title}
           </h2>
           <div
-            className={`text-lg font-mono font-bold px-4 py-1.5 rounded-xl ${
+            className={`text-lg font-mono font-black px-4 py-1.5 rounded-xl flex items-center gap-2 ${
               isLowTime
-                ? 'bg-red-100 text-red-600 animate-pulse'
-                : 'bg-gray-100 text-gray-800'
+                ? 'bg-red-400/10 text-red-400 border border-red-400/20 animate-pulse'
+                : 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20'
             }`}
           >
-            ⏱ {formatTime(timeRemaining)}
+            <Clock className="w-4 h-4" /> {formatTime(timeRemaining)}
           </div>
           <div className="text-sm text-gray-500">
             {answeredCount}/{questions.length} answered
@@ -292,8 +311,8 @@ const TakeTest = () => {
       <div className="max-w-5xl mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
         {/* Question navigation sidebar */}
         <div className="lg:w-64 flex-shrink-0">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sticky top-20">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Questions</h3>
+          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-4 sticky top-24">
+            <h3 className="text-sm font-bold text-gray-300 mb-3">Questions</h3>
             <div className="grid grid-cols-5 lg:grid-cols-4 gap-2">
               {questions.map((q, index) => {
                 const qId = q._id || q.id || index;
@@ -303,12 +322,12 @@ const TakeTest = () => {
                   <button
                     key={qId}
                     onClick={() => setCurrentIndex(index)}
-                    className={`w-10 h-10 rounded-xl text-sm font-medium transition-all ${
+                    className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${
                       isCurrent
-                        ? 'bg-blue-500 text-white shadow-sm'
+                        ? 'bg-yellow-400 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-black'
                         : isAnswered
-                        ? 'bg-green-100 text-green-700 border border-green-200'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-green-400/10 text-green-400 border-2 border-green-400/30'
+                        : 'bg-[#1a1a1a] text-gray-500 border-2 border-gray-800 hover:border-gray-700'
                     }`}
                   >
                     {index + 1}
@@ -320,9 +339,11 @@ const TakeTest = () => {
             <button
               onClick={() => setShowConfirmModal(true)}
               disabled={submitting}
-              className="w-full mt-4 py-2.5 bg-green-500 text-white font-medium rounded-xl hover:bg-green-600 transition-colors text-sm disabled:opacity-50"
+              className="btn-primary w-full mt-4 py-2.5 text-sm"
             >
-              Submit Test
+              <span className="flex items-center justify-center gap-2">
+                <Send className="w-3.5 h-3.5" /> Submit Test
+              </span>
             </button>
           </div>
         </div>
@@ -330,9 +351,9 @@ const TakeTest = () => {
         {/* Current question */}
         <div className="flex-1">
           {currentQuestion && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">
+                <span className="badge badge-accent">
                   Question {currentIndex + 1} of {questions.length}
                 </span>
                 <span className="text-sm text-gray-500">
@@ -340,7 +361,7 @@ const TakeTest = () => {
                 </span>
               </div>
 
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+              <h3 className="text-lg font-bold text-white mb-6">
                 {currentQuestion.text}
               </h3>
 
@@ -355,8 +376,8 @@ const TakeTest = () => {
                         key={oIndex}
                         className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
                           isSelected
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                            ? 'border-yellow-400/50 bg-yellow-400/5'
+                            : 'border-gray-800 hover:border-gray-700 hover:bg-[#1a1a1a]'
                         }`}
                       >
                         <input
@@ -364,9 +385,9 @@ const TakeTest = () => {
                           name={`q-${qId}`}
                           checked={isSelected}
                           onChange={() => setAnswer(qId, option)}
-                          className="text-blue-500 focus:ring-blue-400"
+                          className="accent-yellow-400"
                         />
-                        <span className="text-gray-800">{option}</span>
+                        <span className={`${isSelected ? 'text-white' : 'text-gray-300'}`}>{option}</span>
                       </label>
                     );
                   })}
@@ -387,7 +408,7 @@ const TakeTest = () => {
                   }
                   placeholder="Type your answer here..."
                   rows={5}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors resize-none"
+                  className="input-field resize-none"
                 />
               )}
 
@@ -396,23 +417,23 @@ const TakeTest = () => {
                 <button
                   onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
                   disabled={currentIndex === 0}
-                  className="px-5 py-2.5 rounded-xl font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-40"
+                  className="btn-secondary flex items-center gap-2 disabled:opacity-40"
                 >
-                  Previous
+                  <ChevronLeft className="w-4 h-4" /> Previous
                 </button>
                 {currentIndex < questions.length - 1 ? (
                   <button
                     onClick={() => setCurrentIndex((prev) => prev + 1)}
-                    className="px-5 py-2.5 rounded-xl font-medium text-white bg-blue-500 hover:bg-blue-600 transition-colors"
+                    className="btn-primary flex items-center gap-2"
                   >
-                    Next
+                    Next <ChevronRight className="w-4 h-4" />
                   </button>
                 ) : (
                   <button
                     onClick={() => setShowConfirmModal(true)}
-                    className="px-5 py-2.5 rounded-xl font-medium text-white bg-green-500 hover:bg-green-600 transition-colors"
+                    className="btn-primary flex items-center gap-2"
                   >
-                    Finish Test
+                    <Send className="w-4 h-4" /> Finish Test
                   </button>
                 )}
               </div>
@@ -423,28 +444,28 @@ const TakeTest = () => {
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Submit Test?</h3>
-            <p className="text-gray-500 text-sm mb-1">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6 max-w-sm w-full mx-4 animate-scaleIn">
+            <h3 className="text-lg font-black text-white mb-2">Submit Test?</h3>
+            <p className="text-gray-400 text-sm mb-1">
               You have answered {answeredCount} of {questions.length} questions.
             </p>
             {answeredCount < questions.length && (
-              <p className="text-amber-600 text-sm mb-4">
+              <p className="text-amber-400 text-sm mb-4">
                 {questions.length - answeredCount} question(s) are unanswered.
               </p>
             )}
             <div className="flex gap-3 mt-5">
               <button
                 onClick={() => setShowConfirmModal(false)}
-                className="flex-1 px-4 py-2.5 rounded-xl font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="btn-secondary flex-1"
               >
                 Cancel
               </button>
               <button
                 onClick={() => submitTest(false)}
                 disabled={submitting}
-                className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white bg-green-500 hover:bg-green-600 transition-colors disabled:opacity-50"
+                className="btn-primary flex-1"
               >
                 {submitting ? 'Submitting...' : 'Submit'}
               </button>

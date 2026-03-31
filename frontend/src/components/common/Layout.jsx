@@ -8,14 +8,9 @@ const Layout = ({ children, activePage }) => {
   const logout = useAuthStore((state) => state.logout);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Fixed top navbar */}
+    <div className="min-h-screen bg-[#0a0a0a]">
       <Navbar user={user} onLogout={logout} />
-
-      {/* Fixed left sidebar (hidden on mobile via Sidebar internals) */}
       <Sidebar activePage={activePage} user={user} />
-
-      {/* Main content area */}
       <main className="pt-16 lg:pl-64 min-h-screen">
         <div className="p-4 sm:p-6 lg:p-8">
           {children}

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Clock, HelpCircle, Users, Calendar, Plus, FileQuestion, Search } from 'lucide-react';
 import api from '../../utils/api.js';
 import useAuth from '../../hooks/useAuth.js';
-import { LoadingSpinner } from '../../components/LoadingSpinner.jsx';
 
 const TestBrowser = () => {
   const navigate = useNavigate();
@@ -10,6 +10,7 @@ const TestBrowser = () => {
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const cardsRef = useRef([]);
 
   useEffect(() => {
     const fetchTests = async () => {
@@ -26,6 +27,28 @@ const TestBrowser = () => {
     fetchTests();
   }, []);
 
+  // GSAP stagger animation
+  useEffect(() => {
+    if (!loading && tests.length > 0 && cardsRef.current.length > 0) {
+      const loadGsap = async () => {
+        try {
+          const gsap = (await import('gsap')).default || (await import('gsap')).gsap;
+          gsap.fromTo(
+            cardsRef.current.filter(Boolean),
+            { opacity: 0, y: 30 },
+            { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out' }
+          );
+        } catch {
+          // GSAP not available, cards will show normally
+          cardsRef.current.forEach((el) => {
+            if (el) el.style.opacity = '1';
+          });
+        }
+      };
+      loadGsap();
+    }
+  }, [loading, tests]);
+
   const formatDate = (dateStr) => {
     if (!dateStr) return null;
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -39,34 +62,34 @@ const TestBrowser = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+        <div className="w-8 h-8 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Online Tests</h1>
+            <h1 className="text-3xl font-black text-white">Online Tests</h1>
             <p className="mt-1 text-gray-500">Browse and take available tests</p>
           </div>
           {user?.roles?.includes('instructor') || user?.roles?.includes('admin') ? (
             <button
               onClick={() => navigate('/tests/create')}
-              className="mt-4 sm:mt-0 inline-flex items-center px-5 py-2.5 bg-blue-500 text-white font-medium rounded-xl hover:bg-blue-600 transition-colors shadow-sm"
+              className="btn-primary mt-4 sm:mt-0 inline-flex items-center gap-2"
             >
-              + Create Test
+              <Plus className="w-4 h-4" /> Create Test
             </button>
           ) : null}
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
+          <div className="mb-6 p-3 bg-red-400/10 border border-red-400/20 rounded-xl text-red-400 text-sm">
             {error}
           </div>
         )}
@@ -74,22 +97,26 @@ const TestBrowser = () => {
         {/* Empty state */}
         {!error && tests.length === 0 && (
           <div className="text-center py-20">
-            <span className="text-5xl block mb-4">📝</span>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No tests available</h3>
+            <div className="w-16 h-16 bg-[#111111] border-2 border-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <FileQuestion className="w-8 h-8 text-gray-600" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">No tests available</h3>
             <p className="text-gray-500">Check back later for new tests.</p>
           </div>
         )}
 
         {/* Test Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tests.map((test) => (
+          {tests.map((test, index) => (
             <div
               key={test._id}
+              ref={(el) => (cardsRef.current[index] = el)}
               onClick={() => navigate(`/tests/${test._id}`)}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:border-blue-100 transition-all cursor-pointer group"
+              style={{ opacity: 0 }}
+              className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6 hover:border-yellow-400/30 transition-all cursor-pointer group"
             >
               {/* Title & Description */}
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors mb-2 line-clamp-1">
+              <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors mb-2 line-clamp-1">
                 {test.title}
               </h3>
               <p className="text-gray-500 text-sm mb-4 line-clamp-2">
@@ -98,35 +125,35 @@ const TestBrowser = () => {
 
               {/* Creator */}
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
+                <div className="w-7 h-7 rounded-full bg-yellow-400/10 flex items-center justify-center text-xs font-bold text-yellow-400">
                   {test.creator?.name?.charAt(0)?.toUpperCase() || '?'}
                 </div>
-                <span className="text-sm text-gray-600">{test.creator?.name || 'Unknown'}</span>
+                <span className="text-sm text-gray-400">{test.creator?.name || 'Unknown'}</span>
               </div>
 
               {/* Badges */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {test.duration && (
-                  <span className="inline-flex items-center gap-1 text-xs font-medium bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg">
-                    ⏱ {test.duration} min
+                  <span className="badge badge-accent inline-flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {test.duration} min
                   </span>
                 )}
                 {test.questions && (
-                  <span className="inline-flex items-center gap-1 text-xs font-medium bg-purple-50 text-purple-700 px-2.5 py-1 rounded-lg">
-                    ❓ {test.questions.length || test.questionCount || 0} questions
+                  <span className="badge badge-purple inline-flex items-center gap-1">
+                    <HelpCircle className="w-3 h-3" /> {test.questions.length || test.questionCount || 0} questions
                   </span>
                 )}
                 {(test.totalAttempts !== undefined || test.attemptsCount !== undefined) && (
-                  <span className="inline-flex items-center gap-1 text-xs font-medium bg-green-50 text-green-700 px-2.5 py-1 rounded-lg">
-                    👥 {test.totalAttempts ?? test.attemptsCount ?? 0} attempts
+                  <span className="badge badge-green inline-flex items-center gap-1">
+                    <Users className="w-3 h-3" /> {test.totalAttempts ?? test.attemptsCount ?? 0} attempts
                   </span>
                 )}
               </div>
 
               {/* Scheduled time */}
               {test.scheduledStartTime && (
-                <div className="text-xs text-amber-700 bg-amber-50 px-3 py-2 rounded-lg">
-                  📅 Scheduled: {formatDate(test.scheduledStartTime)}
+                <div className="flex items-center gap-2 text-xs badge badge-accent">
+                  <Calendar className="w-3 h-3" /> Scheduled: {formatDate(test.scheduledStartTime)}
                 </div>
               )}
             </div>

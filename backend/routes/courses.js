@@ -6,9 +6,11 @@ import {
   updateCourse,
   deleteCourse,
   enrollCourse,
+  unenrollCourse,
   getEnrolledCourses,
   getProgress,
   getMyCourses,
+  processCheckout,
 } from '../controllers/courseController.js';
 import { authMiddleware, optionalAuth } from '../middleware/auth.js';
 
@@ -22,6 +24,8 @@ router.post('/', authMiddleware, createCourse);
 router.put('/:id', authMiddleware, updateCourse);
 router.delete('/:id', authMiddleware, deleteCourse);
 router.post('/enroll', authMiddleware, enrollCourse);
+router.post('/checkout', authMiddleware, processCheckout);
+router.delete('/enroll/:courseId', authMiddleware, unenrollCourse);
 router.get('/:courseId/progress', authMiddleware, getProgress);
 
 export default router;

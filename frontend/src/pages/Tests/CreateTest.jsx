@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Plus, Trash2, HelpCircle, Star, Clock, Target, ArrowLeft, Shuffle, Eye, Calendar } from 'lucide-react';
 import api from '../../utils/api.js';
-import { LoadingSpinner } from '../../components/LoadingSpinner.jsx';
 
 const emptyQuestion = () => ({
   id: Date.now(),
@@ -115,47 +115,47 @@ const CreateTest = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create Test</h1>
+            <h1 className="text-3xl font-black text-white">Create Test</h1>
             <p className="mt-1 text-gray-500">Design a new test with questions</p>
           </div>
           <button
             onClick={() => navigate('/tests')}
-            className="text-gray-500 hover:text-gray-700 font-medium"
+            className="btn-ghost flex items-center gap-2"
           >
-            Cancel
+            <ArrowLeft className="w-4 h-4" /> Cancel
           </button>
         </div>
 
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
+          <div className="mb-6 p-3 bg-red-400/10 border border-red-400/20 rounded-xl text-red-400 text-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Info */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
+          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6">
+            <h2 className="text-lg font-bold text-white mb-4">Basic Information</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Test Title <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                  Test Title <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. JavaScript Fundamentals Quiz"
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                  className="input-field"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Description
                 </label>
                 <textarea
@@ -163,31 +163,31 @@ const CreateTest = () => {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Brief description of the test..."
                   rows={3}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors resize-none"
+                  className="input-field resize-none"
                 />
               </div>
             </div>
           </div>
 
           {/* Settings */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Settings</h2>
+          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6">
+            <h2 className="text-lg font-bold text-white mb-4">Settings</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Duration (minutes)
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
+                  <Clock className="w-4 h-4 text-yellow-400" /> Duration (minutes)
                 </label>
                 <input
                   type="number"
                   min={1}
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                  className="input-field"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Passing Score (%)
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
+                  <Target className="w-4 h-4 text-yellow-400" /> Passing Score (%)
                 </label>
                 <input
                   type="number"
@@ -195,29 +195,29 @@ const CreateTest = () => {
                   max={100}
                   value={passingScore}
                   onChange={(e) => setPassingScore(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                  className="input-field"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Scheduled Start Time
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
+                  <Calendar className="w-4 h-4 text-yellow-400" /> Scheduled Start Time
                 </label>
                 <input
                   type="datetime-local"
                   value={scheduledStartTime}
                   onChange={(e) => setScheduledStartTime(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                  className="input-field"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Scheduled End Time
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
+                  <Calendar className="w-4 h-4 text-yellow-400" /> Scheduled End Time
                 </label>
                 <input
                   type="datetime-local"
                   value={scheduledEndTime}
                   onChange={(e) => setScheduledEndTime(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                  className="input-field"
                 />
               </div>
             </div>
@@ -228,47 +228,53 @@ const CreateTest = () => {
                 <div
                   onClick={() => setShuffleQuestions(!shuffleQuestions)}
                   className={`relative w-11 h-6 rounded-full transition-colors ${
-                    shuffleQuestions ? 'bg-blue-500' : 'bg-gray-300'
+                    shuffleQuestions ? 'bg-yellow-400' : 'bg-gray-700'
                   }`}
                 >
                   <span
-                    className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                      shuffleQuestions ? 'translate-x-5' : ''
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full shadow transition-transform ${
+                      shuffleQuestions ? 'translate-x-5 bg-black' : 'bg-gray-400'
                     }`}
                   />
                 </div>
-                <span className="text-sm text-gray-700">Shuffle questions</span>
+                <div className="flex items-center gap-2">
+                  <Shuffle className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-300">Shuffle questions</span>
+                </div>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <div
                   onClick={() => setShowResults(!showResults)}
                   className={`relative w-11 h-6 rounded-full transition-colors ${
-                    showResults ? 'bg-blue-500' : 'bg-gray-300'
+                    showResults ? 'bg-yellow-400' : 'bg-gray-700'
                   }`}
                 >
                   <span
-                    className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                      showResults ? 'translate-x-5' : ''
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full shadow transition-transform ${
+                      showResults ? 'translate-x-5 bg-black' : 'bg-gray-400'
                     }`}
                   />
                 </div>
-                <span className="text-sm text-gray-700">Show results to students after submission</span>
+                <div className="flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-300">Show results to students after submission</span>
+                </div>
               </label>
             </div>
           </div>
 
           {/* Questions */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-bold text-white">
                 Questions ({questions.length})
               </h2>
               <button
                 type="button"
                 onClick={addQuestion}
-                className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-yellow-400 hover:text-yellow-300 transition-colors"
               >
-                + Add Question
+                <Plus className="w-4 h-4" /> Add Question
               </button>
             </div>
 
@@ -276,20 +282,20 @@ const CreateTest = () => {
               {questions.map((question, qIndex) => (
                 <div
                   key={question.id}
-                  className="border border-gray-200 rounded-xl p-5 relative"
+                  className="border-2 border-gray-800 rounded-xl p-5 relative bg-[#0a0a0a]"
                 >
                   {/* Question header */}
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">
+                    <span className="badge badge-accent">
                       Question {qIndex + 1}
                     </span>
                     {questions.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeQuestion(qIndex)}
-                        className="text-red-400 hover:text-red-600 text-sm font-medium"
+                        className="flex items-center gap-1 text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
                       >
-                        Remove
+                        <Trash2 className="w-3.5 h-3.5" /> Remove
                       </button>
                     )}
                   </div>
@@ -297,20 +303,20 @@ const CreateTest = () => {
                   {/* Type & Points */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                      <label className="block text-xs font-semibold text-gray-400 mb-1">
                         Question Type
                       </label>
                       <select
                         value={question.type}
                         onChange={(e) => updateQuestion(qIndex, 'type', e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm"
+                        className="input-field py-2 text-sm"
                       >
                         <option value="multiple-choice">Multiple Choice</option>
                         <option value="short-answer">Short Answer</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                      <label className="block text-xs font-semibold text-gray-400 mb-1">
                         Points
                       </label>
                       <input
@@ -320,38 +326,38 @@ const CreateTest = () => {
                         onChange={(e) =>
                           updateQuestion(qIndex, 'points', e.target.value)
                         }
-                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm"
+                        className="input-field py-2 text-sm"
                       />
                     </div>
                   </div>
 
                   {/* Question text */}
                   <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Question Text <span className="text-red-500">*</span>
+                    <label className="block text-xs font-semibold text-gray-400 mb-1">
+                      Question Text <span className="text-red-400">*</span>
                     </label>
                     <textarea
                       value={question.text}
                       onChange={(e) => updateQuestion(qIndex, 'text', e.target.value)}
                       placeholder="Enter your question..."
                       rows={2}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm resize-none"
+                      className="input-field py-2 text-sm resize-none"
                     />
                   </div>
 
                   {/* Multiple choice options */}
                   {question.type === 'multiple-choice' && (
                     <div className="space-y-2">
-                      <label className="block text-xs font-medium text-gray-600">
+                      <label className="block text-xs font-semibold text-gray-400">
                         Options (select the correct answer)
                       </label>
                       {question.options.map((option, oIndex) => (
                         <label
                           key={oIndex}
-                          className={`flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                          className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
                             question.correctAnswer === oIndex
-                              ? 'border-green-400 bg-green-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-green-400/50 bg-green-400/5'
+                              : 'border-gray-800 hover:border-gray-700'
                           }`}
                         >
                           <input
@@ -361,7 +367,7 @@ const CreateTest = () => {
                             onChange={() =>
                               updateQuestion(qIndex, 'correctAnswer', oIndex)
                             }
-                            className="text-green-500 focus:ring-green-400"
+                            className="accent-green-400"
                           />
                           <input
                             type="text"
@@ -370,10 +376,10 @@ const CreateTest = () => {
                               updateOption(qIndex, oIndex, e.target.value)
                             }
                             placeholder={`Option ${oIndex + 1}`}
-                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm p-0"
+                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-white placeholder-gray-600 p-0 focus:outline-none"
                           />
                           {question.correctAnswer === oIndex && (
-                            <span className="text-xs text-green-600 font-medium">
+                            <span className="text-xs text-green-400 font-bold">
                               Correct
                             </span>
                           )}
@@ -387,20 +393,20 @@ const CreateTest = () => {
           </div>
 
           {/* Preview / Summary */}
-          <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6">
-            <h3 className="text-sm font-semibold text-blue-900 mb-3">Test Preview</h3>
-            <div className="flex flex-wrap gap-4 text-sm text-blue-800">
-              <span className="bg-white px-3 py-1.5 rounded-lg shadow-sm">
-                ❓ {questions.length} question{questions.length !== 1 ? 's' : ''}
+          <div className="bg-yellow-400/5 rounded-2xl border-2 border-yellow-400/20 p-6">
+            <h3 className="text-sm font-bold text-yellow-400 mb-3">Test Preview</h3>
+            <div className="flex flex-wrap gap-3 text-sm">
+              <span className="badge badge-purple inline-flex items-center gap-1">
+                <HelpCircle className="w-3 h-3" /> {questions.length} question{questions.length !== 1 ? 's' : ''}
               </span>
-              <span className="bg-white px-3 py-1.5 rounded-lg shadow-sm">
-                ⭐ {totalPoints} total points
+              <span className="badge badge-accent inline-flex items-center gap-1">
+                <Star className="w-3 h-3" /> {totalPoints} total points
               </span>
-              <span className="bg-white px-3 py-1.5 rounded-lg shadow-sm">
-                ⏱ {duration} minutes
+              <span className="badge badge-blue inline-flex items-center gap-1">
+                <Clock className="w-3 h-3" /> {duration} minutes
               </span>
-              <span className="bg-white px-3 py-1.5 rounded-lg shadow-sm">
-                🎯 {passingScore}% to pass
+              <span className="badge badge-green inline-flex items-center gap-1">
+                <Target className="w-3 h-3" /> {passingScore}% to pass
               </span>
             </div>
           </div>
@@ -410,18 +416,18 @@ const CreateTest = () => {
             <button
               type="button"
               onClick={() => navigate('/tests')}
-              className="px-6 py-2.5 rounded-xl font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+              className="btn-secondary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-xl font-medium text-white bg-blue-500 hover:bg-blue-600 transition-colors shadow-sm disabled:opacity-50"
+              className="btn-primary"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <LoadingSpinner size="sm" /> Creating...
+                  <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" /> Creating...
                 </span>
               ) : (
                 'Create Test'

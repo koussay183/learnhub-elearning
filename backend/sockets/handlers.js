@@ -1,170 +1,150 @@
 import ChatMessage from '../models/ChatMessage.js';
-import User from '../models/User.js';
+import { createNotification } from '../controllers/notificationController.js';
 
-const activeUsers = new Map(); // userId -> { socketId, roomId }
-const testRooms = new Map(); // testId -> { participants, startTime, duration }
+const activeUsers = new Map();
+const testRooms = new Map();
 
 export const setupSocketHandlers = (io) => {
   io.on('connection', (socket) => {
-    console.log(`✓ User connected: ${socket.id}`);
+    console.log('User connected:', socket.id);
 
-    // CHAT EVENTS
-    socket.on('chat:join-room', async (data) => {
-      const { roomId, userId } = data;
-      socket.join(roomId);
-      activeUsers.set(userId, { socketId: socket.id, roomId });
-
-      io.to(roomId).emit('chat:user-online', { userId, status: 'online' });
+    // User identifies themselves - join their personal notification room
+    socket.on('user:identify', (userId) => {
+      if (userId) {
+        socket.userId = userId;
+        socket.join(`user_${userId}`);
+        activeUsers.set(userId, { socketId: socket.id, status: 'online' });
+        io.emit('users:online', Array.from(activeUsers.keys()));
+      }
     });
 
-    socket.on('chat:send-message', async (data) => {
+    // Get online users
+    socket.on('users:get-online', () => {
+      socket.emit('users:online', Array.from(activeUsers.keys()));
+    });
+
+    // Chat: join room (for group chat)
+    socket.on('chat:join-room', ({ roomId, userId }) => {
+      socket.join(roomId);
+      socket.to(roomId).emit('chat:user-online', { userId, roomId });
+    });
+
+    // Chat: send message to room
+    socket.on('chat:send-message', async ({ roomId, content, userId }) => {
       try {
-        const { roomId, content, attachmentUrl } = data;
-
-        const message = new ChatMessage({
-          senderId: data.userId,
-          roomId,
-          content,
-          attachmentUrl,
-        });
-
-        await message.save();
-        const populated = await message.populate('senderId', 'firstName lastName avatar');
-
-        io.to(roomId).emit('chat:receive-message', {
-          _id: populated._id,
-          senderId: populated.senderId,
-          content,
-          attachmentUrl,
-          timestamp: populated.createdAt,
-          roomId,
-        });
-      } catch (error) {
-        console.error('Send message error:', error);
-        socket.emit('error', { message: 'Failed to send message' });
+        const message = await ChatMessage.create({ senderId: userId, roomId, content });
+        const populated = await ChatMessage.findById(message._id)
+          .populate('senderId', 'firstName lastName avatar');
+        io.to(roomId).emit('chat:receive-message', populated);
+      } catch (err) {
+        socket.emit('chat:error', { message: 'Failed to send message' });
       }
     });
 
-    socket.on('chat:typing', (data) => {
-      const { roomId, userId } = data;
-      io.to(roomId).emit('chat:user-typing', { userId, roomId });
+    // Chat: send direct message
+    socket.on('chat:send-dm', async ({ toUserId, content, userId }) => {
+      try {
+        // Create a consistent DM room ID (sort both IDs so it's always the same)
+        const roomId = [userId, toUserId].sort().join('_dm_');
+        const message = await ChatMessage.create({ senderId: userId, roomId, content });
+        const populated = await ChatMessage.findById(message._id)
+          .populate('senderId', 'firstName lastName avatar');
+
+        // Send to both users
+        io.to(`user_${userId}`).emit('chat:receive-message', populated);
+        io.to(`user_${toUserId}`).emit('chat:receive-message', populated);
+
+        // Create notification for recipient
+        const sender = populated.senderId;
+        createNotification(
+          io, toUserId, 'message',
+          'New Message',
+          `${sender.firstName} ${sender.lastName} sent you a message`,
+          { roomId, fromUserId: userId }
+        );
+      } catch (err) {
+        socket.emit('chat:error', { message: 'Failed to send message' });
+      }
     });
 
-    socket.on('chat:leave-room', (data) => {
-      const { roomId, userId } = data;
+    // Chat: typing indicator
+    socket.on('chat:typing', ({ roomId, userId, userName }) => {
+      socket.to(roomId).emit('chat:user-typing', { userId, userName });
+    });
+
+    // Chat: leave room
+    socket.on('chat:leave-room', ({ roomId, userId }) => {
       socket.leave(roomId);
-      activeUsers.delete(userId);
-      io.to(roomId).emit('chat:user-offline', { userId, status: 'offline' });
+      socket.to(roomId).emit('chat:user-offline', { userId });
     });
 
-    // TEST ROOM EVENTS
-    socket.on('test:join-room', (data) => {
-      const { testId, userId } = data;
+    // Test room events
+    socket.on('test:join-room', ({ testId, userId }) => {
       const roomId = `test-${testId}`;
       socket.join(roomId);
-
       if (!testRooms.has(testId)) {
-        testRooms.set(testId, {
-          participants: [],
-          startTime: new Date(),
-          duration: data.duration,
-        });
+        testRooms.set(testId, { participants: new Set(), startTime: Date.now(), duration: 0 });
       }
-
-      const room = testRooms.get(testId);
-      if (!room.participants.includes(userId)) {
-        room.participants.push(userId);
-      }
-
-      io.to(roomId).emit('test:participant-joined', {
-        userId,
-        count: room.participants.length,
-      });
+      testRooms.get(testId).participants.add(userId);
+      io.to(roomId).emit('test:participant-joined', { userId, count: testRooms.get(testId).participants.size });
     });
 
-    socket.on('test:timer-sync-request', (data) => {
-      const { testId, userId } = data;
-      const roomId = `test-${testId}`;
+    socket.on('test:timer-sync-request', ({ testId }) => {
       const room = testRooms.get(testId);
-
       if (room) {
-        const elapsed = Date.now() - room.startTime.getTime();
-        const remaining = Math.max(0, room.duration * 60 * 1000 - elapsed);
-
-        socket.emit('test:timer-sync', {
-          timeRemaining: remaining,
-          serverTime: Date.now(),
-        });
+        const elapsed = Date.now() - room.startTime;
+        const remaining = Math.max(0, room.duration - elapsed);
+        socket.emit('test:timer-sync', { remaining, testId });
       }
     });
 
-    socket.on('test:submit-answer', async (data) => {
-      const { testId, questionId, answer, userId } = data;
-      const roomId = `test-${testId}`;
-
-      io.to(roomId).emit('test:answer-received', {
-        userId,
-        questionId,
-        ack: true,
-      });
+    socket.on('test:submit-answer', ({ testId, questionIndex, answer }) => {
+      socket.emit('test:answer-received', { questionIndex });
     });
 
-    socket.on('test:reconnect', (data) => {
-      const { testId, userId, sessionId } = data;
+    socket.on('test:reconnect', ({ testId, userId, sessionId }) => {
       const roomId = `test-${testId}`;
       socket.join(roomId);
-
-      socket.emit('test:reconnect-ack', {
-        sessionId,
-        serverTime: Date.now(),
-      });
-
-      io.to(roomId).emit('test:user-reconnected', { userId });
-    });
-
-    socket.on('test:leave-room', (data) => {
-      const { testId, userId } = data;
-      const roomId = `test-${testId}`;
-      socket.leave(roomId);
-
       const room = testRooms.get(testId);
       if (room) {
-        room.participants = room.participants.filter(id => id !== userId);
-        if (room.participants.length === 0) {
-          testRooms.delete(testId);
-        }
+        room.participants.add(userId);
+        const elapsed = Date.now() - room.startTime;
+        const remaining = Math.max(0, room.duration - elapsed);
+        socket.emit('test:reconnect-ack', { remaining, testId });
+        socket.to(roomId).emit('test:user-reconnected', { userId });
       }
-
-      io.to(roomId).emit('test:participant-left', { userId });
     });
 
-    // DISCONNECT
+    socket.on('test:leave-room', ({ testId, userId }) => {
+      const roomId = `test-${testId}`;
+      socket.leave(roomId);
+      const room = testRooms.get(testId);
+      if (room) {
+        room.participants.delete(userId);
+        if (room.participants.size === 0) testRooms.delete(testId);
+        io.to(roomId).emit('test:participant-left', { userId });
+      }
+    });
+
+    // Disconnect
     socket.on('disconnect', () => {
-      activeUsers.forEach((user, userId) => {
-        if (user.socketId === socket.id) {
-          activeUsers.delete(userId);
-        }
-      });
-      console.log(`✓ User disconnected: ${socket.id}`);
+      if (socket.userId) {
+        activeUsers.delete(socket.userId);
+        io.emit('users:online', Array.from(activeUsers.keys()));
+      }
     });
   });
 
-  // Emit timer sync every 5 seconds to all test rooms
+  // Timer sync interval for test rooms
   setInterval(() => {
-    testRooms.forEach((room, testId) => {
-      const roomId = `test-${testId}`;
-      const elapsed = Date.now() - room.startTime.getTime();
-      const remaining = Math.max(0, room.duration * 60 * 1000 - elapsed);
-
-      io.to(roomId).emit('test:timer-sync', {
-        timeRemaining: remaining,
-        serverTime: Date.now(),
-      });
-
-      if (remaining === 0) {
-        io.to(roomId).emit('test:test-ended', { testId, message: 'Time is up' });
+    for (const [testId, room] of testRooms) {
+      const elapsed = Date.now() - room.startTime;
+      const remaining = Math.max(0, room.duration - elapsed);
+      io.to(`test-${testId}`).emit('test:timer-sync', { remaining, testId });
+      if (remaining <= 0) {
+        io.to(`test-${testId}`).emit('test:test-ended', { testId });
         testRooms.delete(testId);
       }
-    });
+    }
   }, 5000);
 };

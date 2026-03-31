@@ -126,12 +126,25 @@ export const enrollCourse = async (req, res) => {
 
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ error: 'Course not found' });
+    if (course.status !== 'published') return res.status(400).json({ error: 'Course is not available for enrollment' });
 
+    // Check for duplicate enrollment
     const existingEnrollment = await Enrollment.findOne({ userId: req.userId, courseId });
     if (existingEnrollment) {
       return res.status(400).json({ error: 'Already enrolled' });
     }
 
+    // For paid courses, redirect to checkout
+    if (course.price > 0) {
+      return res.json({
+        requiresPayment: true,
+        courseId: course._id,
+        price: course.price,
+        title: course.title,
+      });
+    }
+
+    // Free course - enroll directly
     const enrollment = new Enrollment({
       userId: req.userId,
       courseId,
@@ -145,6 +158,62 @@ export const enrollCourse = async (req, res) => {
   } catch (error) {
     console.error('Enroll course error:', error);
     res.status(500).json({ error: 'Failed to enroll' });
+  }
+};
+
+export const unenrollCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const enrollment = await Enrollment.findOneAndDelete({ userId: req.userId, courseId });
+    if (!enrollment) return res.status(404).json({ error: 'Enrollment not found' });
+
+    // Decrement totalEnrollments
+    await Course.findByIdAndUpdate(courseId, { $inc: { totalEnrollments: -1 } });
+
+    res.json({ message: 'Successfully unenrolled' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const processCheckout = async (req, res) => {
+  try {
+    const { courseId, cardNumber, expiryDate, cvv, cardName } = req.body;
+
+    // Validate card fields exist (MVP - no real validation)
+    if (!cardNumber || !expiryDate || !cvv || !cardName) {
+      return res.status(400).json({ error: 'All card fields are required' });
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+    if (course.status !== 'published') return res.status(400).json({ error: 'Course not available' });
+
+    // Check duplicate
+    const existing = await Enrollment.findOne({ userId: req.userId, courseId });
+    if (existing) return res.status(400).json({ error: 'Already enrolled' });
+
+    // MVP: Simulate payment processing (always succeeds)
+    const paymentId = 'PAY_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+    // Create enrollment
+    const enrollment = await Enrollment.create({
+      userId: req.userId,
+      courseId,
+      enrollmentDate: new Date(),
+    });
+
+    course.totalEnrollments += 1;
+    await course.save();
+
+    res.status(201).json({
+      message: 'Payment successful! You are now enrolled.',
+      paymentId,
+      enrollment,
+      course: { title: course.title, _id: course._id }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 

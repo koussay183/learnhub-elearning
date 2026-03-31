@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../utils/api';
 import PostCard from '../../components/community/PostCard';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
+import { Plus, X, Filter, MessageSquare, Sparkles } from 'lucide-react';
+import gsap from 'gsap';
 
 const CATEGORIES = [
-  { key: '', label: 'All' },
+  { key: '', label: 'All Posts' },
   { key: 'discussion', label: 'Discussions' },
   { key: 'question', label: 'Questions' },
   { key: 'announcement', label: 'Announcements' },
@@ -22,6 +24,36 @@ const Feed = () => {
   const [showNewPost, setShowNewPost] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '', category: 'discussion' });
   const [creating, setCreating] = useState(false);
+
+  const postsContainerRef = useRef(null);
+  const headerRef = useRef(null);
+  const filtersRef = useRef(null);
+
+  // GSAP entrance for header
+  useEffect(() => {
+    if (headerRef.current) {
+      gsap.fromTo(headerRef.current,
+        { opacity: 0, y: -20 },
+        { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }
+      );
+    }
+    if (filtersRef.current) {
+      gsap.fromTo(filtersRef.current.children,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: 'power2.out', delay: 0.2 }
+      );
+    }
+  }, []);
+
+  // GSAP stagger on posts
+  useEffect(() => {
+    if (!loading && postsContainerRef.current && posts.length > 0) {
+      gsap.fromTo(postsContainerRef.current.children,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out' }
+      );
+    }
+  }, [loading, posts]);
 
   const fetchPosts = useCallback(async () => {
     setLoading(true);
@@ -49,7 +81,7 @@ const Feed = () => {
 
   const handleLike = async (postId) => {
     try {
-      const { data } = await api.post(`/api/community/posts/${postId}/like`);
+      await api.post(`/api/community/posts/${postId}/like`);
       setPosts((prev) =>
         prev.map((p) => {
           if (p._id === postId) {
@@ -87,34 +119,41 @@ const Feed = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div ref={headerRef} className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Community</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <div className="flex items-center gap-3 mb-1">
+              <MessageSquare className="w-7 h-7 text-yellow-400" />
+              <h1 className="text-2xl font-bold text-white">Community</h1>
+            </div>
+            <p className="text-sm text-gray-500 ml-10">
               Join the conversation with fellow learners
             </p>
           </div>
           <button
             onClick={() => setShowNewPost(true)}
-            className="bg-blue-500 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-blue-600 transition-colors text-sm"
+            className="bg-yellow-400 text-black px-5 py-2.5 rounded-xl font-semibold text-sm
+                       border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
+                       hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]
+                       transition-all flex items-center gap-2"
           >
-            + New Post
+            <Plus className="w-4 h-4" />
+            New Post
           </button>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+        {/* Filter Pills */}
+        <div ref={filtersRef} className="flex gap-2 mb-6 overflow-x-auto pb-1 scrollbar-hide">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.key}
               onClick={() => handleCategoryChange(cat.key)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 border-2 ${
                 activeCategory === cat.key
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                  ? 'bg-yellow-400/10 text-yellow-400 border-yellow-400/50'
+                  : 'bg-[#111111] text-gray-400 border-gray-800 hover:border-gray-700 hover:text-gray-300'
               }`}
             >
               {cat.label}
@@ -124,21 +163,24 @@ const Feed = () => {
 
         {/* New Post Modal */}
         {showNewPost && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-[#111111] border-2 border-gray-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg font-bold text-gray-900">Create a Post</h2>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-yellow-400" />
+                  <h2 className="text-lg font-bold text-white">Create a Post</h2>
+                </div>
                 <button
                   onClick={() => setShowNewPost(false)}
-                  className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                  className="text-gray-500 hover:text-white transition-colors p-1"
                 >
-                  x
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               <form onSubmit={handleCreatePost} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-300 mb-1.5">
                     Title
                   </label>
                   <input
@@ -146,13 +188,14 @@ const Feed = () => {
                     value={newPost.title}
                     onChange={(e) => setNewPost((p) => ({ ...p, title: e.target.value }))}
                     placeholder="What's on your mind?"
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2.5 bg-[#1a1a1a] border-2 border-gray-800 rounded-xl text-sm text-white placeholder-gray-600
+                               focus:outline-none focus:border-yellow-400/50 transition-all"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-300 mb-1.5">
                     Content
                   </label>
                   <textarea
@@ -160,19 +203,21 @@ const Feed = () => {
                     onChange={(e) => setNewPost((p) => ({ ...p, content: e.target.value }))}
                     placeholder="Share your thoughts, questions, or resources..."
                     rows={5}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    className="w-full px-4 py-2.5 bg-[#1a1a1a] border-2 border-gray-800 rounded-xl text-sm text-white placeholder-gray-600
+                               focus:outline-none focus:border-yellow-400/50 transition-all resize-none"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-300 mb-1.5">
                     Category
                   </label>
                   <select
                     value={newPost.category}
                     onChange={(e) => setNewPost((p) => ({ ...p, category: e.target.value }))}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    className="w-full px-4 py-2.5 bg-[#1a1a1a] border-2 border-gray-800 rounded-xl text-sm text-white
+                               focus:outline-none focus:border-yellow-400/50 transition-all appearance-none cursor-pointer"
                   >
                     <option value="discussion">Discussion</option>
                     <option value="question">Question</option>
@@ -185,14 +230,18 @@ const Feed = () => {
                   <button
                     type="button"
                     onClick={() => setShowNewPost(false)}
-                    className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                    className="px-4 py-2.5 text-sm font-medium text-gray-400 border-2 border-gray-800 rounded-xl
+                               hover:border-gray-700 hover:text-gray-300 transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={creating}
-                    className="px-5 py-2.5 bg-blue-500 text-white text-sm font-medium rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50"
+                    className="px-5 py-2.5 bg-yellow-400 text-black text-sm font-semibold rounded-xl
+                               border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]
+                               hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]
+                               transition-all disabled:opacity-50"
                   >
                     {creating ? 'Posting...' : 'Post'}
                   </button>
@@ -209,11 +258,12 @@ const Feed = () => {
           </div>
         ) : posts.length === 0 ? (
           <div className="text-center py-20">
+            <MessageSquare className="w-12 h-12 text-gray-700 mx-auto mb-3" />
             <p className="text-gray-400 text-lg mb-2">No posts yet</p>
-            <p className="text-gray-400 text-sm">Be the first to start a conversation!</p>
+            <p className="text-gray-600 text-sm">Be the first to start a conversation!</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div ref={postsContainerRef} className="space-y-4">
             {posts.map((post) => (
               <PostCard
                 key={post._id}
@@ -231,7 +281,8 @@ const Feed = () => {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-40"
+              className="px-4 py-2 text-sm font-medium text-gray-400 bg-[#111111] border-2 border-gray-800 rounded-xl
+                         hover:border-gray-700 hover:text-gray-300 transition-all disabled:opacity-40"
             >
               Previous
             </button>
@@ -241,7 +292,8 @@ const Feed = () => {
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-40"
+              className="px-4 py-2 text-sm font-medium text-gray-400 bg-[#111111] border-2 border-gray-800 rounded-xl
+                         hover:border-gray-700 hover:text-gray-300 transition-all disabled:opacity-40"
             >
               Next
             </button>

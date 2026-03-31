@@ -12,6 +12,7 @@ import Enrollment from './models/Enrollment.js';
 import { Test, TestAttempt } from './models/Test.js';
 import { CommunityPost } from './models/Community.js';
 import ChatMessage from './models/ChatMessage.js';
+import Notification from './models/Notification.js';
 
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/elearning';
 
@@ -29,6 +30,7 @@ const seed = async () => {
     await TestAttempt.deleteMany({});
     await CommunityPost.deleteMany({});
     await ChatMessage.deleteMany({});
+    await Notification.deleteMany({});
     console.log('✓ Cleared existing data');
 
     // ====== USERS ======
@@ -207,33 +209,33 @@ const seed = async () => {
     const sessionData = [
       // React & Node.js Bootcamp (5 sessions)
       { courseId: courses[0]._id, title: 'Introduction to React', description: 'Learn the fundamentals of React: JSX, components, props, and state.', videoUrl: 'https://www.youtube.com/embed/Ke90Tje7VS0', pdfUrl: 'https://reactjs.org/docs/getting-started.html', order: 1, duration: 45, isPublished: true },
-      { courseId: courses[0]._id, title: 'React Hooks Deep Dive', description: 'Master useState, useEffect, useContext, useReducer, and custom hooks.', videoUrl: 'https://www.youtube.com/embed/TNhaISOUy6Q', order: 2, duration: 60, isPublished: true },
-      { courseId: courses[0]._id, title: 'Building REST APIs with Express', description: 'Create a full REST API with Express.js, routing, middleware, and error handling.', videoUrl: 'https://www.youtube.com/embed/pKd0Rpw7O48', order: 3, duration: 55, isPublished: true },
-      { courseId: courses[0]._id, title: 'MongoDB & Mongoose', description: 'Database design, CRUD operations, schemas, and data modeling with Mongoose.', videoUrl: 'https://www.youtube.com/embed/DZBGEVgL2eE', order: 4, duration: 50, isPublished: true },
-      { courseId: courses[0]._id, title: 'Full Stack Project: Build & Deploy', description: 'Connect React frontend to Express backend. Deploy to production.', videoUrl: 'https://www.youtube.com/embed/7CqJlxBYj-M', order: 5, duration: 90, isPublished: true },
+      { courseId: courses[0]._id, title: 'React Hooks Deep Dive', description: 'Master useState, useEffect, useContext, useReducer, and custom hooks.', videoUrl: 'https://www.youtube.com/embed/TNhaISOUy6Q', pdfUrl: 'https://reactjs.org/docs/hooks-intro.html', order: 2, duration: 60, isPublished: true },
+      { courseId: courses[0]._id, title: 'Building REST APIs with Express', description: 'Create a full REST API with Express.js, routing, middleware, and error handling.', videoUrl: 'https://www.youtube.com/embed/pKd0Rpw7O48', pdfUrl: 'https://expressjs.com/en/starter/installing.html', order: 3, duration: 55, isPublished: true },
+      { courseId: courses[0]._id, title: 'MongoDB & Mongoose', description: 'Database design, CRUD operations, schemas, and data modeling with Mongoose.', videoUrl: 'https://www.youtube.com/embed/DZBGEVgL2eE', pdfUrl: 'https://mongoosejs.com/docs/guide.html', order: 4, duration: 50, isPublished: true },
+      { courseId: courses[0]._id, title: 'Full Stack Project: Build & Deploy', description: 'Connect React frontend to Express backend. Deploy to production.', videoUrl: 'https://www.youtube.com/embed/7CqJlxBYj-M', pdfUrl: 'https://vitejs.dev/guide/', order: 5, duration: 90, isPublished: true },
 
       // Python Data Science (4 sessions)
-      { courseId: courses[1]._id, title: 'Python Basics & Setup', description: 'Install Python, set up Jupyter Notebooks, and learn fundamental Python syntax.', videoUrl: 'https://www.youtube.com/embed/rfscVS0vtbw', order: 1, duration: 40, isPublished: true },
-      { courseId: courses[1]._id, title: 'NumPy & Pandas Essentials', description: 'Data manipulation, analysis, and transformation with NumPy arrays and Pandas DataFrames.', videoUrl: 'https://www.youtube.com/embed/vmEHCJofslg', order: 2, duration: 55, isPublished: true },
-      { courseId: courses[1]._id, title: 'Data Visualization with Matplotlib', description: 'Create charts, graphs, and visualizations to communicate data insights.', videoUrl: 'https://www.youtube.com/embed/3Xc3CA655Y4', order: 3, duration: 45, isPublished: true },
-      { courseId: courses[1]._id, title: 'Introduction to Machine Learning', description: 'Build your first ML models with Scikit-Learn: regression, classification, and clustering.', videoUrl: 'https://www.youtube.com/embed/7eh4d6sabA0', order: 4, duration: 70, isPublished: true },
+      { courseId: courses[1]._id, title: 'Python Basics & Setup', description: 'Install Python, set up Jupyter Notebooks, and learn fundamental Python syntax.', videoUrl: 'https://www.youtube.com/embed/rfscVS0vtbw', pdfUrl: 'https://docs.python.org/3/tutorial/index.html', order: 1, duration: 40, isPublished: true },
+      { courseId: courses[1]._id, title: 'NumPy & Pandas Essentials', description: 'Data manipulation, analysis, and transformation with NumPy arrays and Pandas DataFrames.', videoUrl: 'https://www.youtube.com/embed/vmEHCJofslg', pdfUrl: 'https://numpy.org/doc/stable/user/quickstart.html', order: 2, duration: 55, isPublished: true },
+      { courseId: courses[1]._id, title: 'Data Visualization with Matplotlib', description: 'Create charts, graphs, and visualizations to communicate data insights.', videoUrl: 'https://www.youtube.com/embed/3Xc3CA655Y4', pdfUrl: 'https://matplotlib.org/stable/tutorials/index.html', order: 3, duration: 45, isPublished: true },
+      { courseId: courses[1]._id, title: 'Introduction to Machine Learning', description: 'Build your first ML models with Scikit-Learn: regression, classification, and clustering.', videoUrl: 'https://www.youtube.com/embed/7eh4d6sabA0', pdfUrl: 'https://scikit-learn.org/stable/tutorial/index.html', order: 4, duration: 70, isPublished: true },
 
       // UI/UX Design (4 sessions)
-      { courseId: courses[2]._id, title: 'Design Thinking & UX Research', description: 'Learn the design process, user research methods, and persona creation.', videoUrl: 'https://www.youtube.com/embed/gHGN6ld2CZo', order: 1, duration: 35, isPublished: true },
-      { courseId: courses[2]._id, title: 'Figma Basics & UI Components', description: 'Master Figma tools, frames, components, and auto-layout.', videoUrl: 'https://www.youtube.com/embed/FTFaQWZBqQ8', order: 2, duration: 50, isPublished: true },
-      { courseId: courses[2]._id, title: 'Color Theory & Typography', description: 'Choose effective color palettes and typography for your designs.', videoUrl: 'https://www.youtube.com/embed/AvgCkHrcj90', order: 3, duration: 40, isPublished: true },
-      { courseId: courses[2]._id, title: 'Prototyping & Handoff', description: 'Create interactive prototypes and prepare design specs for developers.', videoUrl: 'https://www.youtube.com/embed/dXQ7IHkTiMM', order: 4, duration: 45, isPublished: true },
+      { courseId: courses[2]._id, title: 'Design Thinking & UX Research', description: 'Learn the design process, user research methods, and persona creation.', videoUrl: 'https://www.youtube.com/embed/gHGN6ld2CZo', pdfUrl: 'https://www.interaction-design.org/literature/topics/design-thinking', order: 1, duration: 35, isPublished: true },
+      { courseId: courses[2]._id, title: 'Figma Basics & UI Components', description: 'Master Figma tools, frames, components, and auto-layout.', videoUrl: 'https://www.youtube.com/embed/FTFaQWZBqQ8', pdfUrl: 'https://help.figma.com/hc/en-us/categories/360002051613-Getting-Started', order: 2, duration: 50, isPublished: true },
+      { courseId: courses[2]._id, title: 'Color Theory & Typography', description: 'Choose effective color palettes and typography for your designs.', videoUrl: 'https://www.youtube.com/embed/AvgCkHrcj90', pdfUrl: 'https://www.interaction-design.org/literature/topics/color-theory', order: 3, duration: 40, isPublished: true },
+      { courseId: courses[2]._id, title: 'Prototyping & Handoff', description: 'Create interactive prototypes and prepare design specs for developers.', videoUrl: 'https://www.youtube.com/embed/dXQ7IHkTiMM', pdfUrl: 'https://help.figma.com/hc/en-us/articles/360040314193-Guide-to-prototyping', order: 4, duration: 45, isPublished: true },
 
       // Advanced JavaScript (3 sessions)
-      { courseId: courses[3]._id, title: 'Closures, Scopes & the Event Loop', description: 'Understand how JavaScript really works under the hood.', videoUrl: 'https://www.youtube.com/embed/8aGhZQkoFbQ', order: 1, duration: 60, isPublished: true },
-      { courseId: courses[3]._id, title: 'Design Patterns in JavaScript', description: 'Module, Observer, Factory, Singleton, and other essential patterns.', videoUrl: 'https://www.youtube.com/embed/kuirGzhGhR8', order: 2, duration: 55, isPublished: true },
-      { courseId: courses[3]._id, title: 'Async JavaScript Mastery', description: 'Promises, async/await, generators, and handling complex async flows.', videoUrl: 'https://www.youtube.com/embed/vn3tm0quoqE', order: 3, duration: 50, isPublished: true },
+      { courseId: courses[3]._id, title: 'Closures, Scopes & the Event Loop', description: 'Understand how JavaScript really works under the hood.', videoUrl: 'https://www.youtube.com/embed/8aGhZQkoFbQ', pdfUrl: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures', order: 1, duration: 60, isPublished: true },
+      { courseId: courses[3]._id, title: 'Design Patterns in JavaScript', description: 'Module, Observer, Factory, Singleton, and other essential patterns.', videoUrl: 'https://www.youtube.com/embed/kuirGzhGhR8', pdfUrl: 'https://www.patterns.dev/vanilla/factory-pattern', order: 2, duration: 55, isPublished: true },
+      { courseId: courses[3]._id, title: 'Async JavaScript Mastery', description: 'Promises, async/await, generators, and handling complex async flows.', videoUrl: 'https://www.youtube.com/embed/vn3tm0quoqE', pdfUrl: 'https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous', order: 3, duration: 50, isPublished: true },
 
       // React Native (4 sessions)
-      { courseId: courses[4]._id, title: 'React Native Setup & Core Components', description: 'Set up your development environment and learn core React Native components.', videoUrl: 'https://www.youtube.com/embed/0-S5a0eXPoc', order: 1, duration: 45, isPublished: true },
-      { courseId: courses[4]._id, title: 'Navigation & Routing', description: 'Implement stack, tab, and drawer navigation in your mobile app.', videoUrl: 'https://www.youtube.com/embed/npe3Wf4tpSg', order: 2, duration: 50, isPublished: true },
-      { courseId: courses[4]._id, title: 'State Management & API Integration', description: 'Manage app state and connect to REST APIs for dynamic content.', videoUrl: 'https://www.youtube.com/embed/AnjyzruqKn0', order: 3, duration: 55, isPublished: true },
-      { courseId: courses[4]._id, title: 'Publishing to App Stores', description: 'Build, test, and deploy your app to the App Store and Google Play.', videoUrl: 'https://www.youtube.com/embed/oBmRcJqJXbk', order: 4, duration: 40, isPublished: true },
+      { courseId: courses[4]._id, title: 'React Native Setup & Core Components', description: 'Set up your development environment and learn core React Native components.', videoUrl: 'https://www.youtube.com/embed/0-S5a0eXPoc', pdfUrl: 'https://reactnative.dev/docs/getting-started', order: 1, duration: 45, isPublished: true },
+      { courseId: courses[4]._id, title: 'Navigation & Routing', description: 'Implement stack, tab, and drawer navigation in your mobile app.', videoUrl: 'https://www.youtube.com/embed/npe3Wf4tpSg', pdfUrl: 'https://reactnavigation.org/docs/getting-started', order: 2, duration: 50, isPublished: true },
+      { courseId: courses[4]._id, title: 'State Management & API Integration', description: 'Manage app state and connect to REST APIs for dynamic content.', videoUrl: 'https://www.youtube.com/embed/AnjyzruqKn0', pdfUrl: 'https://reactnative.dev/docs/network', order: 3, duration: 55, isPublished: true },
+      { courseId: courses[4]._id, title: 'Publishing to App Stores', description: 'Build, test, and deploy your app to the App Store and Google Play.', videoUrl: 'https://www.youtube.com/embed/oBmRcJqJXbk', pdfUrl: 'https://reactnative.dev/docs/signed-apk-android', order: 4, duration: 40, isPublished: true },
     ];
 
     const sessions = await Session.insertMany(sessionData);
@@ -375,31 +377,223 @@ const seed = async () => {
 
     console.log(`✓ Created ${posts.length} community posts`);
 
-    // ====== CHAT MESSAGES ======
+    // ====== CHAT MESSAGES (General room) ======
     const chatMessages = await ChatMessage.insertMany([
       { senderId: emma._id, roomId: 'general', content: 'Hey everyone! Anyone working on the React bootcamp?' },
       { senderId: alex._id, roomId: 'general', content: 'Yeah! I just finished the hooks section. It was great!' },
       { senderId: sarah._id, roomId: 'general', content: 'Glad to hear that Alex! Let me know if you have any questions about the next section.' },
-      { senderId: lisa._id, roomId: 'general', content: 'I\'m starting the Python course today. Wish me luck! 🍀' },
+      { senderId: lisa._id, roomId: 'general', content: 'I\'m starting the Python course today. Wish me luck!' },
       { senderId: mike._id, roomId: 'general', content: 'Good luck Lisa! The first two sessions are very beginner-friendly.' },
       { senderId: emma._id, roomId: 'general', content: 'Does anyone want to form a study group for the JavaScript patterns course?' },
       { senderId: alex._id, roomId: 'general', content: 'I\'m in! That course looks really interesting.' },
       { senderId: sarah._id, roomId: 'general', content: 'Great idea Emma! Study groups are the best way to learn. I can drop by to answer questions sometimes.' },
     ]);
 
-    console.log(`✓ Created ${chatMessages.length} chat messages`);
+    // ====== DM CHAT MESSAGES ======
+    // DM between Emma and Sarah
+    const emmaSarahRoom = [emma._id.toString(), sarah._id.toString()].sort().join('_dm_');
+    const dmMessages1 = await ChatMessage.insertMany([
+      { senderId: emma._id, roomId: emmaSarahRoom, content: 'Hi Sarah! I had a question about the React Hooks session.' },
+      { senderId: sarah._id, roomId: emmaSarahRoom, content: 'Of course Emma! What\'s your question?' },
+      { senderId: emma._id, roomId: emmaSarahRoom, content: 'I\'m confused about useEffect cleanup functions. When exactly do they run?' },
+      { senderId: sarah._id, roomId: emmaSarahRoom, content: 'Great question! The cleanup runs before the component unmounts AND before every re-run of the effect. Think of it as "undo the previous effect before doing the next one".' },
+      { senderId: emma._id, roomId: emmaSarahRoom, content: 'That makes so much more sense now. Thank you!' },
+    ]);
+
+    // DM between Alex and Mike
+    const alexMikeRoom = [alex._id.toString(), mike._id.toString()].sort().join('_dm_');
+    const dmMessages2 = await ChatMessage.insertMany([
+      { senderId: alex._id, roomId: alexMikeRoom, content: 'Hey Mike, is the Python course good for someone with zero Python experience?' },
+      { senderId: mike._id, roomId: alexMikeRoom, content: 'Absolutely! The first session covers all the basics. You\'ll be writing Python in no time.' },
+      { senderId: alex._id, roomId: alexMikeRoom, content: 'Awesome, I\'ll enroll then. Thanks!' },
+    ]);
+
+    // DM between Lisa and Emma
+    const lisaEmmaRoom = [lisa._id.toString(), emma._id.toString()].sort().join('_dm_');
+    const dmMessages3 = await ChatMessage.insertMany([
+      { senderId: lisa._id, roomId: lisaEmmaRoom, content: 'Emma! Want to study together for the JS patterns course?' },
+      { senderId: emma._id, roomId: lisaEmmaRoom, content: 'Yes! I was just about to ask you the same thing. When are you free?' },
+      { senderId: lisa._id, roomId: lisaEmmaRoom, content: 'How about weekday evenings? We could do video calls and code together.' },
+      { senderId: emma._id, roomId: lisaEmmaRoom, content: 'Perfect, let\'s start next Monday!' },
+    ]);
+
+    const totalDMs = dmMessages1.length + dmMessages2.length + dmMessages3.length;
+    console.log(`✓ Created ${chatMessages.length} general chat messages`);
+    console.log(`✓ Created ${totalDMs} DM chat messages`);
+
+    // ====== NOTIFICATIONS ======
+    const notifications = await Notification.insertMany([
+      // Enrollment notifications for instructors
+      {
+        userId: sarah._id,
+        type: 'enrollment',
+        title: 'New Enrollment',
+        message: 'Emma Wilson enrolled in "Complete React & Node.js Bootcamp"',
+        data: { courseId: courses[0]._id, studentId: emma._id },
+        read: true,
+        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      },
+      {
+        userId: sarah._id,
+        type: 'enrollment',
+        title: 'New Enrollment',
+        message: 'Alex Rivera enrolled in "Complete React & Node.js Bootcamp"',
+        data: { courseId: courses[0]._id, studentId: alex._id },
+        read: true,
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      },
+      {
+        userId: sarah._id,
+        type: 'enrollment',
+        title: 'New Enrollment',
+        message: 'Lisa Park enrolled in "Complete React & Node.js Bootcamp"',
+        data: { courseId: courses[0]._id, studentId: lisa._id },
+        read: false,
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      },
+      {
+        userId: mike._id,
+        type: 'enrollment',
+        title: 'New Enrollment',
+        message: 'Emma Wilson enrolled in "Python for Data Science & Machine Learning"',
+        data: { courseId: courses[1]._id, studentId: emma._id },
+        read: true,
+        createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+      },
+      {
+        userId: mike._id,
+        type: 'enrollment',
+        title: 'New Enrollment',
+        message: 'Alex Rivera enrolled in "Python for Data Science & Machine Learning"',
+        data: { courseId: courses[1]._id, studentId: alex._id },
+        read: false,
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      },
+
+      // Comment notifications
+      {
+        userId: emma._id,
+        type: 'comment',
+        title: 'New Comment',
+        message: 'Sarah Johnson commented on your post "How do you structure large React projects?"',
+        data: { postId: posts[1]._id },
+        read: true,
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      },
+      {
+        userId: emma._id,
+        type: 'comment',
+        title: 'New Comment',
+        message: 'Mike Chen commented on your post "How do you structure large React projects?"',
+        data: { postId: posts[1]._id },
+        read: false,
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      },
+
+      // Like notifications
+      {
+        userId: alex._id,
+        type: 'like',
+        title: 'New Like',
+        message: 'Sarah Johnson liked your post "Just finished my first full-stack project!"',
+        data: { postId: posts[3]._id },
+        read: false,
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      },
+      {
+        userId: alex._id,
+        type: 'like',
+        title: 'New Like',
+        message: 'Mike Chen liked your post "Just finished my first full-stack project!"',
+        data: { postId: posts[3]._id },
+        read: false,
+        createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+      },
+
+      // Message notifications
+      {
+        userId: sarah._id,
+        type: 'message',
+        title: 'New Message',
+        message: 'Emma Wilson sent you a message',
+        data: { roomId: emmaSarahRoom, fromUserId: emma._id },
+        read: false,
+        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
+      },
+      {
+        userId: mike._id,
+        type: 'message',
+        title: 'New Message',
+        message: 'Alex Rivera sent you a message',
+        data: { roomId: alexMikeRoom, fromUserId: alex._id },
+        read: false,
+        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
+      },
+
+      // System notifications
+      {
+        userId: emma._id,
+        type: 'system',
+        title: 'Welcome to LearnHub!',
+        message: 'Thanks for joining LearnHub. Start exploring courses and connect with the community!',
+        data: {},
+        read: true,
+        createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      },
+      {
+        userId: alex._id,
+        type: 'system',
+        title: 'Welcome to LearnHub!',
+        message: 'Thanks for joining LearnHub. Start exploring courses and connect with the community!',
+        data: {},
+        read: true,
+        createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+      },
+      {
+        userId: lisa._id,
+        type: 'system',
+        title: 'Welcome to LearnHub!',
+        message: 'Thanks for joining LearnHub. Start exploring courses and connect with the community!',
+        data: {},
+        read: true,
+        createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+      },
+
+      // Course update notification
+      {
+        userId: emma._id,
+        type: 'course_update',
+        title: 'Course Updated',
+        message: 'New session added to "Complete React & Node.js Bootcamp"',
+        data: { courseId: courses[0]._id },
+        read: false,
+        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
+      },
+      {
+        userId: lisa._id,
+        type: 'course_update',
+        title: 'Certificate Earned!',
+        message: 'Congratulations! You earned a certificate for "Complete React & Node.js Bootcamp"',
+        data: { courseId: courses[0]._id },
+        read: false,
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      },
+    ]);
+
+    console.log(`✓ Created ${notifications.length} notifications`);
 
     // ====== SUMMARY ======
     console.log('\n========================================');
     console.log('  SEED DATA COMPLETE');
     console.log('========================================');
-    console.log(`  Users:       ${users.length}`);
-    console.log(`  Courses:     ${courses.length}`);
-    console.log(`  Sessions:    ${sessions.length}`);
-    console.log(`  Enrollments: ${enrollments.length}`);
-    console.log(`  Tests:       ${tests.length}`);
-    console.log(`  Posts:       ${posts.length}`);
-    console.log(`  Messages:    ${chatMessages.length}`);
+    console.log(`  Users:         ${users.length}`);
+    console.log(`  Courses:       ${courses.length}`);
+    console.log(`  Sessions:      ${sessions.length}`);
+    console.log(`  Enrollments:   ${enrollments.length}`);
+    console.log(`  Tests:         ${tests.length}`);
+    console.log(`  Posts:         ${posts.length}`);
+    console.log(`  Messages:      ${chatMessages.length + totalDMs} (${chatMessages.length} general + ${totalDMs} DMs)`);
+    console.log(`  Notifications: ${notifications.length}`);
     console.log('========================================');
     console.log('\n  LOGIN CREDENTIALS (all users):');
     console.log('  Password: password123');

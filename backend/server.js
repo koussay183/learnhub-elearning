@@ -13,6 +13,7 @@ import testRoutes from './routes/tests.js';
 import adminRoutes from './routes/admin.js';
 import chatRoutes from './routes/chat.js';
 import userRoutes from './routes/users.js';
+import notificationRoutes from './routes/notifications.js';
 import { authMiddleware } from './middleware/auth.js';
 import { setupSocketHandlers } from './sockets/handlers.js';
 
@@ -46,6 +47,7 @@ app.use('/api/tests', testRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 404
 app.use((req, res) => {
