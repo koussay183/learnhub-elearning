@@ -15,7 +15,6 @@ export const authMiddleware = async (req, res, next) => {
 
     req.userId = decoded.userId;
 
-    // Optionally load user for role checks
     const user = await User.findById(decoded.userId).select('roles');
     if (!user) {
       return res.status(401).json({ error: 'User not found' });
@@ -28,7 +27,6 @@ export const authMiddleware = async (req, res, next) => {
   }
 };
 
-// Optional auth - populates req.userId if token present, but doesn't block
 export const optionalAuth = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -45,6 +43,8 @@ export const optionalAuth = async (req, res, next) => {
   }
   next();
 };
+
+export const roleCheck = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.userId || !req.userRoles) {
       return res.status(401).json({ error: 'Not authenticated' });

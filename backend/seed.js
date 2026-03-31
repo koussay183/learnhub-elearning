@@ -13,7 +13,7 @@ import { Test, TestAttempt } from './models/Test.js';
 import { CommunityPost } from './models/Community.js';
 import ChatMessage from './models/ChatMessage.js';
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/elearning';
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/elearning';
 
 const seed = async () => {
   try {
