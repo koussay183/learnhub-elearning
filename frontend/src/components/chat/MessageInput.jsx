@@ -16,9 +16,9 @@ const MessageInput = ({ onSend, disabled = false, typingUser = null }) => {
   };
 
   return (
-    <div className="border-t border-border bg-surface-card p-4">
+    <div className="border-t border-bdr bg-surface-card p-4">
       {typingUser && (
-        <p className="text-xs text-content-muted italic mb-2 ml-1">{typingUser} is typing...</p>
+        <p className="text-xs text-txt-muted italic mb-2 ml-1">{typingUser} is typing...</p>
       )}
       <form onSubmit={handleSubmit} className="flex items-center gap-3">
         <input
@@ -27,7 +27,7 @@ const MessageInput = ({ onSend, disabled = false, typingUser = null }) => {
           onKeyDown={handleKeyDown}
           placeholder="Type a message..."
           disabled={disabled}
-          className="flex-1 px-4 py-2.5 bg-surface border-2 border-border rounded-xl text-sm text-content placeholder-content-muted
+          className="flex-1 px-4 py-2.5 bg-surface border-2 border-bdr rounded-xl text-sm text-txt placeholder-txt-muted
                      focus:border-yellow-400/50 focus:outline-none disabled:opacity-50 transition-all"
         />
         <button type="submit" disabled={disabled || !content.trim()}

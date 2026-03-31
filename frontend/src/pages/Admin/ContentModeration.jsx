@@ -97,8 +97,8 @@ const ContentModeration = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-black text-content">Content Moderation</h1>
-          <p className="mt-1 text-content-muted">Review and moderate platform content</p>
+          <h1 className="text-3xl font-black text-txt">Content Moderation</h1>
+          <p className="mt-1 text-txt-muted">Review and moderate platform content</p>
         </div>
 
         {/* Error */}
@@ -112,13 +112,13 @@ const ContentModeration = () => {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-surface-card border-2 border-border rounded-xl p-1 mb-6 w-fit">
+        <div className="flex gap-1 bg-surface-card border-2 border-bdr rounded-xl p-1 mb-6 w-fit">
           <button
             onClick={() => setActiveTab('courses')}
             className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
               activeTab === 'courses'
                 ? 'bg-yellow-400 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-                : 'text-content-muted hover:text-content'
+                : 'text-txt-muted hover:text-txt'
             }`}
           >
             <BookOpen className="w-4 h-4" /> Courses
@@ -128,7 +128,7 @@ const ContentModeration = () => {
             className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
               activeTab === 'posts'
                 ? 'bg-yellow-400 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-                : 'text-content-muted hover:text-content'
+                : 'text-txt-muted hover:text-txt'
             }`}
           >
             <MessageSquare className="w-4 h-4" /> Community Posts
@@ -136,7 +136,7 @@ const ContentModeration = () => {
         </div>
 
         {/* Content */}
-        <div className="bg-surface-card border-2 border-border rounded-2xl overflow-hidden">
+        <div className="bg-surface-card border-2 border-bdr rounded-2xl overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="w-8 h-8 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
@@ -145,40 +145,40 @@ const ContentModeration = () => {
             /* Courses Tab */
             courses.length === 0 ? (
               <div className="text-center py-20">
-                <div className="w-14 h-14 bg-surface-input border-2 border-border rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="w-7 h-7 text-content-muted" />
+                <div className="w-14 h-14 bg-surface-input border-2 border-bdr rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="w-7 h-7 text-txt-muted" />
                 </div>
-                <p className="text-content-muted">No courses to moderate.</p>
+                <p className="text-txt-muted">No courses to moderate.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-surface border-b-2 border-border">
-                      <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
+                    <tr className="bg-surface border-b-2 border-bdr">
+                      <th className="text-left px-6 py-3 text-xs font-bold text-txt-muted uppercase tracking-wider">
                         Title
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-bold text-txt-muted uppercase tracking-wider">
                         Instructor
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-bold text-txt-muted uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-bold text-txt-muted uppercase tracking-wider">
                         Date
                       </th>
-                      <th className="text-right px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
+                      <th className="text-right px-6 py-3 text-xs font-bold text-txt-muted uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-bdr">
                     {courses.map((course) => (
                       <tr key={course._id} className="hover:bg-surface-input transition-colors">
                         <td className="px-6 py-4">
-                          <span className="font-semibold text-content">{course.title}</span>
+                          <span className="font-semibold text-txt">{course.title}</span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-content-secondary">
+                        <td className="px-6 py-4 text-sm text-txt-secondary">
                           {course.instructor?.name || 'Unknown'}
                         </td>
                         <td className="px-6 py-4">
@@ -186,7 +186,7 @@ const ContentModeration = () => {
                             {course.status || 'draft'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-content-muted">
+                        <td className="px-6 py-4 text-sm text-txt-muted">
                           {formatDate(course.createdAt)}
                         </td>
                         <td className="px-6 py-4 text-right">
@@ -227,42 +227,42 @@ const ContentModeration = () => {
           ) : /* Posts Tab */
           posts.length === 0 ? (
             <div className="text-center py-20">
-              <div className="w-14 h-14 bg-surface-input border-2 border-border rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="w-7 h-7 text-content-muted" />
+              <div className="w-14 h-14 bg-surface-input border-2 border-bdr rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="w-7 h-7 text-txt-muted" />
               </div>
-              <p className="text-content-muted">No posts to moderate.</p>
+              <p className="text-txt-muted">No posts to moderate.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-surface border-b-2 border-border">
-                    <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
+                  <tr className="bg-surface border-b-2 border-bdr">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-txt-muted uppercase tracking-wider">
                       Title
                     </th>
-                    <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-txt-muted uppercase tracking-wider">
                       Author
                     </th>
-                    <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-txt-muted uppercase tracking-wider">
                       Category
                     </th>
-                    <th className="text-left px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
+                    <th className="text-left px-6 py-3 text-xs font-bold text-txt-muted uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="text-right px-6 py-3 text-xs font-bold text-content-muted uppercase tracking-wider">
+                    <th className="text-right px-6 py-3 text-xs font-bold text-txt-muted uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody className="divide-y divide-bdr">
                   {posts.map((post) => (
                     <tr key={post._id} className="hover:bg-surface-input transition-colors">
                       <td className="px-6 py-4">
-                        <span className="font-semibold text-content line-clamp-1">
+                        <span className="font-semibold text-txt line-clamp-1">
                           {post.title || post.content?.substring(0, 50) || 'Untitled'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-content-secondary">
+                      <td className="px-6 py-4 text-sm text-txt-secondary">
                         {post.author?.name || 'Unknown'}
                       </td>
                       <td className="px-6 py-4">
@@ -270,7 +270,7 @@ const ContentModeration = () => {
                           {post.category || 'general'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-content-muted">
+                      <td className="px-6 py-4 text-sm text-txt-muted">
                         {formatDate(post.createdAt)}
                       </td>
                       <td className="px-6 py-4 text-right">

@@ -18,18 +18,18 @@ const ChatBubble = ({ message, isOwn }) => {
         )}
         <div>
           {!isOwn && (
-            <p className="text-xs text-content-muted mb-1 ml-1 font-medium">
+            <p className="text-xs text-txt-muted mb-1 ml-1 font-medium">
               {sender.firstName} {sender.lastName}
             </p>
           )}
           <div className={`px-4 py-2.5 text-sm leading-relaxed ${
             isOwn
               ? 'bg-yellow-400/20 text-yellow-100 rounded-l-2xl rounded-tr-2xl'
-              : 'bg-surface-input text-content-secondary rounded-r-2xl rounded-tl-2xl border border-border'
+              : 'bg-surface-input text-txt-secondary rounded-r-2xl rounded-tl-2xl border border-bdr'
           }`}>
             {message.content}
           </div>
-          <p className={`text-[10px] text-content-muted mt-1 ${isOwn ? 'text-right mr-1' : 'ml-1'}`}>
+          <p className={`text-[10px] text-txt-muted mt-1 ${isOwn ? 'text-right mr-1' : 'ml-1'}`}>
             {formatTime(message.createdAt || message.timestamp)}
           </p>
         </div>

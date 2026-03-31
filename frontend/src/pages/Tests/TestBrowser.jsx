@@ -106,8 +106,8 @@ const TestBrowser = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-black text-content">Online Tests</h1>
-            <p className="mt-1 text-content-muted">Browse and take available tests</p>
+            <h1 className="text-3xl font-black text-txt">Online Tests</h1>
+            <p className="mt-1 text-txt-muted">Browse and take available tests</p>
           </div>
           {user ? (
             <button
@@ -129,11 +129,11 @@ const TestBrowser = () => {
         {/* Empty state */}
         {!error && tests.length === 0 && (
           <div className="text-center py-20">
-            <div className="w-16 h-16 bg-surface-card border-2 border-border rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <FileQuestion className="w-8 h-8 text-content-muted" />
+            <div className="w-16 h-16 bg-surface-card border-2 border-bdr rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <FileQuestion className="w-8 h-8 text-txt-muted" />
             </div>
-            <h3 className="text-xl font-bold text-content mb-2">No tests available</h3>
-            <p className="text-content-muted">Check back later for new tests.</p>
+            <h3 className="text-xl font-bold text-txt mb-2">No tests available</h3>
+            <p className="text-txt-muted">Check back later for new tests.</p>
           </div>
         )}
 
@@ -155,8 +155,8 @@ const TestBrowser = () => {
                 style={{ opacity: 0 }}
                 className={`bg-surface-card border-2 rounded-2xl p-6 transition-all group relative ${
                   isClosed
-                    ? 'border-border opacity-60 cursor-not-allowed'
-                    : 'border-border hover:border-yellow-400/30 cursor-pointer'
+                    ? 'border-bdr opacity-60 cursor-not-allowed'
+                    : 'border-bdr hover:border-yellow-400/30 cursor-pointer'
                 }`}
               >
                 {/* Status Badge */}
@@ -183,11 +183,11 @@ const TestBrowser = () => {
 
                 {/* Title & Description */}
                 <h3 className={`text-lg font-bold transition-colors mb-2 line-clamp-1 ${
-                  isClosed ? 'text-content-muted' : 'text-content group-hover:text-yellow-400'
+                  isClosed ? 'text-txt-muted' : 'text-txt group-hover:text-yellow-400'
                 }`}>
                   {test.title}
                 </h3>
-                <p className="text-content-muted text-sm mb-4 line-clamp-2">
+                <p className="text-txt-muted text-sm mb-4 line-clamp-2">
                   {test.description || 'No description provided.'}
                 </p>
 
@@ -196,7 +196,7 @@ const TestBrowser = () => {
                   <div className="w-7 h-7 rounded-full bg-yellow-400/10 flex items-center justify-center text-xs font-bold text-yellow-400">
                     {test.createdBy?.firstName?.charAt(0)?.toUpperCase() || test.creator?.name?.charAt(0)?.toUpperCase() || '?'}
                   </div>
-                  <span className="text-sm text-content-secondary">{test.createdBy?.firstName ? `${test.createdBy.firstName} ${test.createdBy.lastName || ''}` : test.creator?.name || 'Unknown'}</span>
+                  <span className="text-sm text-txt-secondary">{test.createdBy?.firstName ? `${test.createdBy.firstName} ${test.createdBy.lastName || ''}` : test.creator?.name || 'Unknown'}</span>
                 </div>
 
                 {/* Badges */}
@@ -220,15 +220,15 @@ const TestBrowser = () => {
 
                 {/* Schedule Time Window */}
                 {(startTime || endTime) && (
-                  <div className="space-y-1.5 pt-3 border-t border-border">
+                  <div className="space-y-1.5 pt-3 border-t border-bdr">
                     {startTime && (
-                      <div className="flex items-center gap-2 text-xs text-content-secondary">
+                      <div className="flex items-center gap-2 text-xs text-txt-secondary">
                         <Calendar className="w-3 h-3 text-blue-400 flex-shrink-0" />
                         <span>Opens: {formatDate(test.settings.scheduledStartTime)}</span>
                       </div>
                     )}
                     {endTime && (
-                      <div className="flex items-center gap-2 text-xs text-content-secondary">
+                      <div className="flex items-center gap-2 text-xs text-txt-secondary">
                         <Calendar className="w-3 h-3 text-red-400 flex-shrink-0" />
                         <span>Closes: {formatDate(test.settings.scheduledEndTime)}</span>
                       </div>

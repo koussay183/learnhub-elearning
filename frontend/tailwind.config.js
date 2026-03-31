@@ -15,12 +15,13 @@ export default {
           DEFAULT: '#FACC15',
           hover: '#EAB308',
         },
-        content: {
+        heading: 'var(--text-primary)',
+        txt: {
           DEFAULT: 'var(--text-primary)',
           secondary: 'var(--text-secondary)',
           muted: 'var(--text-muted)',
         },
-        border: {
+        bdr: {
           DEFAULT: 'var(--border)',
           hover: 'var(--border-hover)',
         }

@@ -66,7 +66,7 @@ const UserProfile = () => {
   if (error || !profile) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
-        <div className="bg-surface-card border-2 border-border rounded-2xl p-8 max-w-md text-center">
+        <div className="bg-surface-card border-2 border-bdr rounded-2xl p-8 max-w-md text-center">
           <p className="text-red-400 font-medium mb-4">{error || 'User not found'}</p>
           <button onClick={() => navigate(-1)} className="btn-primary">
             Go Back
@@ -84,7 +84,7 @@ const UserProfile = () => {
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-sm text-content-muted hover:text-yellow-400 mb-6 transition-colors group"
+          className="flex items-center gap-2 text-sm text-txt-muted hover:text-yellow-400 mb-6 transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span>Back</span>
@@ -92,13 +92,13 @@ const UserProfile = () => {
 
         <div ref={cardRef} style={{ opacity: 0 }}>
           {/* Profile Header Card */}
-          <div className="bg-surface-card border-2 border-border rounded-2xl p-6 mb-6">
+          <div className="bg-surface-card border-2 border-bdr rounded-2xl p-6 mb-6">
             <div className="flex items-start gap-5">
               {profile.avatar ? (
                 <img
                   src={profile.avatar}
                   alt={`${profile.firstName}'s avatar`}
-                  className="w-20 h-20 rounded-2xl object-cover border-2 border-border flex-shrink-0"
+                  className="w-20 h-20 rounded-2xl object-cover border-2 border-bdr flex-shrink-0"
                   onError={(e) => {
                     e.target.style.display = 'none';
                     e.target.nextElementSibling.style.display = 'flex';
@@ -113,7 +113,7 @@ const UserProfile = () => {
                 {initial}
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-2xl font-black text-content">
+                <h1 className="text-2xl font-black text-txt">
                   {profile.firstName} {profile.lastName}
                 </h1>
                 {profile.roles && profile.roles.length > 0 && (
@@ -126,7 +126,7 @@ const UserProfile = () => {
                   </div>
                 )}
                 {profile.bio && (
-                  <p className="text-content-secondary text-sm mt-3 leading-relaxed">
+                  <p className="text-txt-secondary text-sm mt-3 leading-relaxed">
                     {profile.bio}
                   </p>
                 )}
@@ -134,34 +134,34 @@ const UserProfile = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-border">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-bdr">
               <div className="text-center p-3 bg-surface rounded-xl">
                 <div className="flex items-center justify-center gap-1.5 text-yellow-400 mb-1">
                   <Calendar className="w-4 h-4" />
                 </div>
-                <p className="text-xs text-content-muted">Joined</p>
-                <p className="text-sm font-bold text-content">{formatDate(profile.createdAt)}</p>
+                <p className="text-xs text-txt-muted">Joined</p>
+                <p className="text-sm font-bold text-txt">{formatDate(profile.createdAt)}</p>
               </div>
               <div className="text-center p-3 bg-surface rounded-xl">
                 <div className="flex items-center justify-center gap-1.5 text-blue-400 mb-1">
                   <BookOpen className="w-4 h-4" />
                 </div>
-                <p className="text-xs text-content-muted">Courses</p>
-                <p className="text-sm font-bold text-content">{profile.courseCount || courses.length || 0}</p>
+                <p className="text-xs text-txt-muted">Courses</p>
+                <p className="text-sm font-bold text-txt">{profile.courseCount || courses.length || 0}</p>
               </div>
               <div className="text-center p-3 bg-surface rounded-xl">
                 <div className="flex items-center justify-center gap-1.5 text-green-400 mb-1">
                   <Users className="w-4 h-4" />
                 </div>
-                <p className="text-xs text-content-muted">Students</p>
-                <p className="text-sm font-bold text-content">{profile.studentCount || 0}</p>
+                <p className="text-xs text-txt-muted">Students</p>
+                <p className="text-sm font-bold text-txt">{profile.studentCount || 0}</p>
               </div>
               <div className="text-center p-3 bg-surface rounded-xl">
                 <div className="flex items-center justify-center gap-1.5 text-purple-400 mb-1">
                   <Award className="w-4 h-4" />
                 </div>
-                <p className="text-xs text-content-muted">Posts</p>
-                <p className="text-sm font-bold text-content">{profile.postCount || 0}</p>
+                <p className="text-xs text-txt-muted">Posts</p>
+                <p className="text-sm font-bold text-txt">{profile.postCount || 0}</p>
               </div>
             </div>
           </div>
@@ -169,7 +169,7 @@ const UserProfile = () => {
           {/* Courses by this user */}
           {courses.length > 0 && (
             <div>
-              <h2 className="text-lg font-bold text-content mb-4">
+              <h2 className="text-lg font-bold text-txt mb-4">
                 Courses by {profile.firstName}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -177,12 +177,12 @@ const UserProfile = () => {
                   <Link
                     key={course._id}
                     to={`/courses/${course._id}`}
-                    className="bg-surface-card border-2 border-border rounded-2xl p-5 hover:border-yellow-400/30 transition-all group"
+                    className="bg-surface-card border-2 border-bdr rounded-2xl p-5 hover:border-yellow-400/30 transition-all group"
                   >
-                    <h3 className="text-base font-bold text-content group-hover:text-yellow-400 transition-colors mb-1 line-clamp-1">
+                    <h3 className="text-base font-bold text-txt group-hover:text-yellow-400 transition-colors mb-1 line-clamp-1">
                       {course.title}
                     </h3>
-                    <p className="text-content-muted text-sm mb-3 line-clamp-2">
+                    <p className="text-txt-muted text-sm mb-3 line-clamp-2">
                       {course.description || 'No description'}
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -210,9 +210,9 @@ const UserProfile = () => {
 
           {/* Empty state for courses */}
           {courses.length === 0 && (
-            <div className="bg-surface-card border-2 border-border rounded-2xl p-6 text-center">
-              <BookOpen className="w-8 h-8 text-content-muted mx-auto mb-2" />
-              <p className="text-content-muted text-sm">
+            <div className="bg-surface-card border-2 border-bdr rounded-2xl p-6 text-center">
+              <BookOpen className="w-8 h-8 text-txt-muted mx-auto mb-2" />
+              <p className="text-txt-muted text-sm">
                 {profile.firstName} hasn't published any courses yet.
               </p>
             </div>

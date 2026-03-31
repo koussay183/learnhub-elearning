@@ -119,7 +119,7 @@ const SessionPlayer = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
-        <div className="w-8 h-8 border-[3px] border-border border-t-yellow-400 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-[3px] border-bdr border-t-yellow-400 rounded-full animate-spin" />
       </div>
     );
   }
@@ -128,8 +128,8 @@ const SessionPlayer = () => {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="text-center">
-          <h3 className="text-lg font-bold text-content mb-2">Something went wrong</h3>
-          <p className="text-content-muted mb-4">{error}</p>
+          <h3 className="text-lg font-bold text-txt mb-2">Something went wrong</h3>
+          <p className="text-txt-muted mb-4">{error}</p>
           <button onClick={() => navigate(`/courses/${courseId}`)} className="btn-secondary">
             Back to Course
           </button>
@@ -149,21 +149,21 @@ const SessionPlayer = () => {
       </div>
 
       {/* Top nav */}
-      <div className="bg-surface border-b border-border px-4 py-3">
+      <div className="bg-surface border-b border-bdr px-4 py-3">
         <div className="flex items-center justify-between max-w-screen-2xl mx-auto">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate(`/courses/${courseId}`)}
-              className="flex items-center gap-2 text-content-muted hover:text-yellow-400 transition-colors"
+              className="flex items-center gap-2 text-txt-muted hover:text-yellow-400 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
               <span className="hidden sm:inline text-sm font-medium">Back to Course</span>
             </button>
-            <div className="hidden md:block text-sm text-content-muted">
-              <span className="text-content font-semibold">{course?.title}</span>
+            <div className="hidden md:block text-sm text-txt-muted">
+              <span className="text-txt font-semibold">{course?.title}</span>
             </div>
           </div>
-          <div className="text-sm text-content-muted font-medium">
+          <div className="text-sm text-txt-muted font-medium">
             <span className="text-yellow-400">{currentIndex + 1}</span> / {sessions.length}
           </div>
         </div>
@@ -204,8 +204,8 @@ const SessionPlayer = () => {
                     style={{ paddingTop: '56.25%', position: 'relative' }}
                   >
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <Video className="w-16 h-16 text-content-muted mb-3" />
-                      <p className="text-content-muted">No video available for this session</p>
+                      <Video className="w-16 h-16 text-txt-muted mb-3" />
+                      <p className="text-txt-muted">No video available for this session</p>
                     </div>
                   </div>
                 )}
@@ -223,11 +223,11 @@ const SessionPlayer = () => {
 
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                   <div>
-                    <h2 className="text-xl font-black text-content mb-1">
+                    <h2 className="text-xl font-black text-txt mb-1">
                       {currentSession?.title}
                     </h2>
                     {currentSession?.description && (
-                      <p className="text-content-muted mt-2">{currentSession.description}</p>
+                      <p className="text-txt-muted mt-2">{currentSession.description}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
@@ -266,15 +266,15 @@ const SessionPlayer = () => {
                 </div>
 
                 {/* Previous / Next buttons */}
-                <div className="flex items-center justify-between pt-4 border-t border-border">
+                <div className="flex items-center justify-between pt-4 border-t border-bdr">
                   {prevSession ? (
                     <button
                       onClick={() => navigateSession(prevSession, 'prev')}
-                      className="flex items-center gap-3 text-content-muted hover:text-yellow-400 transition-colors group"
+                      className="flex items-center gap-3 text-txt-muted hover:text-yellow-400 transition-colors group"
                     >
                       <ChevronLeft className="w-5 h-5" />
                       <div className="text-left">
-                        <p className="text-xs text-content-muted">Previous</p>
+                        <p className="text-xs text-txt-muted">Previous</p>
                         <p className="text-sm font-semibold group-hover:text-yellow-400 transition-colors">{prevSession.title}</p>
                       </div>
                     </button>
@@ -285,10 +285,10 @@ const SessionPlayer = () => {
                   {nextSession ? (
                     <button
                       onClick={() => navigateSession(nextSession, 'next')}
-                      className="flex items-center gap-3 text-content-muted hover:text-yellow-400 transition-colors text-right group"
+                      className="flex items-center gap-3 text-txt-muted hover:text-yellow-400 transition-colors text-right group"
                     >
                       <div>
-                        <p className="text-xs text-content-muted">Next</p>
+                        <p className="text-xs text-txt-muted">Next</p>
                         <p className="text-sm font-semibold group-hover:text-yellow-400 transition-colors">{nextSession.title}</p>
                       </div>
                       <ChevronRight className="w-5 h-5" />
@@ -304,18 +304,18 @@ const SessionPlayer = () => {
 
         {/* Sidebar - Session List */}
         <div
-          className="w-full lg:w-80 bg-surface-card border-t lg:border-t-0 lg:border-l border-border overflow-y-auto"
+          className="w-full lg:w-80 bg-surface-card border-t lg:border-t-0 lg:border-l border-bdr overflow-y-auto"
         >
-          <div className="p-4 border-b border-border">
-            <h3 className="text-sm font-bold text-content uppercase tracking-wide">
+          <div className="p-4 border-b border-bdr">
+            <h3 className="text-sm font-bold text-txt uppercase tracking-wide">
               Course Content
             </h3>
-            <p className="text-xs text-content-muted mt-1">
+            <p className="text-xs text-txt-muted mt-1">
               <span className="text-yellow-400 font-semibold">{completedSessions.size}</span> of {sessions.length} completed
             </p>
           </div>
 
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-bdr">
             {sessions.map((session, index) => {
               const isActive = session._id === currentSession?._id;
               const isCompleted = completedSessions.has(session._id);
@@ -339,7 +339,7 @@ const SessionPlayer = () => {
                         ? 'bg-green-400/10 text-green-400 border-green-400/20'
                         : isActive
                         ? 'bg-yellow-400/10 text-yellow-400 border-yellow-400/20'
-                        : 'bg-surface text-content-muted border-border'
+                        : 'bg-surface text-txt-muted border-bdr'
                     }`}
                   >
                     {isCompleted ? (
@@ -351,17 +351,17 @@ const SessionPlayer = () => {
                   <div className="min-w-0 flex-1">
                     <p
                       className={`text-sm font-medium truncate ${
-                        isActive ? 'text-yellow-400' : 'text-content-secondary'
+                        isActive ? 'text-yellow-400' : 'text-txt-secondary'
                       }`}
                     >
                       {session.title}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
                       {session.duration && (
-                        <p className="text-xs text-content-muted">{session.duration}</p>
+                        <p className="text-xs text-txt-muted">{session.duration}</p>
                       )}
-                      {session.videoUrl && <Play className="w-3 h-3 text-content-muted" />}
-                      {session.pdfUrl && <FileText className="w-3 h-3 text-content-muted" />}
+                      {session.videoUrl && <Play className="w-3 h-3 text-txt-muted" />}
+                      {session.pdfUrl && <FileText className="w-3 h-3 text-txt-muted" />}
                     </div>
                   </div>
                 </button>

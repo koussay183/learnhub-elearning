@@ -125,7 +125,7 @@ const TakeTest = () => {
   useEffect(() => {
     if (!started || !attemptId) return;
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const API_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:5000`;
     socketRef.current = io(API_URL);
 
     socketRef.current.emit('test:join-room', { testId, attemptId, userId: user?._id });
@@ -265,7 +265,7 @@ const TakeTest = () => {
   if (error && !test) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface">
-        <div className="bg-surface-card border-2 border-border rounded-2xl p-8 max-w-md text-center">
+        <div className="bg-surface-card border-2 border-bdr rounded-2xl p-8 max-w-md text-center">
           <div className="w-14 h-14 bg-red-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="w-7 h-7 text-red-400" />
           </div>
@@ -285,12 +285,12 @@ const TakeTest = () => {
   if (!started) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center px-4">
-        <div className="bg-surface-card border-2 border-border rounded-2xl p-8 max-w-lg w-full text-center">
+        <div className="bg-surface-card border-2 border-bdr rounded-2xl p-8 max-w-lg w-full text-center">
           <div className="w-16 h-16 bg-yellow-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <HelpCircle className="w-8 h-8 text-yellow-400" />
           </div>
-          <h1 className="text-2xl font-black text-content mb-2">{test?.title}</h1>
-          <p className="text-content-muted mb-6">{test?.description || 'Good luck!'}</p>
+          <h1 className="text-2xl font-black text-txt mb-2">{test?.title}</h1>
+          <p className="text-txt-muted mb-6">{test?.description || 'Good luck!'}</p>
 
           <div className="flex justify-center gap-3 mb-6">
             <span className="badge badge-accent inline-flex items-center gap-1">
@@ -303,18 +303,18 @@ const TakeTest = () => {
 
           {/* Schedule Time Window */}
           {(scheduledStart || scheduledEnd) && (
-            <div className="mb-6 p-4 rounded-xl bg-surface border-2 border-border text-left space-y-2">
-              <h3 className="text-sm font-bold text-content-secondary flex items-center gap-2">
+            <div className="mb-6 p-4 rounded-xl bg-surface border-2 border-bdr text-left space-y-2">
+              <h3 className="text-sm font-bold text-txt-secondary flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-yellow-400" /> Test Schedule
               </h3>
               {scheduledStart && (
-                <div className="flex items-center gap-2 text-sm text-content-secondary">
+                <div className="flex items-center gap-2 text-sm text-txt-secondary">
                   <span className="text-green-400 font-semibold">Opens:</span>
                   <span>{formatScheduleDate(test.settings.scheduledStartTime)}</span>
                 </div>
               )}
               {scheduledEnd && (
-                <div className="flex items-center gap-2 text-sm text-content-secondary">
+                <div className="flex items-center gap-2 text-sm text-txt-secondary">
                   <span className="text-red-400 font-semibold">Closes:</span>
                   <span>{formatScheduleDate(test.settings.scheduledEndTime)}</span>
                 </div>
@@ -393,7 +393,7 @@ const TakeTest = () => {
 
       {/* Timer bar */}
       <div
-        className={`sticky top-0 z-40 bg-surface-card border-b-2 border-border ${
+        className={`sticky top-0 z-40 bg-surface-card border-b-2 border-bdr ${
           showReconnectNotice ? 'mt-10' : ''
         }`}
       >
@@ -407,7 +407,7 @@ const TakeTest = () => {
           />
         </div>
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-content-secondary truncate max-w-xs">
+          <h2 className="text-sm font-bold text-txt-secondary truncate max-w-xs">
             {test?.title}
           </h2>
           <div
@@ -419,7 +419,7 @@ const TakeTest = () => {
           >
             <Clock className="w-4 h-4" /> {formatTime(timeRemaining)}
           </div>
-          <div className="text-sm text-content-muted">
+          <div className="text-sm text-txt-muted">
             {answeredCount}/{questions.length} answered
           </div>
         </div>
@@ -428,8 +428,8 @@ const TakeTest = () => {
       <div className="max-w-5xl mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
         {/* Question navigation sidebar */}
         <div className="lg:w-64 flex-shrink-0">
-          <div className="bg-surface-card border-2 border-border rounded-2xl p-4 sticky top-24">
-            <h3 className="text-sm font-bold text-content-secondary mb-3">Questions</h3>
+          <div className="bg-surface-card border-2 border-bdr rounded-2xl p-4 sticky top-24">
+            <h3 className="text-sm font-bold text-txt-secondary mb-3">Questions</h3>
             <div className="grid grid-cols-5 lg:grid-cols-4 gap-2">
               {questions.map((q, index) => {
                 const qId = q._id || q.id || index;
@@ -444,7 +444,7 @@ const TakeTest = () => {
                         ? 'bg-yellow-400 text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] border-2 border-black'
                         : isAnswered
                         ? 'bg-green-400/10 text-green-400 border-2 border-green-400/30'
-                        : 'bg-surface-input text-content-muted border-2 border-border hover:border-border-hover'
+                        : 'bg-surface-input text-txt-muted border-2 border-bdr hover:border-bdr-hover'
                     }`}
                   >
                     {index + 1}
@@ -468,17 +468,17 @@ const TakeTest = () => {
         {/* Current question */}
         <div className="flex-1">
           {currentQuestion && (
-            <div className="bg-surface-card border-2 border-border rounded-2xl p-6">
+            <div className="bg-surface-card border-2 border-bdr rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <span className="badge badge-accent">
                   Question {currentIndex + 1} of {questions.length}
                 </span>
-                <span className="text-sm text-content-muted">
+                <span className="text-sm text-txt-muted">
                   {currentQuestion.points || 1} point{(currentQuestion.points || 1) !== 1 ? 's' : ''}
                 </span>
               </div>
 
-              <h3 className="text-lg font-bold text-content mb-6">
+              <h3 className="text-lg font-bold text-txt mb-6">
                 {currentQuestion.question || currentQuestion.text}
               </h3>
 
@@ -494,7 +494,7 @@ const TakeTest = () => {
                         className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
                           isSelected
                             ? 'border-yellow-400/50 bg-yellow-400/5'
-                            : 'border-border hover:border-border-hover hover:bg-surface-input'
+                            : 'border-bdr hover:border-bdr-hover hover:bg-surface-input'
                         }`}
                       >
                         <input
@@ -504,7 +504,7 @@ const TakeTest = () => {
                           onChange={() => setAnswer(qId, option)}
                           className="accent-yellow-400"
                         />
-                        <span className={`${isSelected ? 'text-content' : 'text-content-secondary'}`}>{option}</span>
+                        <span className={`${isSelected ? 'text-txt' : 'text-txt-secondary'}`}>{option}</span>
                       </label>
                     );
                   })}
@@ -562,9 +562,9 @@ const TakeTest = () => {
       {/* Confirmation Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-surface-card border-2 border-border rounded-2xl p-6 max-w-sm w-full mx-4 animate-scaleIn">
-            <h3 className="text-lg font-black text-content mb-2">Submit Test?</h3>
-            <p className="text-content-secondary text-sm mb-1">
+          <div className="bg-surface-card border-2 border-bdr rounded-2xl p-6 max-w-sm w-full mx-4 animate-scaleIn">
+            <h3 className="text-lg font-black text-txt mb-2">Submit Test?</h3>
+            <p className="text-txt-secondary text-sm mb-1">
               You have answered {answeredCount} of {questions.length} questions.
             </p>
             {answeredCount < questions.length && (

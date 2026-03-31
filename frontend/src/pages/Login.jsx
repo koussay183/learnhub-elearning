@@ -42,13 +42,13 @@ export const Login = () => {
             <div className="w-10 h-10 bg-yellow-400 rounded-xl flex items-center justify-center rotate-[-3deg] border-[3px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <span className="text-black font-black text-lg">L</span>
             </div>
-            <span className="text-2xl font-black text-content">Learn<span className="text-yellow-400">Hub</span></span>
+            <span className="text-2xl font-black text-txt">Learn<span className="text-yellow-400">Hub</span></span>
           </div>
         </div>
 
         <div className="card p-8">
-          <h1 className="text-2xl font-black text-content mb-1 text-center">Welcome Back</h1>
-          <p className="text-content-muted text-center mb-6">Sign in to continue learning</p>
+          <h1 className="text-2xl font-black text-txt mb-1 text-center">Welcome Back</h1>
+          <p className="text-txt-muted text-center mb-6">Sign in to continue learning</p>
 
           {error && (
             <div className="mb-4 p-3 bg-red-400/10 border border-red-400/20 rounded-xl text-red-400 text-sm">
@@ -58,9 +58,9 @@ export const Login = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-content-secondary mb-2">Email</label>
+              <label className="block text-sm font-semibold text-txt-secondary mb-2">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-muted" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-txt-muted" />
                 <input type="email" name="email" value={formData.email} onChange={handleChange}
                   placeholder="you@example.com"
                   className={`input-field pl-10 ${errors.email ? 'border-red-500' : ''}`} />
@@ -69,9 +69,9 @@ export const Login = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-content-secondary mb-2">Password</label>
+              <label className="block text-sm font-semibold text-txt-secondary mb-2">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-muted" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-txt-muted" />
                 <input type="password" name="password" value={formData.password} onChange={handleChange}
                   placeholder="--------"
                   className={`input-field pl-10 ${errors.password ? 'border-red-500' : ''}`} />
@@ -91,7 +91,7 @@ export const Login = () => {
             </button>
           </form>
 
-          <p className="text-center text-content-muted mt-6">
+          <p className="text-center text-txt-muted mt-6">
             Don't have an account?{' '}
             <Link to="/register" className="text-yellow-400 hover:text-yellow-300 font-semibold">Sign up</Link>
           </p>

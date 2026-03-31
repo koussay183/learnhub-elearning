@@ -87,8 +87,8 @@ const Profile = () => {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-black text-content">Profile Settings</h1>
-          <p className="mt-1 text-content-muted">Manage your personal information and preferences</p>
+          <h1 className="text-3xl font-black text-txt">Profile Settings</h1>
+          <p className="mt-1 text-txt-muted">Manage your personal information and preferences</p>
         </div>
 
         {/* Error */}
@@ -100,8 +100,8 @@ const Profile = () => {
 
         <form onSubmit={handleSave} className="space-y-6">
           {/* Avatar Section */}
-          <div className="bg-surface-card border-2 border-border rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-content mb-4 flex items-center gap-2">
+          <div className="bg-surface-card border-2 border-bdr rounded-2xl p-6">
+            <h2 className="text-lg font-bold text-txt mb-4 flex items-center gap-2">
               <Camera className="w-5 h-5 text-yellow-400" /> Avatar
             </h2>
             <div className="flex items-center gap-5">
@@ -110,7 +110,7 @@ const Profile = () => {
                   <img
                     src={avatarUrl}
                     alt="Avatar"
-                    className="w-20 h-20 rounded-2xl object-cover border-2 border-border"
+                    className="w-20 h-20 rounded-2xl object-cover border-2 border-bdr"
                     onError={(e) => {
                       e.target.style.display = 'none';
                       e.target.nextElementSibling.style.display = 'flex';
@@ -126,8 +126,8 @@ const Profile = () => {
                 </div>
               </div>
               <div className="flex-1">
-                <label className="flex items-center gap-2 text-sm font-semibold text-content-secondary mb-2">
-                  <LinkIcon className="w-4 h-4 text-content-muted" /> Avatar URL
+                <label className="flex items-center gap-2 text-sm font-semibold text-txt-secondary mb-2">
+                  <LinkIcon className="w-4 h-4 text-txt-muted" /> Avatar URL
                 </label>
                 <input
                   type="url"
@@ -141,13 +141,13 @@ const Profile = () => {
           </div>
 
           {/* Personal Info */}
-          <div className="bg-surface-card border-2 border-border rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-content mb-4 flex items-center gap-2">
+          <div className="bg-surface-card border-2 border-bdr rounded-2xl p-6">
+            <h2 className="text-lg font-bold text-txt mb-4 flex items-center gap-2">
               <User className="w-5 h-5 text-yellow-400" /> Personal Information
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-content-secondary mb-2">
+                <label className="block text-sm font-semibold text-txt-secondary mb-2">
                   First Name
                 </label>
                 <input
@@ -159,7 +159,7 @@ const Profile = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-content-secondary mb-2">
+                <label className="block text-sm font-semibold text-txt-secondary mb-2">
                   Last Name
                 </label>
                 <input
@@ -172,8 +172,8 @@ const Profile = () => {
               </div>
             </div>
             <div className="mt-4">
-              <label className="flex items-center gap-2 text-sm font-semibold text-content-secondary mb-2">
-                <Mail className="w-4 h-4 text-content-muted" /> Email
+              <label className="flex items-center gap-2 text-sm font-semibold text-txt-secondary mb-2">
+                <Mail className="w-4 h-4 text-txt-muted" /> Email
               </label>
               <input
                 type="email"
@@ -181,11 +181,11 @@ const Profile = () => {
                 disabled
                 className="input-field opacity-50 cursor-not-allowed"
               />
-              <p className="text-xs text-content-muted mt-1">Email cannot be changed.</p>
+              <p className="text-xs text-txt-muted mt-1">Email cannot be changed.</p>
             </div>
             <div className="mt-4">
-              <label className="flex items-center gap-2 text-sm font-semibold text-content-secondary mb-2">
-                <FileText className="w-4 h-4 text-content-muted" /> Bio
+              <label className="flex items-center gap-2 text-sm font-semibold text-txt-secondary mb-2">
+                <FileText className="w-4 h-4 text-txt-muted" /> Bio
               </label>
               <textarea
                 value={bio}
@@ -198,17 +198,17 @@ const Profile = () => {
           </div>
 
           {/* Preferences */}
-          <div className="bg-surface-card border-2 border-border rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-content mb-4">Preferences</h2>
+          <div className="bg-surface-card border-2 border-bdr rounded-2xl p-6">
+            <h2 className="text-lg font-bold text-txt mb-4">Preferences</h2>
             <div className="space-y-4">
-              <label className="flex items-center justify-between cursor-pointer p-3 rounded-xl border-2 border-border hover:border-border-hover transition-all">
+              <label className="flex items-center justify-between cursor-pointer p-3 rounded-xl border-2 border-bdr hover:border-bdr-hover transition-all">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center">
                     <Bell className="w-4 h-4 text-yellow-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-content">Email Notifications</p>
-                    <p className="text-xs text-content-muted">Receive email updates about your courses</p>
+                    <p className="text-sm font-semibold text-txt">Email Notifications</p>
+                    <p className="text-xs text-txt-muted">Receive email updates about your courses</p>
                   </div>
                 </div>
                 <div
@@ -224,14 +224,14 @@ const Profile = () => {
                   />
                 </div>
               </label>
-              <label className="flex items-center justify-between cursor-pointer p-3 rounded-xl border-2 border-border hover:border-border-hover transition-all">
+              <label className="flex items-center justify-between cursor-pointer p-3 rounded-xl border-2 border-bdr hover:border-bdr-hover transition-all">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-blue-400/10 border border-blue-400/20 flex items-center justify-center">
                     <Globe className="w-4 h-4 text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-content">Public Profile</p>
-                    <p className="text-xs text-content-muted">Make your profile visible to other users</p>
+                    <p className="text-sm font-semibold text-txt">Public Profile</p>
+                    <p className="text-xs text-txt-muted">Make your profile visible to other users</p>
                   </div>
                 </div>
                 <div
@@ -247,14 +247,14 @@ const Profile = () => {
                   />
                 </div>
               </label>
-              <label className="flex items-center justify-between cursor-pointer p-3 rounded-xl border-2 border-border hover:border-border-hover transition-all">
+              <label className="flex items-center justify-between cursor-pointer p-3 rounded-xl border-2 border-bdr hover:border-bdr-hover transition-all">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-purple-400/10 border border-purple-400/20 flex items-center justify-center">
                     {theme === 'dark' ? <Moon className="w-4 h-4 text-purple-400" /> : <Sun className="w-4 h-4 text-purple-400" />}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-content">Dark Mode</p>
-                    <p className="text-xs text-content-muted">Toggle between light and dark theme</p>
+                    <p className="text-sm font-semibold text-txt">Dark Mode</p>
+                    <p className="text-xs text-txt-muted">Toggle between light and dark theme</p>
                   </div>
                 </div>
                 <div

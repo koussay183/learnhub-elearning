@@ -38,8 +38,8 @@ const PostCard = ({ post, onLike, currentUserId }) => {
           {initial}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-content">{author.firstName} {author.lastName}</p>
-          <div className="flex items-center gap-2 text-xs text-content-muted">
+          <p className="text-sm font-semibold text-txt">{author.firstName} {author.lastName}</p>
+          <div className="flex items-center gap-2 text-xs text-txt-muted">
             <Clock className="w-3 h-3" />
             {timeAgo(post.createdAt)}
           </div>
@@ -55,26 +55,26 @@ const PostCard = ({ post, onLike, currentUserId }) => {
       </div>
 
       {/* Content */}
-      <h3 className="text-lg font-bold text-content group-hover:text-yellow-400 transition-colors mb-2">
+      <h3 className="text-lg font-bold text-txt group-hover:text-yellow-400 transition-colors mb-2">
         {post.title}
       </h3>
-      <p className="text-content-secondary text-sm line-clamp-3 mb-4">{post.content}</p>
+      <p className="text-txt-secondary text-sm line-clamp-3 mb-4">{post.content}</p>
 
       {/* Footer */}
-      <div className="flex items-center gap-4 pt-3 border-t border-border">
+      <div className="flex items-center gap-4 pt-3 border-t border-bdr">
         <button
           onClick={(e) => { e.stopPropagation(); onLike && onLike(post._id); }}
           className={`flex items-center gap-1.5 text-sm transition-colors ${
-            isLiked ? 'text-red-400' : 'text-content-muted hover:text-red-400'
+            isLiked ? 'text-red-400' : 'text-txt-muted hover:text-red-400'
           }`}
         >
           <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
           {post.likes?.length || 0}
         </button>
-        <span className="flex items-center gap-1.5 text-sm text-content-muted">
+        <span className="flex items-center gap-1.5 text-sm text-txt-muted">
           <MessageCircle className="w-4 h-4" /> {post.comments?.length || 0}
         </span>
-        <span className="flex items-center gap-1.5 text-sm text-content-muted">
+        <span className="flex items-center gap-1.5 text-sm text-txt-muted">
           <Eye className="w-4 h-4" /> {post.views || 0}
         </span>
       </div>

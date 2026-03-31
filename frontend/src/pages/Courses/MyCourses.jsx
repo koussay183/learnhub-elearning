@@ -89,12 +89,12 @@ const MyCourses = () => {
   return (
     <div className="min-h-screen bg-surface">
       {/* Header */}
-      <div className="border-b border-border">
+      <div className="border-b border-bdr">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-black text-content">My Courses</h1>
-              <p className="text-content-muted mt-1">
+              <h1 className="text-3xl font-black text-txt">My Courses</h1>
+              <p className="text-txt-muted mt-1">
                 Manage your learning journey and course creations
               </p>
             </div>
@@ -117,7 +117,7 @@ const MyCourses = () => {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-8 border-b border-border">
+        <div className="flex gap-1 mb-8 border-b border-bdr">
           {TABS.map((tab) => (
             <button
               key={tab}
@@ -125,7 +125,7 @@ const MyCourses = () => {
               className={`px-5 py-3 text-sm font-semibold transition-colors relative flex items-center gap-2 ${
                 activeTab === tab
                   ? 'text-yellow-400'
-                  : 'text-content-muted hover:text-content-secondary'
+                  : 'text-txt-muted hover:text-txt-secondary'
               }`}
             >
               {tab === 'Enrolled Courses' ? <GraduationCap className="w-4 h-4" /> : <Rocket className="w-4 h-4" />}
@@ -140,19 +140,19 @@ const MyCourses = () => {
         {/* Content */}
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-[3px] border-border border-t-yellow-400 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-[3px] border-bdr border-t-yellow-400 rounded-full animate-spin" />
           </div>
         ) : courses.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-24 h-24 mx-auto mb-6 bg-surface-card rounded-2xl border-2 border-border flex items-center justify-center">
-              <BookOpen className="w-10 h-10 text-content-muted" />
+            <div className="w-24 h-24 mx-auto mb-6 bg-surface-card rounded-2xl border-2 border-bdr flex items-center justify-center">
+              <BookOpen className="w-10 h-10 text-txt-muted" />
             </div>
-            <h3 className="text-xl font-bold text-content mb-2">
+            <h3 className="text-xl font-bold text-txt mb-2">
               {activeTab === 'Enrolled Courses'
                 ? "You haven't enrolled in any courses yet"
                 : "You haven't created any courses yet"}
             </h3>
-            <p className="text-content-muted mb-6">
+            <p className="text-txt-muted mb-6">
               {activeTab === 'Enrolled Courses'
                 ? 'Browse our catalog to find courses that interest you.'
                 : 'Share your expertise by creating your first course.'}
@@ -178,7 +178,7 @@ const MyCourses = () => {
                 <div key={courseId} className="my-course-card opacity-0">
                   <div className="card overflow-hidden group">
                     {/* Thumbnail */}
-                    <div className="relative h-40 bg-surface border-b border-border overflow-hidden flex items-center justify-center">
+                    <div className="relative h-40 bg-surface border-b border-bdr overflow-hidden flex items-center justify-center">
                       {course.thumbnail ? (
                         <img
                           src={course.thumbnail}
@@ -186,7 +186,7 @@ const MyCourses = () => {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
-                        <BookOpen className="w-10 h-10 text-content-muted" />
+                        <BookOpen className="w-10 h-10 text-txt-muted" />
                       )}
                       <span
                         className={`absolute top-3 right-3 px-3 py-1 rounded-lg text-xs font-bold border-2 ${
@@ -205,11 +205,11 @@ const MyCourses = () => {
                       </div>
 
                       <Link to={`/courses/${courseId}`}>
-                        <h3 className="text-lg font-bold text-content mb-1 hover:text-yellow-400 transition-colors line-clamp-1">
+                        <h3 className="text-lg font-bold text-txt mb-1 hover:text-yellow-400 transition-colors line-clamp-1">
                           {course.title}
                         </h3>
                       </Link>
-                      <p className="text-content-muted text-sm mb-4 line-clamp-2">
+                      <p className="text-txt-muted text-sm mb-4 line-clamp-2">
                         {course.description}
                       </p>
 
@@ -218,10 +218,10 @@ const MyCourses = () => {
                         <>
                           <div className="mb-4">
                             <div className="flex justify-between text-sm mb-1.5">
-                              <span className="text-content-muted">Progress</span>
+                              <span className="text-txt-muted">Progress</span>
                               <span className="font-bold text-yellow-400">{Math.round(courseProgress)}%</span>
                             </div>
-                            <div className="w-full h-2 bg-surface rounded-full overflow-hidden border border-border">
+                            <div className="w-full h-2 bg-surface rounded-full overflow-hidden border border-bdr">
                               <div
                                 className={`h-full rounded-full transition-all duration-500 ${
                                   courseProgress >= 100
@@ -232,7 +232,7 @@ const MyCourses = () => {
                               />
                             </div>
                           </div>
-                          <div className="pt-4 border-t border-border">
+                          <div className="pt-4 border-t border-bdr">
                             <Link to={`/courses/${courseId}`}>
                               <button className="btn-primary w-full">
                                 {courseProgress >= 100 ? 'Review Course' : 'Continue Learning'}
@@ -245,7 +245,7 @@ const MyCourses = () => {
                       {/* Created tab: stats + edit/delete */}
                       {activeTab === 'Created Courses' && (
                         <>
-                          <div className="flex items-center gap-4 text-sm text-content-muted mb-4">
+                          <div className="flex items-center gap-4 text-sm text-txt-muted mb-4">
                             <div className="flex items-center gap-1">
                               <Users className="w-4 h-4" />
                               <span>{course.enrollmentCount || 0} students</span>
@@ -255,7 +255,7 @@ const MyCourses = () => {
                               <span>{course.totalSessions || course.sessions?.length || 0} sessions</span>
                             </div>
                           </div>
-                          <div className="pt-4 border-t border-border flex items-center gap-3">
+                          <div className="pt-4 border-t border-bdr flex items-center gap-3">
                             <Link to={`/courses/${courseId}`} className="flex-1">
                               <button className="btn-secondary w-full">
                                 <span className="flex items-center justify-center gap-1.5">

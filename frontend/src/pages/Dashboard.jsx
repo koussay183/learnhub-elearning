@@ -102,10 +102,10 @@ const Dashboard = () => {
     <div ref={containerRef}>
       {/* Welcome */}
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-content">
+        <h1 className="text-3xl font-black text-txt">
           Welcome back, <span className="text-yellow-400">{user?.firstName}</span>
         </h1>
-        <p className="text-content-muted mt-1">Here's your learning overview.</p>
+        <p className="text-txt-muted mt-1">Here's your learning overview.</p>
       </div>
 
       {/* Stats Grid */}
@@ -121,7 +121,7 @@ const Dashboard = () => {
                 </div>
                 <span className={`badge ${c.bg} ${c.text} border ${c.border}`}>{stat.label}</span>
               </div>
-              <p className="text-3xl font-black text-content">{stat.value}</p>
+              <p className="text-3xl font-black text-txt">{stat.value}</p>
             </div>
           );
         })}
@@ -132,7 +132,7 @@ const Dashboard = () => {
         <div className="lg:col-span-2 content-section">
           <div className="card p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-bold text-content flex items-center gap-2">
+              <h2 className="text-xl font-bold text-txt flex items-center gap-2">
                 <Zap className="w-5 h-5 text-yellow-400" /> Continue Learning
               </h2>
               <Link to="/courses/my" className="text-sm text-yellow-400 hover:text-yellow-300 flex items-center gap-1">
@@ -145,7 +145,7 @@ const Dashboard = () => {
                 {activeCourses.slice(0, 4).map(course => (
                   <div
                     key={course._id}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-surface border border-border/50
+                    className="flex items-center gap-4 p-4 rounded-xl bg-surface border border-bdr/50
                                hover:border-yellow-400/20 cursor-pointer transition-all group"
                     onClick={() => navigate(`/courses/${course._id}`)}
                   >
@@ -153,7 +153,7 @@ const Dashboard = () => {
                       <BookOpen className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-content truncate group-hover:text-yellow-400 transition-colors">
+                      <h3 className="font-semibold text-txt truncate group-hover:text-yellow-400 transition-colors">
                         {course.title}
                       </h3>
                       <div className="flex items-center gap-3 mt-2">
@@ -166,14 +166,14 @@ const Dashboard = () => {
                         <span className="text-sm font-bold text-yellow-400 whitespace-nowrap">{course.progress || 0}%</span>
                       </div>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-content-muted group-hover:text-yellow-400 transition-colors" />
+                    <ArrowRight className="w-5 h-5 text-txt-muted group-hover:text-yellow-400 transition-colors" />
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-12">
-                <BookOpen className="w-12 h-12 text-content-muted mx-auto mb-3" />
-                <p className="text-content-muted mb-4">No courses yet. Start learning today!</p>
+                <BookOpen className="w-12 h-12 text-txt-muted mx-auto mb-3" />
+                <p className="text-txt-muted mb-4">No courses yet. Start learning today!</p>
                 <button onClick={() => navigate('/courses')} className="btn-primary">
                   Browse Courses
                 </button>
@@ -186,13 +186,13 @@ const Dashboard = () => {
         <div className="space-y-6">
           {/* Quick Actions */}
           <div className="content-section card p-5">
-            <h2 className="text-lg font-bold text-content mb-4">Quick Actions</h2>
+            <h2 className="text-lg font-bold text-txt mb-4">Quick Actions</h2>
             <div className="space-y-2">
               {quickActions.map((action) => {
                 const Icon = action.icon;
                 return (
                   <button key={action.to} onClick={() => navigate(action.to)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl text-left text-content-secondary transition-all ${action.color}`}>
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl text-left text-txt-secondary transition-all ${action.color}`}>
                     <Icon className="w-5 h-5" />
                     <span className="font-medium text-sm">{action.label}</span>
                   </button>
@@ -204,7 +204,7 @@ const Dashboard = () => {
           {/* Recent Posts */}
           <div className="content-section card p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-content">Community</h2>
+              <h2 className="text-lg font-bold text-txt">Community</h2>
               <Link to="/community" className="text-xs text-yellow-400 hover:text-yellow-300 flex items-center gap-1">
                 View all <ArrowRight className="w-3 h-3" />
               </Link>
@@ -215,15 +215,15 @@ const Dashboard = () => {
                   <div key={post._id}
                     className="p-3 rounded-xl hover:bg-surface-hover cursor-pointer transition-all"
                     onClick={() => navigate(`/community/${post._id}`)}>
-                    <p className="font-medium text-content-secondary text-sm truncate">{post.title}</p>
-                    <p className="text-xs text-content-muted mt-1">
+                    <p className="font-medium text-txt-secondary text-sm truncate">{post.title}</p>
+                    <p className="text-xs text-txt-muted mt-1">
                       {post.likes?.length || 0} likes · {post.comments?.length || 0} comments
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-content-muted text-sm text-center py-4">No posts yet</p>
+              <p className="text-txt-muted text-sm text-center py-4">No posts yet</p>
             )}
           </div>
         </div>

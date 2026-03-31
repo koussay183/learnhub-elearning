@@ -112,7 +112,7 @@ const CourseDetail = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
-        <div className="w-8 h-8 border-[3px] border-border border-t-yellow-400 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-[3px] border-bdr border-t-yellow-400 rounded-full animate-spin" />
       </div>
     );
   }
@@ -124,8 +124,8 @@ const CourseDetail = () => {
           <div className="w-16 h-16 mx-auto mb-4 bg-red-400/10 rounded-2xl border-2 border-red-400/20 flex items-center justify-center">
             <BookOpen className="w-8 h-8 text-red-400" />
           </div>
-          <h3 className="text-lg font-bold text-content mb-2">Course Not Found</h3>
-          <p className="text-content-muted mb-4">{error}</p>
+          <h3 className="text-lg font-bold text-txt mb-2">Course Not Found</h3>
+          <p className="text-txt-muted mb-4">{error}</p>
           <button onClick={() => navigate('/courses')} className="btn-secondary">
             Back to Courses
           </button>
@@ -137,11 +137,11 @@ const CourseDetail = () => {
   return (
     <div className="min-h-screen bg-surface">
       {/* Hero Section */}
-      <div ref={heroRef} className="relative bg-surface-card border-b border-border">
+      <div ref={heroRef} className="relative bg-surface-card border-b border-bdr">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <button
             onClick={() => navigate('/courses')}
-            className="flex items-center gap-2 text-content-muted hover:text-yellow-400 mb-6 transition-colors"
+            className="flex items-center gap-2 text-txt-muted hover:text-yellow-400 mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Courses
@@ -157,8 +157,8 @@ const CourseDetail = () => {
                 )}
               </div>
 
-              <h1 className="text-4xl font-black text-content mb-4">{course.title}</h1>
-              <p className="text-lg text-content-secondary mb-6 max-w-2xl">
+              <h1 className="text-4xl font-black text-txt mb-4">{course.title}</h1>
+              <p className="text-lg text-txt-secondary mb-6 max-w-2xl">
                 {course.description?.substring(0, 200)}
                 {(course.description?.length || 0) > 200 ? '...' : ''}
               </p>
@@ -169,12 +169,12 @@ const CourseDetail = () => {
                   {(course.instructor?.firstName || 'I')[0]}
                 </div>
                 <div>
-                  <p className="font-semibold text-content">
+                  <p className="font-semibold text-txt">
                     {course.instructor?.firstName
                       ? `${course.instructor.firstName} ${course.instructor.lastName || ''}`
                       : course.instructorName || 'Instructor'}
                   </p>
-                  <p className="text-sm text-content-muted">Instructor</p>
+                  <p className="text-sm text-txt-muted">Instructor</p>
                 </div>
               </div>
             </div>
@@ -194,10 +194,10 @@ const CourseDetail = () => {
                   {/* Progress bar */}
                   <div className="mb-4">
                     <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-content-secondary">Progress</span>
+                      <span className="text-txt-secondary">Progress</span>
                       <span className="text-yellow-400 font-bold">{Math.round(progress)}%</span>
                     </div>
-                    <div className="w-full h-2.5 bg-surface rounded-full overflow-hidden border border-border">
+                    <div className="w-full h-2.5 bg-surface rounded-full overflow-hidden border border-bdr">
                       <div
                         className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-yellow-400 to-yellow-500"
                         style={{ width: `${progress}%` }}
@@ -249,22 +249,22 @@ const CourseDetail = () => {
                 </button>
               )}
 
-              <div className="mt-5 pt-5 border-t border-border space-y-3 text-sm">
+              <div className="mt-5 pt-5 border-t border-bdr space-y-3 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-content-muted flex items-center gap-2"><BookOpen className="w-4 h-4" /> Sessions</span>
-                  <span className="font-semibold text-content">{sessions.length}</span>
+                  <span className="text-txt-muted flex items-center gap-2"><BookOpen className="w-4 h-4" /> Sessions</span>
+                  <span className="font-semibold text-txt">{sessions.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-content-muted flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Level</span>
-                  <span className="font-semibold text-content">{course.level || 'Beginner'}</span>
+                  <span className="text-txt-muted flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Level</span>
+                  <span className="font-semibold text-txt">{course.level || 'Beginner'}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-content-muted flex items-center gap-2"><Globe className="w-4 h-4" /> Language</span>
-                  <span className="font-semibold text-content">{course.language || 'English'}</span>
+                  <span className="text-txt-muted flex items-center gap-2"><Globe className="w-4 h-4" /> Language</span>
+                  <span className="font-semibold text-txt">{course.language || 'English'}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-content-muted flex items-center gap-2"><Users className="w-4 h-4" /> Students</span>
-                  <span className="font-semibold text-content">{course.enrollmentCount || 0}</span>
+                  <span className="text-txt-muted flex items-center gap-2"><Users className="w-4 h-4" /> Students</span>
+                  <span className="font-semibold text-txt">{course.enrollmentCount || 0}</span>
                 </div>
               </div>
             </div>
@@ -273,24 +273,24 @@ const CourseDetail = () => {
       </div>
 
       {/* Stats Row */}
-      <div className="border-b border-border">
+      <div className="border-b border-bdr">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-bdr">
             <div className="py-5 text-center">
-              <p className="text-2xl font-black text-content">{course.enrollmentCount || 0}</p>
-              <p className="text-sm text-content-muted">Students</p>
+              <p className="text-2xl font-black text-txt">{course.enrollmentCount || 0}</p>
+              <p className="text-sm text-txt-muted">Students</p>
             </div>
             <div className="py-5 text-center">
-              <p className="text-2xl font-black text-content">{sessions.length}</p>
-              <p className="text-sm text-content-muted">Sessions</p>
+              <p className="text-2xl font-black text-txt">{sessions.length}</p>
+              <p className="text-sm text-txt-muted">Sessions</p>
             </div>
             <div className="py-5 text-center">
               <p className="text-2xl font-black text-yellow-400">{course.level || 'Beginner'}</p>
-              <p className="text-sm text-content-muted">Level</p>
+              <p className="text-sm text-txt-muted">Level</p>
             </div>
             <div className="py-5 text-center">
-              <p className="text-2xl font-black text-content">{course.language || 'English'}</p>
-              <p className="text-sm text-content-muted">Language</p>
+              <p className="text-2xl font-black text-txt">{course.language || 'English'}</p>
+              <p className="text-sm text-txt-muted">Language</p>
             </div>
           </div>
         </div>
@@ -304,7 +304,7 @@ const CourseDetail = () => {
           </div>
         )}
 
-        <div className="flex gap-1 mb-8 border-b border-border">
+        <div className="flex gap-1 mb-8 border-b border-bdr">
           {TABS.map((tab) => (
             <button
               key={tab}
@@ -312,7 +312,7 @@ const CourseDetail = () => {
               className={`px-5 py-3 text-sm font-semibold transition-colors relative ${
                 activeTab === tab
                   ? 'text-yellow-400'
-                  : 'text-content-muted hover:text-content-secondary'
+                  : 'text-txt-muted hover:text-txt-secondary'
               }`}
             >
               {tab}
@@ -327,20 +327,20 @@ const CourseDetail = () => {
         {activeTab === 'Overview' && (
           <div className="animate-fadeIn">
             <div className="card p-8 mb-6">
-              <h2 className="text-2xl font-black text-content mb-4">About this course</h2>
-              <p className="text-content-secondary leading-relaxed whitespace-pre-line">
+              <h2 className="text-2xl font-black text-txt mb-4">About this course</h2>
+              <p className="text-txt-secondary leading-relaxed whitespace-pre-line">
                 {course.description}
               </p>
             </div>
 
             {course.learningPoints && course.learningPoints.length > 0 && (
               <div className="card p-8">
-                <h2 className="text-2xl font-black text-content mb-6">What you'll learn</h2>
+                <h2 className="text-2xl font-black text-txt mb-6">What you'll learn</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {course.learningPoints.map((point, i) => (
                     <div key={i} className="flex items-start gap-3">
                       <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-content-secondary">{point}</span>
+                      <span className="text-txt-secondary">{point}</span>
                     </div>
                   ))}
                 </div>
@@ -354,11 +354,11 @@ const CourseDetail = () => {
           <div className="animate-fadeIn">
             <div className="card overflow-hidden">
               {sessions.length === 0 ? (
-                <div className="p-8 text-center text-content-muted">
+                <div className="p-8 text-center text-txt-muted">
                   No sessions available yet.
                 </div>
               ) : (
-                <div className="divide-y divide-border">
+                <div className="divide-y divide-bdr">
                   {sessions
                     .sort((a, b) => (a.order || 0) - (b.order || 0))
                     .map((session, index) => {
@@ -376,7 +376,7 @@ const CourseDetail = () => {
                             className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold border-2 ${
                               isCompleted
                                 ? 'bg-green-400/10 text-green-400 border-green-400/30'
-                                : 'bg-surface text-content-muted border-border'
+                                : 'bg-surface text-txt-muted border-bdr'
                             }`}
                           >
                             {isCompleted ? (
@@ -388,22 +388,22 @@ const CourseDetail = () => {
 
                           {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-content truncate">
+                            <h4 className="font-semibold text-txt truncate">
                               {session.title}
                             </h4>
                             <div className="flex items-center gap-3 mt-1">
                               {session.duration && (
-                                <span className="text-xs text-content-muted flex items-center gap-1">
+                                <span className="text-xs text-txt-muted flex items-center gap-1">
                                   <Clock className="w-3 h-3" /> {session.duration}
                                 </span>
                               )}
                               {session.videoUrl && (
-                                <span className="text-xs text-content-muted flex items-center gap-1">
+                                <span className="text-xs text-txt-muted flex items-center gap-1">
                                   <Play className="w-3 h-3" /> Video
                                 </span>
                               )}
                               {session.pdfUrl && (
-                                <span className="text-xs text-content-muted flex items-center gap-1">
+                                <span className="text-xs text-txt-muted flex items-center gap-1">
                                   <FileText className="w-3 h-3" /> PDF
                                 </span>
                               )}
@@ -412,7 +412,7 @@ const CourseDetail = () => {
 
                           {/* Lock or Play */}
                           {isLocked ? (
-                            <Lock className="w-5 h-5 text-content-muted flex-shrink-0" />
+                            <Lock className="w-5 h-5 text-txt-muted flex-shrink-0" />
                           ) : (
                             <Link
                               to={`/courses/${id}/sessions/${session._id}`}
@@ -436,11 +436,11 @@ const CourseDetail = () => {
           <div className="animate-fadeIn">
             {reviews.length === 0 ? (
               <div className="card p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-surface rounded-2xl border-2 border-border flex items-center justify-center">
-                  <MessageSquare className="w-8 h-8 text-content-muted" />
+                <div className="w-16 h-16 mx-auto mb-4 bg-surface rounded-2xl border-2 border-bdr flex items-center justify-center">
+                  <MessageSquare className="w-8 h-8 text-txt-muted" />
                 </div>
-                <h3 className="text-lg font-bold text-content mb-2">No reviews yet</h3>
-                <p className="text-content-muted">Be the first to share your experience with this course.</p>
+                <h3 className="text-lg font-bold text-txt mb-2">No reviews yet</h3>
+                <p className="text-txt-muted">Be the first to share your experience with this course.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -452,7 +452,7 @@ const CourseDetail = () => {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-semibold text-content">
+                          <h4 className="font-semibold text-txt">
                             {review.user?.firstName
                               ? `${review.user.firstName} ${review.user.lastName || ''}`
                               : 'Anonymous'}
@@ -464,14 +464,14 @@ const CourseDetail = () => {
                                 <Star
                                   key={j}
                                   className={`w-4 h-4 ${
-                                    j < review.rating ? 'text-yellow-400 fill-current' : 'text-content-muted'
+                                    j < review.rating ? 'text-yellow-400 fill-current' : 'text-txt-muted'
                                   }`}
                                 />
                               ))}
                             </div>
                           )}
                         </div>
-                        <p className="text-content-secondary text-sm">{review.comment || review.text}</p>
+                        <p className="text-txt-secondary text-sm">{review.comment || review.text}</p>
                       </div>
                     </div>
                   </div>

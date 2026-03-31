@@ -75,7 +75,7 @@ const Checkout = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
-        <div className="w-8 h-8 border-[3px] border-border border-t-yellow-400 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-[3px] border-bdr border-t-yellow-400 rounded-full animate-spin" />
       </div>
     );
   }
@@ -87,9 +87,9 @@ const Checkout = () => {
           <div className="w-20 h-20 bg-green-400/10 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-green-400/30">
             <CheckCircle className="w-10 h-10 text-green-400" />
           </div>
-          <h2 className="text-2xl font-black text-content mb-2">Payment Successful!</h2>
-          <p className="text-content-muted">You're now enrolled in <span className="text-yellow-400">{course?.title}</span></p>
-          <p className="text-content-muted text-sm mt-2">Redirecting...</p>
+          <h2 className="text-2xl font-black text-txt mb-2">Payment Successful!</h2>
+          <p className="text-txt-muted">You're now enrolled in <span className="text-yellow-400">{course?.title}</span></p>
+          <p className="text-txt-muted text-sm mt-2">Redirecting...</p>
         </div>
       </div>
     );
@@ -98,20 +98,20 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-surface py-12 px-4">
       <div className="max-w-lg mx-auto">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-content-secondary hover:text-yellow-400 mb-6 transition-colors">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-txt-secondary hover:text-yellow-400 mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
 
         {/* Order Summary */}
         <div className="checkout-card card p-6 mb-6">
-          <h2 className="text-lg font-bold text-content mb-4">Order Summary</h2>
-          <div className="flex items-center gap-4 p-4 bg-surface rounded-xl border border-border">
+          <h2 className="text-lg font-bold text-txt mb-4">Order Summary</h2>
+          <div className="flex items-center gap-4 p-4 bg-surface rounded-xl border border-bdr">
             <div className="w-14 h-14 rounded-xl bg-yellow-400/10 flex items-center justify-center flex-shrink-0">
               <CreditCard className="w-6 h-6 text-yellow-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-content truncate">{course?.title}</h3>
-              <p className="text-sm text-content-muted">{course?.totalSessions || course?.sessions?.length || 0} sessions</p>
+              <h3 className="font-bold text-txt truncate">{course?.title}</h3>
+              <p className="text-sm text-txt-muted">{course?.totalSessions || course?.sessions?.length || 0} sessions</p>
             </div>
             <span className="text-xl font-black text-yellow-400">${course?.price}</span>
           </div>
@@ -121,7 +121,7 @@ const Checkout = () => {
         <div className="checkout-card card p-6">
           <div className="flex items-center gap-2 mb-6">
             <Lock className="w-5 h-5 text-yellow-400" />
-            <h2 className="text-lg font-bold text-content">Payment Details</h2>
+            <h2 className="text-lg font-bold text-txt">Payment Details</h2>
             <span className="ml-auto badge badge-green flex items-center gap-1">
               <Shield className="w-3 h-3" /> Secure
             </span>
@@ -135,7 +135,7 @@ const Checkout = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-content-secondary mb-2">Cardholder Name</label>
+              <label className="block text-sm font-semibold text-txt-secondary mb-2">Cardholder Name</label>
               <input
                 type="text"
                 value={card.cardName}
@@ -147,7 +147,7 @@ const Checkout = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-content-secondary mb-2">Card Number</label>
+              <label className="block text-sm font-semibold text-txt-secondary mb-2">Card Number</label>
               <input
                 type="text"
                 value={card.cardNumber}
@@ -161,7 +161,7 @@ const Checkout = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-content-secondary mb-2">Expiry</label>
+                <label className="block text-sm font-semibold text-txt-secondary mb-2">Expiry</label>
                 <input
                   type="text"
                   value={card.expiryDate}
@@ -173,7 +173,7 @@ const Checkout = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-content-secondary mb-2">CVV</label>
+                <label className="block text-sm font-semibold text-txt-secondary mb-2">CVV</label>
                 <input
                   type="text"
                   value={card.cvv}
@@ -199,7 +199,7 @@ const Checkout = () => {
               </button>
             </div>
 
-            <p className="text-xs text-content-muted text-center">
+            <p className="text-xs text-txt-muted text-center">
               This is a demo checkout. No real payment will be processed.
             </p>
           </form>

@@ -51,8 +51,8 @@ const AdminDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-black text-content">Admin Dashboard</h1>
-          <p className="mt-1 text-content-muted">Platform overview and management</p>
+          <h1 className="text-3xl font-black text-txt">Admin Dashboard</h1>
+          <p className="mt-1 text-txt-muted">Platform overview and management</p>
         </div>
 
         {/* Error */}
@@ -72,7 +72,7 @@ const AdminDashboard = () => {
             return (
               <div
                 key={card.key}
-                className="bg-surface-card border-2 border-border rounded-2xl p-6 hover:border-yellow-400/30 transition-all"
+                className="bg-surface-card border-2 border-bdr rounded-2xl p-6 hover:border-yellow-400/30 transition-all"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className={`w-12 h-12 rounded-xl ${colors.bg} border ${colors.border} flex items-center justify-center`}>
@@ -92,51 +92,51 @@ const AdminDashboard = () => {
                     </span>
                   )}
                 </div>
-                <p className="text-3xl font-black text-content">{value.toLocaleString()}</p>
-                <p className="text-sm text-content-muted mt-1">{card.label}</p>
+                <p className="text-3xl font-black text-txt">{value.toLocaleString()}</p>
+                <p className="text-sm text-txt-muted mt-1">{card.label}</p>
               </div>
             );
           })}
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-surface-card border-2 border-border rounded-2xl p-6">
-          <h2 className="text-lg font-bold text-content mb-5">Quick Actions</h2>
+        <div className="bg-surface-card border-2 border-bdr rounded-2xl p-6">
+          <h2 className="text-lg font-bold text-txt mb-5">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <button
               onClick={() => navigate('/admin/users')}
-              className="flex items-center gap-3 p-4 rounded-xl border-2 border-border hover:border-yellow-400/30 hover:bg-yellow-400/5 transition-all text-left group"
+              className="flex items-center gap-3 p-4 rounded-xl border-2 border-bdr hover:border-yellow-400/30 hover:bg-yellow-400/5 transition-all text-left group"
             >
               <div className="w-10 h-10 rounded-xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center">
                 <UserCog className="w-5 h-5 text-yellow-400" />
               </div>
               <div>
-                <p className="font-bold text-content group-hover:text-yellow-400 transition-colors">Manage Users</p>
-                <p className="text-xs text-content-muted">View, edit & manage user accounts</p>
+                <p className="font-bold text-txt group-hover:text-yellow-400 transition-colors">Manage Users</p>
+                <p className="text-xs text-txt-muted">View, edit & manage user accounts</p>
               </div>
             </button>
             <button
               onClick={() => navigate('/admin/moderation')}
-              className="flex items-center gap-3 p-4 rounded-xl border-2 border-border hover:border-yellow-400/30 hover:bg-yellow-400/5 transition-all text-left group"
+              className="flex items-center gap-3 p-4 rounded-xl border-2 border-bdr hover:border-yellow-400/30 hover:bg-yellow-400/5 transition-all text-left group"
             >
               <div className="w-10 h-10 rounded-xl bg-purple-400/10 border border-purple-400/20 flex items-center justify-center">
                 <Shield className="w-5 h-5 text-purple-400" />
               </div>
               <div>
-                <p className="font-bold text-content group-hover:text-yellow-400 transition-colors">Moderate Content</p>
-                <p className="text-xs text-content-muted">Review courses & community posts</p>
+                <p className="font-bold text-txt group-hover:text-yellow-400 transition-colors">Moderate Content</p>
+                <p className="text-xs text-txt-muted">Review courses & community posts</p>
               </div>
             </button>
             <button
               onClick={() => navigate('/courses')}
-              className="flex items-center gap-3 p-4 rounded-xl border-2 border-border hover:border-yellow-400/30 hover:bg-yellow-400/5 transition-all text-left group"
+              className="flex items-center gap-3 p-4 rounded-xl border-2 border-bdr hover:border-yellow-400/30 hover:bg-yellow-400/5 transition-all text-left group"
             >
               <div className="w-10 h-10 rounded-xl bg-green-400/10 border border-green-400/20 flex items-center justify-center">
                 <Library className="w-5 h-5 text-green-400" />
               </div>
               <div>
-                <p className="font-bold text-content group-hover:text-yellow-400 transition-colors">View Courses</p>
-                <p className="text-xs text-content-muted">Browse all platform courses</p>
+                <p className="font-bold text-txt group-hover:text-yellow-400 transition-colors">View Courses</p>
+                <p className="text-xs text-txt-muted">Browse all platform courses</p>
               </div>
             </button>
           </div>
