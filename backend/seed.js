@@ -389,6 +389,46 @@ const seed = async () => {
       { senderId: sarah._id, roomId: 'general', content: 'Great idea Emma! Study groups are the best way to learn. I can drop by to answer questions sometimes.' },
     ]);
 
+    // ====== COURSE CHANNEL MESSAGES ======
+    // React & Node.js Bootcamp channel (course 0 - enrolled: emma, alex, lisa | instructor: sarah)
+    const reactChannelId = `course_${courses[0]._id}`;
+    const reactChannelMsgs = await ChatMessage.insertMany([
+      { senderId: sarah._id, roomId: reactChannelId, content: 'Welcome to the React & Node.js Bootcamp channel! Feel free to ask questions about any session here.' },
+      { senderId: emma._id, roomId: reactChannelId, content: 'Thanks Sarah! Quick question - in session 2, should we use useReducer instead of useState for complex state?' },
+      { senderId: sarah._id, roomId: reactChannelId, content: 'Great question Emma! useReducer is better when you have multiple related state values or complex state transitions. I\'ll cover this in an upcoming session.' },
+      { senderId: alex._id, roomId: reactChannelId, content: 'I just finished the Express API session. The middleware concept finally clicked!' },
+      { senderId: lisa._id, roomId: reactChannelId, content: 'Congrats Alex! I found the MongoDB session really helpful too. Mongoose makes everything so much easier.' },
+      { senderId: sarah._id, roomId: reactChannelId, content: 'So glad to hear the sessions are helping! Remember, practice is key. Try building a small project after each session.' },
+    ]);
+
+    // Python Data Science channel (course 1 - enrolled: emma, alex | instructor: mike)
+    const pythonChannelId = `course_${courses[1]._id}`;
+    const pythonChannelMsgs = await ChatMessage.insertMany([
+      { senderId: mike._id, roomId: pythonChannelId, content: 'Welcome to the Python Data Science channel! Drop your questions here anytime.' },
+      { senderId: emma._id, roomId: pythonChannelId, content: 'Hi Mike! I\'m struggling with Pandas DataFrames. Any tips for getting started?' },
+      { senderId: mike._id, roomId: pythonChannelId, content: 'Start by loading CSV files with pd.read_csv() and explore with .head(), .describe(), and .info(). Session 2 covers this in detail!' },
+      { senderId: alex._id, roomId: pythonChannelId, content: 'The NumPy session was eye-opening. Array broadcasting is so powerful!' },
+    ]);
+
+    // Advanced JavaScript channel (course 3 - enrolled: emma, alex | instructor: mike)
+    const jsChannelId = `course_${courses[3]._id}`;
+    const jsChannelMsgs = await ChatMessage.insertMany([
+      { senderId: mike._id, roomId: jsChannelId, content: 'Welcome to Advanced JavaScript! This course is all about understanding JS deeply.' },
+      { senderId: emma._id, roomId: jsChannelId, content: 'The closures session blew my mind. I finally understand how they work!' },
+      { senderId: alex._id, roomId: jsChannelId, content: 'Same here! The event loop explanation was the best I\'ve seen.' },
+      { senderId: mike._id, roomId: jsChannelId, content: 'Awesome! Next up is design patterns. You\'ll love the Observer pattern - it\'s everywhere in modern JS.' },
+    ]);
+
+    // UI/UX Design channel (course 2 - enrolled: lisa | instructor: sarah)
+    const designChannelId = `course_${courses[2]._id}`;
+    const designChannelMsgs = await ChatMessage.insertMany([
+      { senderId: sarah._id, roomId: designChannelId, content: 'Welcome to UI/UX Design! Share your Figma projects here for feedback.' },
+      { senderId: lisa._id, roomId: designChannelId, content: 'Hi Sarah! I just finished my first wireframe. Can I share it for feedback?' },
+      { senderId: sarah._id, roomId: designChannelId, content: 'Absolutely Lisa! I\'d love to see it. Feel free to share a Figma link anytime.' },
+    ]);
+
+    const totalCourseChannelMsgs = reactChannelMsgs.length + pythonChannelMsgs.length + jsChannelMsgs.length + designChannelMsgs.length;
+
     // ====== DM CHAT MESSAGES ======
     // DM between Emma and Sarah
     const emmaSarahRoom = [emma._id.toString(), sarah._id.toString()].sort().join('_dm_');
@@ -419,6 +459,7 @@ const seed = async () => {
 
     const totalDMs = dmMessages1.length + dmMessages2.length + dmMessages3.length;
     console.log(`✓ Created ${chatMessages.length} general chat messages`);
+    console.log(`✓ Created ${totalCourseChannelMsgs} course channel messages`);
     console.log(`✓ Created ${totalDMs} DM chat messages`);
 
     // ====== NOTIFICATIONS ======
@@ -592,7 +633,7 @@ const seed = async () => {
     console.log(`  Enrollments:   ${enrollments.length}`);
     console.log(`  Tests:         ${tests.length}`);
     console.log(`  Posts:         ${posts.length}`);
-    console.log(`  Messages:      ${chatMessages.length + totalDMs} (${chatMessages.length} general + ${totalDMs} DMs)`);
+    console.log(`  Messages:      ${chatMessages.length + totalCourseChannelMsgs + totalDMs} (${chatMessages.length} general + ${totalCourseChannelMsgs} course channels + ${totalDMs} DMs)`);
     console.log(`  Notifications: ${notifications.length}`);
     console.log('========================================');
     console.log('\n  LOGIN CREDENTIALS (all users):');

@@ -23,13 +23,13 @@ export const setupSocketHandlers = (io) => {
       socket.emit('users:online', Array.from(activeUsers.keys()));
     });
 
-    // Chat: join room (for group chat)
+    // Chat: join room (for group chat and course channels)
     socket.on('chat:join-room', ({ roomId, userId }) => {
       socket.join(roomId);
       socket.to(roomId).emit('chat:user-online', { userId, roomId });
     });
 
-    // Chat: send message to room
+    // Chat: send message to room (works for general, course channels, etc.)
     socket.on('chat:send-message', async ({ roomId, content, userId }) => {
       try {
         const message = await ChatMessage.create({ senderId: userId, roomId, content });

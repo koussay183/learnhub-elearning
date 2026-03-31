@@ -1,11 +1,26 @@
 import mongoose from 'mongoose';
 import ChatMessage from '../models/ChatMessage.js';
+import Enrollment from '../models/Enrollment.js';
+import Course from '../models/Course.js';
 import User from '../models/User.js';
 
 export const getMessages = async (req, res) => {
   try {
     const { roomId } = req.params;
     const { before, limit = 50 } = req.query;
+
+    // For course channels, verify user is enrolled or is the instructor
+    if (roomId.startsWith('course_')) {
+      const courseId = roomId.replace('course_', '');
+      const course = await Course.findById(courseId);
+      if (course) {
+        const isInstructor = course.instructor.toString() === req.userId;
+        const isEnrolled = await Enrollment.findOne({ userId: req.userId, courseId });
+        if (!isInstructor && !isEnrolled) {
+          return res.status(403).json({ error: 'You must be enrolled to view this channel' });
+        }
+      }
+    }
 
     const query = { roomId, isDeleted: { $ne: true } };
     if (before) query.createdAt = { $lt: new Date(before) };
@@ -38,7 +53,41 @@ export const getRooms = async (req, res) => {
     // Always include general room
     if (!allRooms.includes('general')) allRooms.unshift('general');
 
-    // Build room info
+    // Get course channels from enrollments
+    const enrollments = await Enrollment.find({ userId: req.userId }).populate('courseId', 'title thumbnail instructor');
+    const courseChannels = [];
+    for (const enrollment of enrollments) {
+      if (enrollment.courseId) {
+        const channelId = `course_${enrollment.courseId._id}`;
+        courseChannels.push({
+          roomId: channelId,
+          courseId: enrollment.courseId._id,
+          courseTitle: enrollment.courseId.title,
+          courseThumbnail: enrollment.courseId.thumbnail,
+        });
+        // Remove from allRooms if it's there (we handle it separately)
+        const idx = allRooms.indexOf(channelId);
+        if (idx !== -1) allRooms.splice(idx, 1);
+      }
+    }
+
+    // Also add course channels for courses the user instructs
+    const instructedCourses = await Course.find({ instructor: req.userId, status: 'published' }).select('title thumbnail');
+    for (const course of instructedCourses) {
+      const channelId = `course_${course._id}`;
+      if (!courseChannels.find(c => c.roomId === channelId)) {
+        courseChannels.push({
+          roomId: channelId,
+          courseId: course._id,
+          courseTitle: course.title,
+          courseThumbnail: course.thumbnail,
+        });
+        const idx = allRooms.indexOf(channelId);
+        if (idx !== -1) allRooms.splice(idx, 1);
+      }
+    }
+
+    // Build room info for general + DM rooms
     const rooms = await Promise.all(allRooms.map(async (roomId) => {
       const lastMessage = await ChatMessage.findOne({ roomId })
         .populate('senderId', 'firstName lastName')
@@ -83,7 +132,39 @@ export const getRooms = async (req, res) => {
       };
     }));
 
-    res.json(rooms);
+    // Build course channel info
+    const courseRooms = await Promise.all(courseChannels.map(async (ch) => {
+      const lastMessage = await ChatMessage.findOne({ roomId: ch.roomId })
+        .populate('senderId', 'firstName lastName')
+        .sort({ createdAt: -1 });
+
+      const unread = await ChatMessage.countDocuments({
+        roomId: ch.roomId,
+        senderId: { $ne: userId },
+        readBy: { $ne: userId },
+        createdAt: { $gt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+      });
+
+      // Count members (enrollments + instructor)
+      const memberCount = await Enrollment.countDocuments({ courseId: ch.courseId });
+
+      return {
+        roomId: ch.roomId,
+        roomName: ch.courseTitle,
+        roomAvatar: ch.courseThumbnail,
+        isCourseChannel: true,
+        courseId: ch.courseId,
+        memberCount,
+        lastMessage: lastMessage ? {
+          content: lastMessage.content,
+          sender: lastMessage.senderId ? `${lastMessage.senderId.firstName}` : 'Unknown',
+          time: lastMessage.createdAt,
+        } : null,
+        unread,
+      };
+    }));
+
+    res.json({ rooms, courseChannels: courseRooms });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

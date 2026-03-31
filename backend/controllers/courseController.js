@@ -1,6 +1,7 @@
 import Course from '../models/Course.js';
 import Session from '../models/Session.js';
 import Enrollment from '../models/Enrollment.js';
+import ChatMessage from '../models/ChatMessage.js';
 import User from '../models/User.js';
 
 export const getCourses = async (req, res) => {
@@ -154,6 +155,15 @@ export const enrollCourse = async (req, res) => {
     await enrollment.save();
     await Course.findByIdAndUpdate(courseId, { $inc: { totalEnrollments: 1 } });
 
+    // Add a join message to the course chat channel
+    const enrolledUser = await User.findById(req.userId).select('firstName lastName');
+    const channelRoomId = `course_${courseId}`;
+    await ChatMessage.create({
+      senderId: req.userId,
+      roomId: channelRoomId,
+      content: `${enrolledUser.firstName} ${enrolledUser.lastName} joined the course channel!`,
+    });
+
     res.status(201).json({ message: 'Enrolled successfully', enrollment });
   } catch (error) {
     console.error('Enroll course error:', error);
@@ -205,6 +215,15 @@ export const processCheckout = async (req, res) => {
 
     course.totalEnrollments += 1;
     await course.save();
+
+    // Add a join message to the course chat channel
+    const paidUser = await User.findById(req.userId).select('firstName lastName');
+    const channelRoomId = `course_${courseId}`;
+    await ChatMessage.create({
+      senderId: req.userId,
+      roomId: channelRoomId,
+      content: `${paidUser.firstName} ${paidUser.lastName} joined the course channel!`,
+    });
 
     res.status(201).json({
       message: 'Payment successful! You are now enrolled.',

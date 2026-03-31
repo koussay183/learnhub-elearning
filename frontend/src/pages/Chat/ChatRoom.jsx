@@ -5,13 +5,14 @@ import api from '../../utils/api';
 import ChatBubble from '../../components/chat/ChatBubble';
 import MessageInput from '../../components/chat/MessageInput';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
-import { MessageCircle, Send, Users, Hash, Search, Plus, X, User, ChevronDown } from 'lucide-react';
+import { MessageCircle, Send, Users, Hash, Search, Plus, X, User, ChevronDown, BookOpen } from 'lucide-react';
 
 const ChatRoom = () => {
   const { user } = useAuth();
   const socket = useSocket();
 
   const [rooms, setRooms] = useState([]);
+  const [courseChannels, setCourseChannels] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [activeRoom, setActiveRoom] = useState('general');
   const [activeRoomLabel, setActiveRoomLabel] = useState('General');
@@ -39,6 +40,9 @@ const ChatRoom = () => {
   // Check if a room ID is a DM
   const isDmRoom = (roomId) => roomId.includes('_dm_');
 
+  // Check if a room ID is a course channel
+  const isCourseChannel = (roomId) => roomId.startsWith('course_');
+
   // Get the other user's info from a DM room
   const getDmPartner = (roomId) => {
     if (!isDmRoom(roomId) || !user) return null;
@@ -47,12 +51,22 @@ const ChatRoom = () => {
     return allUsers.find((u) => u._id === partnerId);
   };
 
+  // Get course channel info
+  const getCourseInfo = (roomId) => {
+    return courseChannels.find((c) => c.roomId === roomId);
+  };
+
   // Format room display name
   const formatRoomName = (roomId) => {
     if (isDmRoom(roomId)) {
       const partner = getDmPartner(roomId);
       if (partner) return `${partner.firstName} ${partner.lastName}`;
       return 'Direct Message';
+    }
+    if (isCourseChannel(roomId)) {
+      const info = getCourseInfo(roomId);
+      if (info) return info.roomName;
+      return 'Course Channel';
     }
     if (roomId === 'general') return 'General';
     return roomId.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -63,15 +77,29 @@ const ChatRoom = () => {
     const fetchRooms = async () => {
       try {
         const { data } = await api.get('/api/chat/rooms');
-        const roomList = data.rooms || [];
-        if (!roomList.includes('general')) {
-          roomList.unshift('general');
+        // New format: { rooms: [...], courseChannels: [...] }
+        const roomList = Array.isArray(data) ? data : (data.rooms || []);
+        const channels = data.courseChannels || [];
+
+        // Separate group rooms and DM rooms
+        const groupRooms = [];
+        const dmList = [];
+        roomList.forEach((r) => {
+          const id = typeof r === 'string' ? r : r.roomId;
+          if (isDmRoom(id)) {
+            dmList.push(id);
+          } else {
+            groupRooms.push(id);
+          }
+        });
+
+        if (!groupRooms.includes('general')) {
+          groupRooms.unshift('general');
         }
-        // Separate DM rooms from group rooms
-        const groupRooms = roomList.filter((r) => !isDmRoom(r));
-        const dmList = roomList.filter((r) => isDmRoom(r));
+
         setRooms(groupRooms);
         setDmRooms(dmList);
+        setCourseChannels(channels);
       } catch (err) {
         console.error('Failed to fetch rooms:', err);
         setRooms(['general']);
@@ -99,7 +127,7 @@ const ChatRoom = () => {
     setLoading(true);
     try {
       const { data } = await api.get(`/api/chat/${activeRoom}/messages`);
-      setMessages(data.messages || []);
+      setMessages(data.messages || data || []);
     } catch (err) {
       console.error('Failed to fetch messages:', err);
       setMessages([]);
@@ -278,6 +306,32 @@ const ChatRoom = () => {
                 </button>
               ))}
 
+              {/* Course Channels */}
+              {courseChannels.length > 0 && (
+                <>
+                  <p className="text-[10px] font-bold text-content-muted uppercase tracking-widest px-3 mb-2 mt-4">
+                    Course Channels
+                  </p>
+                  {courseChannels.map((ch) => (
+                    <button
+                      key={ch.roomId}
+                      onClick={() => switchRoom(ch.roomId)}
+                      className={`w-full text-left px-3 py-2.5 rounded-xl mb-1 text-sm font-medium transition-all flex items-center gap-3 ${
+                        activeRoom === ch.roomId
+                          ? 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20'
+                          : 'text-content-secondary hover:bg-surface-input hover:text-content-secondary border border-transparent'
+                      }`}
+                    >
+                      <BookOpen className="w-4 h-4 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <span className="truncate block">{ch.roomName}</span>
+                        <span className="text-[10px] text-content-muted">{ch.memberCount || 0} members</span>
+                      </div>
+                    </button>
+                  ))}
+                </>
+              )}
+
               {/* DM Rooms */}
               {dmRooms.length > 0 && (
                 <>
@@ -398,6 +452,16 @@ const ChatRoom = () => {
                 <p className="text-[10px] text-content-muted">Direct Message</p>
               </div>
             </>
+          ) : isCourseChannel(activeRoom) ? (
+            <>
+              <BookOpen className="w-5 h-5 text-yellow-400" />
+              <div>
+                <h3 className="text-base font-semibold text-content">{activeRoomLabel}</h3>
+                <p className="text-[10px] text-content-muted">
+                  Course Channel {getCourseInfo(activeRoom)?.memberCount ? `· ${getCourseInfo(activeRoom).memberCount} members` : ''}
+                </p>
+              </div>
+            </>
           ) : (
             <>
               <Hash className="w-5 h-5 text-yellow-400" />
@@ -418,9 +482,19 @@ const ChatRoom = () => {
           ) : messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <MessageCircle className="w-10 h-10 text-gray-800 mx-auto mb-3" />
-                <p className="text-content-muted text-sm mb-1">No messages yet</p>
-                <p className="text-content-muted text-xs">Be the first to say something!</p>
+                {isCourseChannel(activeRoom) ? (
+                  <>
+                    <BookOpen className="w-10 h-10 text-gray-800 mx-auto mb-3" />
+                    <p className="text-content-muted text-sm mb-1">No messages in this course channel yet</p>
+                    <p className="text-content-muted text-xs">Start a discussion with your fellow learners!</p>
+                  </>
+                ) : (
+                  <>
+                    <MessageCircle className="w-10 h-10 text-gray-800 mx-auto mb-3" />
+                    <p className="text-content-muted text-sm mb-1">No messages yet</p>
+                    <p className="text-content-muted text-xs">Be the first to say something!</p>
+                  </>
+                )}
               </div>
             </div>
           ) : (
