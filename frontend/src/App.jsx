@@ -39,6 +39,9 @@ import ContentModeration from './pages/Admin/ContentModeration.jsx';
 // Settings
 import Profile from './pages/Settings/Profile.jsx';
 
+// Landing
+import LandingPage from './pages/LandingPage.jsx';
+
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
 
@@ -123,9 +126,9 @@ function App() {
           {/* Settings */}
           <Route path="/settings" element={<AppLayout activePage="settings"><Profile /></AppLayout>} />
 
-          {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          {/* Landing / Default */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>
     </SocketProvider>
