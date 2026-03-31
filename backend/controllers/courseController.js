@@ -1,0 +1,205 @@
+import Course from '../models/Course.js';
+import Session from '../models/Session.js';
+import Enrollment from '../models/Enrollment.js';
+import User from '../models/User.js';
+
+export const getCourses = async (req, res) => {
+  try {
+    const { category, level, search, page = 1, limit = 12 } = req.query;
+    let filter = { status: 'published' };
+
+    if (category) filter.category = category;
+    if (level) filter.level = level;
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+    const courses = await Course.find(filter)
+      .populate('instructor', 'firstName lastName avatar')
+      .limit(limit)
+      .skip(skip)
+      .sort({ createdAt: -1 });
+
+    const total = await Course.countDocuments(filter);
+
+    res.json({ courses, total, page, pages: Math.ceil(total / limit) });
+  } catch (error) {
+    console.error('Get courses error:', error);
+    res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+};
+
+export const getCourseDetail = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id)
+      .populate('instructor', 'firstName lastName avatar bio')
+      .lean();
+
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    const sessions = await Session.find({ courseId: req.params.id }).sort({ order: 1 });
+    let userEnrollment = null;
+
+    if (req.userId) {
+      userEnrollment = await Enrollment.findOne({ userId: req.userId, courseId: req.params.id });
+    }
+
+    res.json({ course, sessions, enrollment: userEnrollment });
+  } catch (error) {
+    console.error('Get course detail error:', error);
+    res.status(500).json({ error: 'Failed to fetch course' });
+  }
+};
+
+export const createCourse = async (req, res) => {
+  try {
+    const { title, description, category, level, price, thumbnail } = req.body;
+
+    if (!title || !description || !category) {
+      return res.status(400).json({ error: 'Required fields missing' });
+    }
+
+    const course = new Course({
+      title,
+      description,
+      category,
+      level,
+      price,
+      thumbnail,
+      instructor: req.userId,
+      status: 'draft',
+    });
+
+    await course.save();
+    res.status(201).json({ message: 'Course created', course });
+  } catch (error) {
+    console.error('Create course error:', error);
+    res.status(500).json({ error: 'Failed to create course' });
+  }
+};
+
+export const updateCourse = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    if (course.instructor.toString() !== req.userId) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    Object.assign(course, req.body);
+    await course.save();
+    res.json({ message: 'Course updated', course });
+  } catch (error) {
+    console.error('Update course error:', error);
+    res.status(500).json({ error: 'Failed to update course' });
+  }
+};
+
+export const deleteCourse = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    if (course.instructor.toString() !== req.userId) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    await Course.findByIdAndDelete(req.params.id);
+    await Session.deleteMany({ courseId: req.params.id });
+    await Enrollment.deleteMany({ courseId: req.params.id });
+
+    res.json({ message: 'Course deleted' });
+  } catch (error) {
+    console.error('Delete course error:', error);
+    res.status(500).json({ error: 'Failed to delete course' });
+  }
+};
+
+export const enrollCourse = async (req, res) => {
+  try {
+    const { courseId } = req.body;
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    const existingEnrollment = await Enrollment.findOne({ userId: req.userId, courseId });
+    if (existingEnrollment) {
+      return res.status(400).json({ error: 'Already enrolled' });
+    }
+
+    const enrollment = new Enrollment({
+      userId: req.userId,
+      courseId,
+      enrollmentDate: new Date(),
+    });
+
+    await enrollment.save();
+    await Course.findByIdAndUpdate(courseId, { $inc: { totalEnrollments: 1 } });
+
+    res.status(201).json({ message: 'Enrolled successfully', enrollment });
+  } catch (error) {
+    console.error('Enroll course error:', error);
+    res.status(500).json({ error: 'Failed to enroll' });
+  }
+};
+
+export const getEnrolledCourses = async (req, res) => {
+  try {
+    const enrollments = await Enrollment.find({ userId: req.userId })
+      .populate('courseId')
+      .sort({ enrollmentDate: -1 });
+
+    const courses = enrollments.map(e => ({
+      ...e.courseId.toObject(),
+      progress: e.progress,
+      status: e.status,
+      enrollmentId: e._id,
+    }));
+
+    res.json(courses);
+  } catch (error) {
+    console.error('Get enrolled courses error:', error);
+    res.status(500).json({ error: 'Failed to fetch enrolled courses' });
+  }
+};
+
+export const getProgress = async (req, res) => {
+  try {
+    const enrollment = await Enrollment.findOne({
+      userId: req.userId,
+      courseId: req.params.courseId,
+    })
+      .populate('courseId')
+      .populate('completedSessions');
+
+    if (!enrollment) return res.status(404).json({ error: 'Enrollment not found' });
+
+    const totalSessions = await Session.countDocuments({ courseId: req.params.courseId });
+
+    res.json({
+      enrollmentId: enrollment._id,
+      progress: enrollment.progress,
+      completedCount: enrollment.completedSessions.length,
+      totalSessions,
+      status: enrollment.status,
+    });
+  } catch (error) {
+    console.error('Get progress error:', error);
+    res.status(500).json({ error: 'Failed to fetch progress' });
+  }
+};
+
+export const getMyCourses = async (req, res) => {
+  try {
+    const courses = await Course.find({ instructor: req.userId }).sort({ createdAt: -1 });
+    res.json(courses);
+  } catch (error) {
+    console.error('Get my courses error:', error);
+    res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+};
