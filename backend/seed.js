@@ -261,10 +261,17 @@ const seed = async () => {
     console.log(`✓ Created ${enrollments.length} enrollments`);
 
     // ====== TESTS ======
+    // Schedule helpers: one upcoming (1 hour from now), one always open (no schedule), one closed (in the past)
+    const nowMs = Date.now();
+    const oneHourFromNow = new Date(nowMs + 60 * 60 * 1000);
+    const twoHoursFromNow = new Date(nowMs + 2 * 60 * 60 * 1000);
+    const twoDaysAgo = new Date(nowMs - 2 * 24 * 60 * 60 * 1000);
+    const oneDayAgo = new Date(nowMs - 1 * 24 * 60 * 60 * 1000);
+
     const tests = await Test.insertMany([
       {
         title: 'JavaScript Fundamentals Quiz',
-        description: 'Test your knowledge of core JavaScript concepts including variables, functions, and async programming.',
+        description: 'Test your knowledge of core JavaScript concepts including variables, functions, and async programming. This test is always open - no schedule.',
         courseId: courses[0]._id,
         createdBy: sarah._id,
         questions: [
@@ -280,7 +287,7 @@ const seed = async () => {
       },
       {
         title: 'Python Data Types Challenge',
-        description: 'Quiz on Python data types, list comprehensions, and basic algorithms.',
+        description: 'Quiz on Python data types, list comprehensions, and basic algorithms. This test is scheduled to open soon!',
         courseId: courses[1]._id,
         createdBy: mike._id,
         questions: [
@@ -289,20 +296,20 @@ const seed = async () => {
           { _id: new mongoose.Types.ObjectId(), type: 'multiple-choice', question: 'Which library is used for numerical computing in Python?', options: ['Pandas', 'NumPy', 'Matplotlib', 'Scikit-Learn'], correctAnswer: 'NumPy', points: 2 },
           { _id: new mongoose.Types.ObjectId(), type: 'short-answer', question: 'What function prints output to the console in Python?', correctAnswer: 'print', points: 1 },
         ],
-        settings: { duration: 8, passingScore: 50, shuffleQuestions: true, showResults: true, openToPublic: true },
+        settings: { duration: 8, passingScore: 50, shuffleQuestions: true, showResults: true, openToPublic: true, scheduledStartTime: oneHourFromNow, scheduledEndTime: twoHoursFromNow },
         totalAttempts: 1,
         status: 'published',
       },
       {
         title: 'React Hooks Assessment',
-        description: 'Test your understanding of React Hooks: useState, useEffect, useContext, and custom hooks.',
+        description: 'Test your understanding of React Hooks: useState, useEffect, useContext, and custom hooks. This test has already ended.',
         createdBy: sarah._id,
         questions: [
           { _id: new mongoose.Types.ObjectId(), type: 'multiple-choice', question: 'Which hook is used for side effects in React?', options: ['useState', 'useEffect', 'useContext', 'useReducer'], correctAnswer: 'useEffect', points: 2 },
           { _id: new mongoose.Types.ObjectId(), type: 'multiple-choice', question: 'What does useState return?', options: ['A value', 'A function', 'An array with value and setter', 'An object'], correctAnswer: 'An array with value and setter', points: 2 },
           { _id: new mongoose.Types.ObjectId(), type: 'multiple-choice', question: 'When does useEffect run by default?', options: ['Only on mount', 'On every render', 'Only on unmount', 'Never'], correctAnswer: 'On every render', points: 2 },
         ],
-        settings: { duration: 5, passingScore: 70, shuffleQuestions: false, showResults: true, openToPublic: true },
+        settings: { duration: 5, passingScore: 70, shuffleQuestions: false, showResults: true, openToPublic: true, scheduledStartTime: twoDaysAgo, scheduledEndTime: oneDayAgo },
         totalAttempts: 0,
         status: 'published',
       },

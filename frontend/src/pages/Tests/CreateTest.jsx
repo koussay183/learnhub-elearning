@@ -87,15 +87,18 @@ const CreateTest = () => {
     const payload = {
       title: title.trim(),
       description: description.trim(),
-      duration: Number(duration),
-      passingScore: Number(passingScore),
-      shuffleQuestions,
-      showResults,
-      scheduledStartTime: scheduledStartTime || undefined,
-      scheduledEndTime: scheduledEndTime || undefined,
+      status: 'published',
+      settings: {
+        duration: Number(duration),
+        passingScore: Number(passingScore),
+        shuffleQuestions,
+        showResults,
+        scheduledStartTime: scheduledStartTime || undefined,
+        scheduledEndTime: scheduledEndTime || undefined,
+      },
       questions: questions.map((q) => ({
         type: q.type,
-        text: q.text.trim(),
+        question: q.text.trim(),
         points: Number(q.points),
         options: q.type === 'multiple-choice' ? q.options : undefined,
         correctAnswer:

@@ -138,17 +138,7 @@ const CourseDetail = () => {
     <div className="min-h-screen bg-surface">
       {/* Hero Section */}
       <div ref={heroRef} className="relative bg-surface-card border-b border-border">
-        {course.thumbnail && (
-          <div className="absolute inset-0">
-            <img
-              src={course.thumbnail}
-              alt={course.title}
-              className="w-full h-full object-cover opacity-10"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--surface-card)] to-transparent" />
-          </div>
-        )}
-        <div className="relative max-w-7xl mx-auto px-6 py-12">
+        <div className="max-w-7xl mx-auto px-6 py-12">
           <button
             onClick={() => navigate('/courses')}
             className="flex items-center gap-2 text-content-muted hover:text-yellow-400 mb-6 transition-colors"

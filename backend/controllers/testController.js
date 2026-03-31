@@ -35,7 +35,7 @@ export const getTest = async (req, res) => {
 
 export const createTest = async (req, res) => {
   try {
-    const { title, description, questions, settings } = req.body;
+    const { title, description, questions, settings, status } = req.body;
 
     if (!title || !questions || questions.length === 0) {
       return res.status(400).json({ error: 'Title and questions required' });
@@ -45,7 +45,8 @@ export const createTest = async (req, res) => {
       title,
       description,
       questions,
-      settings,
+      settings: settings || {},
+      status: status || 'published',
       createdBy: req.userId,
     });
 

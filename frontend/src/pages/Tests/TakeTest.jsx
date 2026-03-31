@@ -1,13 +1,27 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { Clock, HelpCircle, AlertTriangle, ChevronLeft, ChevronRight, Send, WifiOff, Play } from 'lucide-react';
+import { Clock, HelpCircle, AlertTriangle, ChevronLeft, ChevronRight, Send, WifiOff, Play, Calendar, Lock, Timer } from 'lucide-react';
 import api from '../../utils/api.js';
 import useAuth from '../../hooks/useAuth.js';
 import useTimer from '../../hooks/useTimer.js';
 
 const ANSWERS_KEY = 'test_answers';
 const ATTEMPT_KEY = 'test_attempt';
+
+// Format a countdown from milliseconds
+const formatCountdown = (ms) => {
+  if (ms <= 0) return null;
+  const totalSeconds = Math.floor(ms / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (days > 0) return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
+  return `${minutes}m ${seconds}s`;
+};
 
 const TakeTest = () => {
   const { testId } = useParams();
@@ -33,6 +47,9 @@ const TakeTest = () => {
   const [socketConnected, setSocketConnected] = useState(true);
   const [showReconnectNotice, setShowReconnectNotice] = useState(false);
 
+  // Schedule countdown
+  const [now, setNow] = useState(new Date());
+
   // Timer
   const handleExpire = useCallback(() => {
     submitTest(true);
@@ -40,6 +57,12 @@ const TakeTest = () => {
 
   const { timeRemaining, isRunning, start: startTimer, formatTime, reset: resetTimer } =
     useTimer(0, handleExpire);
+
+  // Tick every second for schedule countdown
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch test info
   useEffect(() => {
@@ -85,6 +108,19 @@ const TakeTest = () => {
     }
   }, [answers, started, testId]);
 
+  // Auto-submit when scheduledEndTime is reached during an active test
+  useEffect(() => {
+    if (!started || !test || submitting) return;
+    const endTime = test.settings?.scheduledEndTime ? new Date(test.settings.scheduledEndTime) : null;
+    if (!endTime) return;
+
+    const msUntilEnd = endTime.getTime() - now.getTime();
+    if (msUntilEnd <= 0) {
+      // End time has passed, auto-submit
+      submitTest(true);
+    }
+  }, [started, test, now, submitting]);
+
   // Socket.io setup
   useEffect(() => {
     if (!started || !attemptId) return;
@@ -118,6 +154,13 @@ const TakeTest = () => {
     };
   }, [started, attemptId, testId, user]);
 
+  // Compute schedule status
+  const scheduledStart = test?.settings?.scheduledStartTime ? new Date(test.settings.scheduledStartTime) : null;
+  const scheduledEnd = test?.settings?.scheduledEndTime ? new Date(test.settings.scheduledEndTime) : null;
+  const isBeforeStart = scheduledStart && now < scheduledStart;
+  const isAfterEnd = scheduledEnd && now > scheduledEnd;
+  const countdownToStart = isBeforeStart ? scheduledStart.getTime() - now.getTime() : 0;
+
   // Start test
   const handleStart = async () => {
     try {
@@ -125,18 +168,26 @@ const TakeTest = () => {
       const { data } = await api.post('/api/tests/start', { testId });
       const attempt = data.attemptId || data.attempt?._id;
       const qs = data.questions || [];
-      const duration = (data.duration || test?.duration || 30) * 60 * 1000;
+
+      // Calculate effective duration: min of test duration and time until scheduledEndTime
+      let durationMs = (data.duration || test?.settings?.duration || test?.duration || 30) * 60 * 1000;
+      if (scheduledEnd) {
+        const msUntilEnd = scheduledEnd.getTime() - Date.now();
+        if (msUntilEnd > 0 && msUntilEnd < durationMs) {
+          durationMs = msUntilEnd;
+        }
+      }
 
       setAttemptId(attempt);
       setQuestions(qs);
       setStarted(true);
-      resetTimer(duration);
+      resetTimer(durationMs);
       startTimer();
 
       // Save attempt info for refresh recovery
       localStorage.setItem(
         `${ATTEMPT_KEY}_${testId}`,
-        JSON.stringify({ attemptId: attempt, questions: qs, remainingTime: duration })
+        JSON.stringify({ attemptId: attempt, questions: qs, remainingTime: durationMs })
       );
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to start test');
@@ -186,8 +237,20 @@ const TakeTest = () => {
   const isLowTime = timeRemaining < 60000 && timeRemaining > 0;
 
   // Timer progress percentage
-  const totalDuration = test?.duration ? test.duration * 60 * 1000 : 1;
+  const totalDuration = test?.settings?.duration ? test.settings.duration * 60 * 1000 : (test?.duration ? test.duration * 60 * 1000 : 1);
   const timerProgress = Math.max(0, Math.min(100, (timeRemaining / totalDuration) * 100));
+
+  const formatScheduleDate = (dateStr) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   // Loading state
   if (loading && !test) {
@@ -229,14 +292,60 @@ const TakeTest = () => {
           <h1 className="text-2xl font-black text-content mb-2">{test?.title}</h1>
           <p className="text-content-muted mb-6">{test?.description || 'Good luck!'}</p>
 
-          <div className="flex justify-center gap-3 mb-8">
+          <div className="flex justify-center gap-3 mb-6">
             <span className="badge badge-accent inline-flex items-center gap-1">
-              <Clock className="w-3 h-3" /> {test?.duration || 30} minutes
+              <Clock className="w-3 h-3" /> {test?.settings?.duration || test?.duration || 30} minutes
             </span>
             <span className="badge badge-purple inline-flex items-center gap-1">
               <HelpCircle className="w-3 h-3" /> {test?.questions?.length || test?.questionCount || '?'} questions
             </span>
           </div>
+
+          {/* Schedule Time Window */}
+          {(scheduledStart || scheduledEnd) && (
+            <div className="mb-6 p-4 rounded-xl bg-surface border-2 border-border text-left space-y-2">
+              <h3 className="text-sm font-bold text-content-secondary flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-yellow-400" /> Test Schedule
+              </h3>
+              {scheduledStart && (
+                <div className="flex items-center gap-2 text-sm text-content-secondary">
+                  <span className="text-green-400 font-semibold">Opens:</span>
+                  <span>{formatScheduleDate(test.settings.scheduledStartTime)}</span>
+                </div>
+              )}
+              {scheduledEnd && (
+                <div className="flex items-center gap-2 text-sm text-content-secondary">
+                  <span className="text-red-400 font-semibold">Closes:</span>
+                  <span>{formatScheduleDate(test.settings.scheduledEndTime)}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Countdown to start */}
+          {isBeforeStart && (
+            <div className="mb-6 p-4 rounded-xl bg-blue-400/5 border-2 border-blue-400/20">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Timer className="w-5 h-5 text-blue-400" />
+                <span className="text-sm font-bold text-blue-400">Test hasn't started yet</span>
+              </div>
+              <div className="text-2xl font-mono font-black text-blue-400">
+                {formatCountdown(countdownToStart)}
+              </div>
+              <p className="text-xs text-blue-400/70 mt-1">until test opens</p>
+            </div>
+          )}
+
+          {/* Test has ended */}
+          {isAfterEnd && (
+            <div className="mb-6 p-4 rounded-xl bg-red-400/5 border-2 border-red-400/20">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Lock className="w-5 h-5 text-red-400" />
+                <span className="text-sm font-bold text-red-400">This test has ended</span>
+              </div>
+              <p className="text-xs text-red-400/70">The submission window has closed.</p>
+            </div>
+          )}
 
           {error && (
             <div className="mb-4 p-3 bg-red-400/10 border border-red-400/20 rounded-xl text-red-400 text-sm">
@@ -246,12 +355,20 @@ const TakeTest = () => {
 
           <button
             onClick={handleStart}
-            disabled={loading}
-            className="btn-primary w-full py-3"
+            disabled={loading || isBeforeStart || isAfterEnd}
+            className={`w-full py-3 ${isBeforeStart || isAfterEnd ? 'btn-secondary opacity-50 cursor-not-allowed' : 'btn-primary'}`}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" /> Starting...
+              </span>
+            ) : isAfterEnd ? (
+              <span className="flex items-center justify-center gap-2">
+                <Lock className="w-4 h-4" /> Test Closed
+              </span>
+            ) : isBeforeStart ? (
+              <span className="flex items-center justify-center gap-2">
+                <Timer className="w-4 h-4" /> Waiting to Open...
               </span>
             ) : (
               <span className="flex items-center justify-center gap-2">
