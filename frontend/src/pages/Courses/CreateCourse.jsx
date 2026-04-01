@@ -45,7 +45,7 @@ const CreateCourse = () => {
   // GSAP entrance
   useEffect(() => {
     if (formRef.current) {
-      gsap.from(formRef.current, { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out' });
+      gsap.fromTo(formRef.current, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' });
     }
   }, []);
 

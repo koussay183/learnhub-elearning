@@ -60,10 +60,10 @@ const CourseDetail = () => {
   useEffect(() => {
     if (!loading && course) {
       if (heroRef.current) {
-        gsap.from(heroRef.current, { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out' });
+        gsap.fromTo(heroRef.current, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' });
       }
       if (contentRef.current) {
-        gsap.from(contentRef.current, { y: 20, opacity: 0, duration: 0.5, delay: 0.2, ease: 'power3.out' });
+        gsap.fromTo(contentRef.current, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, delay: 0.2, ease: 'power3.out' });
       }
     }
   }, [loading, course]);

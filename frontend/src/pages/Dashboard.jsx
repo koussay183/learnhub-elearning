@@ -39,16 +39,16 @@ const Dashboard = () => {
   useEffect(() => {
     if (!loading && containerRef.current) {
       const ctx = gsap.context(() => {
-        gsap.from('.stat-card', {
-          y: 30,
-          opacity: 0,
+        gsap.fromTo('.stat-card', { y: 30, opacity: 0 }, {
+          y: 0,
+          opacity: 1,
           duration: 0.5,
           stagger: 0.1,
           ease: 'power3.out',
         });
-        gsap.from('.content-section', {
-          y: 40,
-          opacity: 0,
+        gsap.fromTo('.content-section', { y: 40, opacity: 0 }, {
+          y: 0,
+          opacity: 1,
           duration: 0.6,
           stagger: 0.15,
           ease: 'power3.out',

@@ -35,7 +35,7 @@ const Checkout = () => {
 
   useEffect(() => {
     if (!loading) {
-      gsap.from('.checkout-card', { y: 30, opacity: 0, duration: 0.6, ease: 'power3.out', stagger: 0.15 });
+      gsap.fromTo('.checkout-card', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.15 });
     }
   }, [loading]);
 
