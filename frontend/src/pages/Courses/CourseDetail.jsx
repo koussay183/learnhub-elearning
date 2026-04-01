@@ -29,6 +29,10 @@ const CourseDetail = () => {
   const [progress, setProgress] = useState(0);
   const [completedSessions, setCompletedSessions] = useState(new Set());
 
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
   const fetchCourse = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -104,6 +108,21 @@ const CourseDetail = () => {
       if (sessionData) setSessions(sessionData);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to unenroll');
+    }
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    setReviewSubmitting(true);
+    try {
+      const res = await api.post(`/api/courses/${id}/reviews`, { rating: reviewRating, comment: reviewComment });
+      setReviews(res.data.reviews || []);
+      setReviewComment('');
+      setReviewRating(5);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to submit review');
+    } finally {
+      setReviewSubmitting(false);
     }
   };
 
@@ -434,15 +453,45 @@ const CourseDetail = () => {
         {/* Reviews Tab */}
         {activeTab === 'Reviews' && (
           <div className="animate-fadeIn">
-            {reviews.length === 0 ? (
+            {/* Review Form - only for enrolled users */}
+            {isEnrolled && (
+              <form onSubmit={handleReviewSubmit} className="card p-6 mb-6">
+                <h3 className="text-lg font-bold text-txt mb-4">Write a Review</h3>
+                <div className="flex items-center gap-1 mb-4">
+                  {Array.from({ length: 5 }, (_, j) => (
+                    <button
+                      key={j}
+                      type="button"
+                      onClick={() => setReviewRating(j + 1)}
+                      className="transition-transform hover:scale-110"
+                    >
+                      <Star className={`w-6 h-6 ${j < reviewRating ? 'text-yellow-400 fill-current' : 'text-txt-muted'}`} />
+                    </button>
+                  ))}
+                  <span className="ml-2 text-sm text-txt-muted">{reviewRating}/5</span>
+                </div>
+                <textarea
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder="Share your experience with this course..."
+                  rows={3}
+                  className="input-field resize-none mb-4"
+                />
+                <button type="submit" disabled={reviewSubmitting} className="btn-primary">
+                  {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </form>
+            )}
+
+            {reviews.length === 0 && !isEnrolled ? (
               <div className="card p-8 text-center">
                 <div className="w-16 h-16 mx-auto mb-4 bg-surface rounded-2xl border-2 border-bdr flex items-center justify-center">
                   <MessageSquare className="w-8 h-8 text-txt-muted" />
                 </div>
                 <h3 className="text-lg font-bold text-txt mb-2">No reviews yet</h3>
-                <p className="text-txt-muted">Be the first to share your experience with this course.</p>
+                <p className="text-txt-muted">Enroll to be the first to review this course.</p>
               </div>
-            ) : (
+            ) : reviews.length === 0 ? null : (
               <div className="space-y-4">
                 {reviews.map((review, i) => (
                   <div key={review._id || i} className="card p-6">

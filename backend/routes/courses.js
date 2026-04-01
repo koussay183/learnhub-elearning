@@ -11,6 +11,9 @@ import {
   getProgress,
   getMyCourses,
   processCheckout,
+  addReview,
+  createSession,
+  completeSession,
 } from '../controllers/courseController.js';
 import { authMiddleware, optionalAuth } from '../middleware/auth.js';
 
@@ -27,5 +30,8 @@ router.post('/enroll', authMiddleware, enrollCourse);
 router.post('/checkout', authMiddleware, processCheckout);
 router.delete('/enroll/:courseId', authMiddleware, unenrollCourse);
 router.get('/:courseId/progress', authMiddleware, getProgress);
+router.post('/:id/reviews', authMiddleware, addReview);
+router.post('/:courseId/sessions', authMiddleware, createSession);
+router.post('/:courseId/sessions/:sessionId/complete', authMiddleware, completeSession);
 
 export default router;

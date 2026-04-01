@@ -68,7 +68,7 @@ export const createCourse = async (req, res) => {
       title,
       description,
       category,
-      level,
+      level: level ? level.toLowerCase() : 'beginner',
       price,
       thumbnail,
       instructor: req.userId,
@@ -91,7 +91,9 @@ export const updateCourse = async (req, res) => {
 
     const allowed = ['title', 'description', 'category', 'level', 'price', 'thumbnail', 'status'];
     allowed.forEach(field => {
-      if (req.body[field] !== undefined) course[field] = req.body[field];
+      if (req.body[field] !== undefined) {
+        course[field] = field === 'level' ? req.body[field].toLowerCase() : req.body[field];
+      }
     });
 
     await course.save();
@@ -289,5 +291,92 @@ export const getMyCourses = async (req, res) => {
   } catch (error) {
     console.error('Get my courses error:', error);
     res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+};
+
+export const addReview = async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+
+    // Check if user is enrolled
+    const enrollment = await Enrollment.findOne({ userId: req.userId, courseId: req.params.id });
+    if (!enrollment) return res.status(403).json({ error: 'You must be enrolled to review' });
+
+    // Check if already reviewed
+    const existingReview = course.reviews.find(r => r.userId?.toString() === req.userId);
+    if (existingReview) {
+      existingReview.rating = rating;
+      existingReview.comment = comment || '';
+    } else {
+      course.reviews.push({ userId: req.userId, rating, comment: comment || '' });
+    }
+
+    // Recalculate average rating
+    const totalRating = course.reviews.reduce((sum, r) => sum + r.rating, 0);
+    course.rating = totalRating / course.reviews.length;
+
+    await course.save();
+    res.json({ message: 'Review saved', reviews: course.reviews, rating: course.rating });
+  } catch (error) {
+    console.error('Add review error:', error);
+    res.status(500).json({ error: 'Failed to add review' });
+  }
+};
+
+export const createSession = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.courseId);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+    if (course.instructor.toString() !== req.userId) return res.status(403).json({ error: 'Not authorized' });
+
+    const session = await Session.create({
+      courseId: req.params.courseId,
+      title: req.body.title,
+      description: req.body.description || '',
+      videoUrl: req.body.videoUrl || '',
+      pdfUrl: req.body.pdfUrl || '',
+      order: req.body.order || 1,
+      duration: req.body.duration || 0,
+      isPublished: true,
+    });
+
+    course.totalSessions = await Session.countDocuments({ courseId: req.params.courseId });
+    await course.save();
+
+    res.status(201).json(session);
+  } catch (error) {
+    console.error('Create session error:', error);
+    res.status(500).json({ error: 'Failed to create session' });
+  }
+};
+
+export const completeSession = async (req, res) => {
+  try {
+    const { courseId, sessionId } = req.params;
+    const enrollment = await Enrollment.findOne({ userId: req.userId, courseId });
+    if (!enrollment) return res.status(404).json({ error: 'Not enrolled' });
+
+    if (!enrollment.completedSessions.includes(sessionId)) {
+      enrollment.completedSessions.push(sessionId);
+      const totalSessions = await Session.countDocuments({ courseId });
+      enrollment.progress = totalSessions > 0 ? (enrollment.completedSessions.length / totalSessions) * 100 : 0;
+      if (enrollment.progress >= 100) {
+        enrollment.status = 'completed';
+        enrollment.certificateEarned = true;
+        enrollment.certificateEarnedAt = new Date();
+      }
+      await enrollment.save();
+    }
+
+    res.json({ progress: enrollment.progress, completedSessions: enrollment.completedSessions });
+  } catch (error) {
+    console.error('Complete session error:', error);
+    res.status(500).json({ error: 'Failed to complete session' });
   }
 };
