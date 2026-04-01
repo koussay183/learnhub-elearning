@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:5000`;
+const envUrl = import.meta.env.VITE_API_URL;
+const API_URL = envUrl && envUrl.length > 0 ? envUrl : `${window.location.protocol}//${window.location.hostname}:5000`;
 
 const api = axios.create({
   baseURL: API_URL,

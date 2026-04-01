@@ -4,7 +4,8 @@ import useAuthStore from './authStore.js';
 
 const SocketContext = createContext(null);
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:5000`;
+const _envUrl = import.meta.env.VITE_API_URL;
+const SOCKET_URL = _envUrl && _envUrl.length > 0 ? _envUrl : `${window.location.protocol}//${window.location.hostname}:5000`;
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
