@@ -137,7 +137,7 @@ const CourseDetail = () => {
   return (
     <div className="min-h-screen bg-surface">
       {/* Hero Section */}
-      <div ref={heroRef} className="relative bg-surface-card border-b border-bdr">
+      <div ref={heroRef} className="relative border-b border-bdr" style={{ backgroundColor: 'var(--surface-card)' }}>
         <div className="max-w-7xl mx-auto px-6 py-12">
           <button
             onClick={() => navigate('/courses')}
@@ -157,8 +157,8 @@ const CourseDetail = () => {
                 )}
               </div>
 
-              <h1 className="text-4xl font-black text-txt mb-4">{course.title}</h1>
-              <p className="text-lg text-txt-secondary mb-6 max-w-2xl">
+              <h1 className="text-4xl font-black mb-4" style={{ color: 'var(--text-primary)' }}>{course.title}</h1>
+              <p className="text-lg mb-6 max-w-2xl" style={{ color: 'var(--text-secondary)' }}>
                 {course.description?.substring(0, 200)}
                 {(course.description?.length || 0) > 200 ? '...' : ''}
               </p>
@@ -169,7 +169,7 @@ const CourseDetail = () => {
                   {(course.instructor?.firstName || 'I')[0]}
                 </div>
                 <div>
-                  <p className="font-semibold text-txt">
+                  <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                     {course.instructor?.firstName
                       ? `${course.instructor.firstName} ${course.instructor.lastName || ''}`
                       : course.instructorName || 'Instructor'}
