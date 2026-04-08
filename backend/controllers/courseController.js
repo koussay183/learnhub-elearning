@@ -3,18 +3,21 @@ import Session from '../models/Session.js';
 import Enrollment from '../models/Enrollment.js';
 import ChatMessage from '../models/ChatMessage.js';
 import User from '../models/User.js';
+import { escapeRegex } from '../middleware/validate.js';
 
 export const getCourses = async (req, res) => {
   try {
-    const { category, level, search, page = 1, limit = 12 } = req.query;
+    const { category, level, search, price, minPrice, page = 1, limit = 12 } = req.query;
     let filter = { status: 'published' };
 
     if (category) filter.category = category;
-    if (level) filter.level = level;
+    if (level) filter.level = level.toLowerCase();
+    if (price !== undefined) filter.price = Number(price);
+    if (minPrice) filter.price = { $gte: Number(minPrice) };
     if (search) {
       filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
+        { title: { $regex: escapeRegex(search), $options: 'i' } },
+        { description: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -99,7 +102,8 @@ export const updateCourse = async (req, res) => {
     await course.save();
     res.json(course);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Update course error:', error);
+    res.status(500).json({ error: 'Failed to update course' });
   }
 };
 
@@ -130,6 +134,7 @@ export const enrollCourse = async (req, res) => {
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ error: 'Course not found' });
     if (course.status !== 'published') return res.status(400).json({ error: 'Course is not available for enrollment' });
+    if (course.instructor.toString() === req.userId) return res.status(400).json({ error: 'You cannot enroll in your own course' });
 
     // Check for duplicate enrollment
     const existingEnrollment = await Enrollment.findOne({ userId: req.userId, courseId });
@@ -184,7 +189,8 @@ export const unenrollCourse = async (req, res) => {
 
     res.json({ message: 'Successfully unenrolled' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Unenroll course error:', error);
+    res.status(500).json({ error: 'Failed to unenroll' });
   }
 };
 
@@ -200,6 +206,7 @@ export const processCheckout = async (req, res) => {
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ error: 'Course not found' });
     if (course.status !== 'published') return res.status(400).json({ error: 'Course not available' });
+    if (course.instructor.toString() === req.userId) return res.status(400).json({ error: 'You cannot enroll in your own course' });
 
     // Check duplicate
     const existing = await Enrollment.findOne({ userId: req.userId, courseId });
@@ -234,7 +241,8 @@ export const processCheckout = async (req, res) => {
       course: { title: course.title, _id: course._id }
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Process checkout error:', error);
+    res.status(500).json({ error: 'Failed to process checkout' });
   }
 };
 
@@ -362,21 +370,67 @@ export const completeSession = async (req, res) => {
     const enrollment = await Enrollment.findOne({ userId: req.userId, courseId });
     if (!enrollment) return res.status(404).json({ error: 'Not enrolled' });
 
-    if (!enrollment.completedSessions.includes(sessionId)) {
+    if (!enrollment.completedSessions.some(id => id.toString() === sessionId)) {
       enrollment.completedSessions.push(sessionId);
-      const totalSessions = await Session.countDocuments({ courseId });
-      enrollment.progress = totalSessions > 0 ? (enrollment.completedSessions.length / totalSessions) * 100 : 0;
-      if (enrollment.progress >= 100) {
-        enrollment.status = 'completed';
-        enrollment.certificateEarned = true;
-        enrollment.certificateEarnedAt = new Date();
-      }
-      await enrollment.save();
     }
+
+    // Deduplicate in case of prior bug
+    const uniqueIds = [...new Set(enrollment.completedSessions.map(id => id.toString()))];
+    enrollment.completedSessions = uniqueIds;
+
+    const totalSessions = await Session.countDocuments({ courseId });
+    enrollment.progress = totalSessions > 0 ? Math.round((uniqueIds.length / totalSessions) * 100) : 0;
+    if (enrollment.progress >= 100) {
+      enrollment.status = 'completed';
+      enrollment.certificateEarned = true;
+      enrollment.certificateEarnedAt = new Date();
+    }
+    await enrollment.save();
 
     res.json({ progress: enrollment.progress, completedSessions: enrollment.completedSessions });
   } catch (error) {
     console.error('Complete session error:', error);
     res.status(500).json({ error: 'Failed to complete session' });
+  }
+};
+
+export const updateSession = async (req, res) => {
+  try {
+    const { courseId, sessionId } = req.params;
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+    if (course.instructor.toString() !== req.userId) return res.status(403).json({ error: 'Not authorized' });
+
+    const session = await Session.findOne({ _id: sessionId, courseId });
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+
+    const allowed = ['title', 'videoUrl', 'pdfUrl', 'order', 'duration', 'description'];
+    allowed.forEach(field => {
+      if (req.body[field] !== undefined) session[field] = req.body[field];
+    });
+
+    await session.save();
+    res.json(session);
+  } catch (error) {
+    console.error('Update session error:', error);
+    res.status(500).json({ error: 'Failed to update session' });
+  }
+};
+
+export const deleteSession = async (req, res) => {
+  try {
+    const { courseId, sessionId } = req.params;
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
+    if (course.instructor.toString() !== req.userId) return res.status(403).json({ error: 'Not authorized' });
+
+    await Session.findOneAndDelete({ _id: sessionId, courseId });
+    course.totalSessions = await Session.countDocuments({ courseId });
+    await course.save();
+
+    res.json({ message: 'Session deleted' });
+  } catch (error) {
+    console.error('Delete session error:', error);
+    res.status(500).json({ error: 'Failed to delete session' });
   }
 };

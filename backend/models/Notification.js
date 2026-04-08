@@ -7,6 +7,7 @@ const NotificationSchema = new mongoose.Schema(
     title: { type: String, required: true },
     message: { type: String, required: true },
     data: { type: mongoose.Schema.Types.Mixed }, // extra data (courseId, postId, etc.)
+    link: { type: String, default: '' },
     read: { type: Boolean, default: false },
   },
   { timestamps: true }

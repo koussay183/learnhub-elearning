@@ -1,37 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../utils/api';
+import { timeAgo, formatDate } from '../../utils/helpers.js';
+import { CATEGORY_COLORS } from '../../utils/constants.js';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { ArrowLeft, Heart, MessageCircle, Eye, Clock, Pin, Send } from 'lucide-react';
 import gsap from 'gsap';
-
-const categoryColors = {
-  discussion: 'badge-blue',
-  question: 'badge-green',
-  announcement: 'badge-accent',
-  resource: 'badge-purple',
-};
-
-const timeAgo = (date) => {
-  const now = new Date();
-  const diff = now - new Date(date);
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  if (days > 0) return `${days}d ago`;
-  if (hours > 0) return `${hours}h ago`;
-  if (minutes > 0) return `${minutes}m ago`;
-  return 'Just now';
-};
-
-const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-  });
-};
 
 const PostDetail = () => {
   const { postId } = useParams();
@@ -160,9 +135,9 @@ const PostDetail = () => {
               {initial}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-txt">
+              <Link to={`/users/${author._id}`} className="font-semibold text-txt hover:text-yellow-400 transition-colors">
                 {author.firstName} {author.lastName}
-              </p>
+              </Link>
               <div className="flex items-center gap-2 text-xs text-txt-muted">
                 <span>Joined {formatDate(author.createdAt || post.createdAt)}</span>
                 <span className="text-txt-muted">&middot;</span>
@@ -176,7 +151,7 @@ const PostDetail = () => {
                   <Pin className="w-3 h-3" /> Pinned
                 </span>
               )}
-              <span className={`badge ${categoryColors[post.category] || 'badge-blue'}`}>
+              <span className={`badge ${CATEGORY_COLORS[post.category] || 'badge-blue'}`}>
                 {post.category}
               </span>
             </div>
@@ -223,6 +198,7 @@ const PostDetail = () => {
               onChange={(e) => setComment(e.target.value)}
               placeholder="Share your thoughts..."
               rows={3}
+              maxLength={2000}
               className="w-full px-4 py-3 bg-surface-input border-2 border-bdr rounded-xl text-sm text-txt placeholder-txt-muted
                          focus:outline-none focus:border-yellow-400/50 transition-all resize-none mb-3"
               required
@@ -270,9 +246,9 @@ const PostDetail = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="text-sm font-medium text-txt">
+                          <Link to={`/users/${cAuthor._id}`} className="text-sm font-medium text-txt hover:text-yellow-400 transition-colors">
                             {cAuthor.firstName} {cAuthor.lastName}
-                          </p>
+                          </Link>
                           <div className="flex items-center gap-1 text-xs text-txt-muted">
                             <Clock className="w-3 h-3" />
                             {timeAgo(c.createdAt)}

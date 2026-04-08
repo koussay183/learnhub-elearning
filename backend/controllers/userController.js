@@ -33,7 +33,8 @@ export const updateProfile = async (req, res) => {
     await user.save();
     res.json(user.toJSON());
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Update profile error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
   }
 };
 
@@ -82,6 +83,7 @@ export const getPublicProfile = async (req, res) => {
 
     res.json({ user, courses, postsCount });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Get public profile error:', error);
+    res.status(500).json({ error: 'Failed to fetch profile' });
   }
 };

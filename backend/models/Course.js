@@ -19,4 +19,8 @@ const CourseSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+CourseSchema.index({ status: 1, createdAt: -1 });
+CourseSchema.index({ instructor: 1 });
+CourseSchema.index({ category: 1 });
+
 export default mongoose.model('Course', CourseSchema);

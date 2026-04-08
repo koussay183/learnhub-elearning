@@ -63,7 +63,7 @@ export const Login = () => {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-txt-muted" />
                 <input type="email" name="email" value={formData.email} onChange={handleChange}
                   placeholder="you@example.com"
-                  className={`input-field pl-10 ${errors.email ? 'border-red-500' : ''}`} />
+                  className={`input-field pl-12 ${errors.email ? 'border-red-500' : ''}`} />
               </div>
               {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
             </div>
@@ -74,7 +74,7 @@ export const Login = () => {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-txt-muted" />
                 <input type="password" name="password" value={formData.password} onChange={handleChange}
                   placeholder="--------"
-                  className={`input-field pl-10 ${errors.password ? 'border-red-500' : ''}`} />
+                  className={`input-field pl-12 ${errors.password ? 'border-red-500' : ''}`} />
               </div>
               {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
             </div>

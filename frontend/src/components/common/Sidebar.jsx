@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, Users, MessageCircle, ClipboardCheck, Settings, Shield } from 'lucide-react';
+import { LayoutDashboard, BookOpen, GraduationCap, Users, MessageCircle, ClipboardCheck, Settings, Shield } from 'lucide-react';
 
 const navItems = [
   { label: 'Dashboard', to: '/dashboard', key: 'dashboard', icon: LayoutDashboard },
   { label: 'Courses', to: '/courses', key: 'courses', icon: BookOpen },
+  { label: 'My Courses', to: '/courses/my', key: 'my-courses', icon: GraduationCap },
   { label: 'Community', to: '/community', key: 'community', icon: Users },
   { label: 'Chat', to: '/chat', key: 'chat', icon: MessageCircle },
   { label: 'Tests', to: '/tests', key: 'tests', icon: ClipboardCheck },

@@ -5,7 +5,7 @@ const useAuthStore = create((set) => ({
   user: null,
   accessToken: localStorage.getItem('accessToken'),
   refreshToken: localStorage.getItem('refreshToken'),
-  isLoading: false,
+  isLoading: !!localStorage.getItem('accessToken'),
   error: null,
 
   register: async (email, password, firstName, lastName) => {

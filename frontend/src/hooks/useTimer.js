@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
+import { API_BASE_URL } from '../utils/constants.js';
 
 const STORAGE_KEY = 'test_timer_remaining';
 
@@ -52,8 +53,7 @@ const useTimer = (initialTime = 0, onExpire = () => {}) => {
 
   // Socket.io listener for timer sync
   useEffect(() => {
-    const API_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:5000`;
-    socketRef.current = io(API_URL, { autoConnect: false });
+    socketRef.current = io(API_BASE_URL, { autoConnect: false });
 
     socketRef.current.on('test:timer-sync', (data) => {
       if (data && typeof data.remainingTime === 'number') {

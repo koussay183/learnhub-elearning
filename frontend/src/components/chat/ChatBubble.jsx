@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const formatTime = (date) => {
   return new Date(date).toLocaleTimeString('en-US', {
     hour: 'numeric', minute: '2-digit', hour12: true,
@@ -12,15 +14,19 @@ const ChatBubble = ({ message, isOwn }) => {
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-3`}>
       <div className={`flex gap-2 max-w-[75%] ${isOwn ? 'flex-row-reverse' : ''}`}>
         {!isOwn && (
-          <div className="w-7 h-7 rounded-lg bg-yellow-400/10 flex items-center justify-center text-yellow-400 text-xs font-bold flex-shrink-0 mt-1">
-            {initial}
-          </div>
+          <Link to={sender._id ? `/users/${sender._id}` : '#'} className="flex-shrink-0 mt-1">
+            <div className="w-7 h-7 rounded-lg bg-yellow-400/10 flex items-center justify-center text-yellow-400 text-xs font-bold hover:bg-yellow-400/20 transition-colors">
+              {initial}
+            </div>
+          </Link>
         )}
         <div>
           {!isOwn && (
-            <p className="text-xs text-txt-muted mb-1 ml-1 font-medium">
-              {sender.firstName} {sender.lastName}
-            </p>
+            <Link to={sender._id ? `/users/${sender._id}` : '#'} className="hover:text-yellow-400 transition-colors">
+              <p className="text-xs text-txt-muted mb-1 ml-1 font-medium hover:text-yellow-400">
+                {sender.firstName} {sender.lastName}
+              </p>
+            </Link>
           )}
           <div className={`px-4 py-2.5 text-sm leading-relaxed ${
             isOwn

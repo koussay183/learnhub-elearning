@@ -1,5 +1,6 @@
 import { CommunityPost, Comment } from '../models/Community.js';
 import User from '../models/User.js';
+import { escapeRegex } from '../middleware/validate.js';
 
 export const getPosts = async (req, res) => {
   try {
@@ -9,8 +10,8 @@ export const getPosts = async (req, res) => {
     if (category) filter.category = category;
     if (search) {
       filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { content: { $regex: search, $options: 'i' } },
+        { title: { $regex: escapeRegex(search), $options: 'i' } },
+        { content: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -44,7 +45,8 @@ export const getPost = async (req, res) => {
 
     res.json(post);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Get post error:', error);
+    res.status(500).json({ error: 'Failed to fetch post' });
   }
 };
 
@@ -92,7 +94,8 @@ export const updatePost = async (req, res) => {
       .populate('comments.authorId', 'firstName lastName avatar');
     res.json(updated);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Update post error:', error);
+    res.status(500).json({ error: 'Failed to update post' });
   }
 };
 

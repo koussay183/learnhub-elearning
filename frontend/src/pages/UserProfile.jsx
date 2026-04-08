@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Calendar, Users, Award } from 'lucide-react';
 import api from '../utils/api.js';
+import { formatDate } from '../utils/helpers.js';
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -46,14 +47,6 @@ const UserProfile = () => {
       loadGsap();
     }
   }, [loading, profile]);
-
-  const formatDate = (date) => {
-    if (!date) return 'Unknown';
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'long',
-      year: 'numeric',
-    });
-  };
 
   if (loading) {
     return (

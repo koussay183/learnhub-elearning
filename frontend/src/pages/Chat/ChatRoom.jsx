@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useSocket } from '../../context/SocketContext';
 import api from '../../utils/api';
@@ -10,11 +11,12 @@ import { MessageCircle, Send, Users, Hash, Search, Plus, X, User, ChevronDown, B
 const ChatRoom = () => {
   const { user } = useAuth();
   const socket = useSocket();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [rooms, setRooms] = useState([]);
   const [courseChannels, setCourseChannels] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
-  const [activeRoom, setActiveRoom] = useState('general');
+  const [activeRoom, setActiveRoom] = useState(searchParams.get('room') || 'general');
   const [activeRoomLabel, setActiveRoomLabel] = useState('General');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -85,21 +87,21 @@ const ChatRoom = () => {
         const groupRooms = [];
         const dmList = [];
         roomList.forEach((r) => {
-          const id = typeof r === 'string' ? r : r.roomId;
-          if (isDmRoom(id)) {
-            dmList.push(id);
+          const room = typeof r === 'string' ? { roomId: r, lastMessage: null, unread: 0 } : r;
+          if (isDmRoom(room.roomId)) {
+            dmList.push(room);
           } else {
-            groupRooms.push(id);
+            groupRooms.push(room);
           }
         });
 
-        if (!groupRooms.includes('general')) {
-          groupRooms.unshift('general');
+        if (!groupRooms.find(r => r.roomId === 'general')) {
+          groupRooms.unshift({ roomId: 'general', lastMessage: null, unread: 0 });
         }
 
         setRooms(groupRooms);
         setDmRooms(dmList);
-        setCourseChannels(channels);
+        setCourseChannels(channels.map(ch => ({ ...ch, unread: ch.unread || 0 })));
       } catch (err) {
         console.error('Failed to fetch rooms:', err);
         setRooms(['general']);
@@ -148,13 +150,42 @@ const ChatRoom = () => {
     // Identify user to server
     socket.emit('user:identify', { userId: user._id });
 
-    // Join room
+    // Join room and mark as read
     socket.emit('chat:join-room', { roomId: activeRoom, userId: user._id });
+    socket.emit('chat:mark-read', { roomId: activeRoom, userId: user._id });
 
     // Listen for new messages
     const handleReceiveMessage = (msg) => {
       if (msg.roomId === activeRoom) {
         setMessages((prev) => [...prev, msg]);
+        socket.emit('chat:mark-read', { roomId: activeRoom, userId: user._id });
+      } else {
+        // Update sidebar: lastMessage + unread for non-active rooms
+        const sender = typeof msg.senderId === 'object'
+          ? msg.senderId.firstName
+          : 'Someone';
+        const newLastMessage = {
+          content: msg.content,
+          sender,
+          time: msg.createdAt || new Date().toISOString(),
+        };
+        const updateList = (list) =>
+          list.map(r => r.roomId === msg.roomId
+            ? { ...r, lastMessage: newLastMessage, unread: (r.unread || 0) + 1 }
+            : r
+          );
+
+        if (msg.roomId.startsWith('course_')) {
+          setCourseChannels(prev => updateList(prev));
+        } else if (msg.roomId.includes('_dm_')) {
+          setDmRooms(prev => {
+            const exists = prev.find(r => r.roomId === msg.roomId);
+            if (exists) return updateList(prev);
+            return [...prev, { roomId: msg.roomId, lastMessage: newLastMessage, unread: 1 }];
+          });
+        } else {
+          setRooms(prev => updateList(prev));
+        }
       }
     };
 
@@ -168,11 +199,11 @@ const ChatRoom = () => {
     };
 
     socket.on('chat:receive-message', handleReceiveMessage);
-    socket.on('chat:typing', handleTyping);
+    socket.on('chat:user-typing', handleTyping);
 
     return () => {
       socket.off('chat:receive-message', handleReceiveMessage);
-      socket.off('chat:typing', handleTyping);
+      socket.off('chat:user-typing', handleTyping);
       socket.emit('chat:leave-room', { roomId: activeRoom, userId: user._id });
     };
   }, [socket, activeRoom, user]);
@@ -186,8 +217,10 @@ const ChatRoom = () => {
     if (!socket || !user) return;
 
     if (isDmRoom(activeRoom)) {
+      const parts = activeRoom.split('_dm_');
+      const toUserId = parts[0] === user._id ? parts[1] : parts[0];
       socket.emit('chat:send-dm', {
-        roomId: activeRoom,
+        toUserId,
         content,
         userId: user._id,
       });
@@ -212,14 +245,19 @@ const ChatRoom = () => {
   const switchRoom = (roomId) => {
     if (roomId === activeRoom) return;
     setActiveRoom(roomId);
+    setSearchParams(roomId === 'general' ? {} : { room: roomId }, { replace: true });
     setSidebarOpen(false);
+    // Reset unread for the room being opened
+    const resetUnread = (list) => list.map(r => r.roomId === roomId ? { ...r, unread: 0 } : r);
+    setRooms(prev => resetUnread(prev));
+    setDmRooms(prev => resetUnread(prev));
+    setCourseChannels(prev => resetUnread(prev));
   };
 
   const startDm = (targetUser) => {
     const dmRoomId = getDmRoomId(user._id, targetUser._id);
-    // Add to DM rooms if not already there
-    if (!dmRooms.includes(dmRoomId)) {
-      setDmRooms((prev) => [...prev, dmRoomId]);
+    if (!dmRooms.find(r => r.roomId === dmRoomId)) {
+      setDmRooms((prev) => [...prev, { roomId: dmRoomId, lastMessage: null, unread: 0 }]);
     }
     switchRoom(dmRoomId);
     setSidebarTab('rooms');
@@ -233,7 +271,7 @@ const ChatRoom = () => {
   });
 
   return (
-    <div className="h-screen bg-surface flex overflow-hidden">
+    <div className="h-[calc(100vh-5.5rem)] bg-surface flex overflow-hidden">
       {/* Mobile Sidebar Toggle */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -291,18 +329,30 @@ const ChatRoom = () => {
               <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest px-3 mb-2 mt-1">
                 Rooms
               </p>
-              {rooms.map((roomId) => (
+              {rooms.map((room) => (
                 <button
-                  key={roomId}
-                  onClick={() => switchRoom(roomId)}
+                  key={room.roomId}
+                  onClick={() => switchRoom(room.roomId)}
                   className={`w-full text-left px-3 py-2.5 rounded-xl mb-1 text-sm font-medium transition-all flex items-center gap-3 ${
-                    activeRoom === roomId
+                    activeRoom === room.roomId
                       ? 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20'
                       : 'text-txt-secondary hover:bg-surface-input hover:text-txt-secondary border border-transparent'
                   }`}
                 >
                   <Hash className="w-4 h-4 flex-shrink-0" />
-                  <span className="truncate">{formatRoomName(roomId)}</span>
+                  <div className="min-w-0 flex-1">
+                    <span className="truncate block">{formatRoomName(room.roomId)}</span>
+                    {room.lastMessage && (
+                      <span className="text-[10px] text-txt-muted truncate block">
+                        {room.lastMessage.sender}: {room.lastMessage.content?.substring(0, 30)}
+                      </span>
+                    )}
+                  </div>
+                  {room.unread > 0 && (
+                    <span className="w-5 h-5 bg-yellow-400 text-black text-[10px] font-black rounded-full flex items-center justify-center flex-shrink-0">
+                      {room.unread > 9 ? '9+' : room.unread}
+                    </span>
+                  )}
                 </button>
               ))}
 
@@ -325,8 +375,19 @@ const ChatRoom = () => {
                       <BookOpen className="w-4 h-4 flex-shrink-0" />
                       <div className="min-w-0 flex-1">
                         <span className="truncate block">{ch.roomName}</span>
-                        <span className="text-[10px] text-txt-muted">{ch.memberCount || 0} members</span>
+                        {ch.lastMessage ? (
+                          <span className="text-[10px] text-txt-muted truncate block">
+                            {ch.lastMessage.sender}: {ch.lastMessage.content?.substring(0, 30)}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-txt-muted">{ch.memberCount || 0} members</span>
+                        )}
                       </div>
+                      {ch.unread > 0 && (
+                        <span className="w-5 h-5 bg-yellow-400 text-black text-[10px] font-black rounded-full flex items-center justify-center flex-shrink-0">
+                          {ch.unread > 9 ? '9+' : ch.unread}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </>
@@ -338,15 +399,15 @@ const ChatRoom = () => {
                   <p className="text-[10px] font-bold text-txt-muted uppercase tracking-widest px-3 mb-2 mt-4">
                     Direct Messages
                   </p>
-                  {dmRooms.map((roomId) => {
-                    const partner = getDmPartner(roomId);
+                  {dmRooms.map((room) => {
+                    const partner = getDmPartner(room.roomId);
                     const partnerInitial = partner?.firstName?.charAt(0)?.toUpperCase() || '?';
                     return (
                       <button
-                        key={roomId}
-                        onClick={() => switchRoom(roomId)}
+                        key={room.roomId}
+                        onClick={() => switchRoom(room.roomId)}
                         className={`w-full text-left px-3 py-2.5 rounded-xl mb-1 text-sm font-medium transition-all flex items-center gap-3 ${
-                          activeRoom === roomId
+                          activeRoom === room.roomId
                             ? 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20'
                             : 'text-txt-secondary hover:bg-surface-input hover:text-txt-secondary border border-transparent'
                         }`}
@@ -354,7 +415,19 @@ const ChatRoom = () => {
                         <div className="w-6 h-6 rounded-md bg-yellow-400/10 flex items-center justify-center text-yellow-400 text-[10px] font-bold flex-shrink-0">
                           {partnerInitial}
                         </div>
-                        <span className="truncate">{formatRoomName(roomId)}</span>
+                        <div className="min-w-0 flex-1">
+                          <span className="truncate block">{formatRoomName(room.roomId)}</span>
+                          {room.lastMessage && (
+                            <span className="text-[10px] text-txt-muted truncate block">
+                              {room.lastMessage.sender}: {room.lastMessage.content?.substring(0, 30)}
+                            </span>
+                          )}
+                        </div>
+                        {room.unread > 0 && (
+                          <span className="w-5 h-5 bg-yellow-400 text-black text-[10px] font-black rounded-full flex items-center justify-center flex-shrink-0">
+                            {room.unread > 9 ? '9+' : room.unread}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -372,7 +445,7 @@ const ChatRoom = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search users..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-surface border-2 border-bdr rounded-xl text-sm text-txt placeholder-txt-muted
+                  className="w-full pl-12 pr-4 py-2.5 bg-surface border-2 border-bdr rounded-xl text-sm text-txt placeholder-txt-muted
                              focus:outline-none focus:border-yellow-400/50 transition-all"
                 />
               </div>
@@ -397,7 +470,9 @@ const ChatRoom = () => {
                         {uInitial}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{u.firstName} {u.lastName}</p>
+                        <Link to={`/users/${u._id}`} onClick={(e) => e.stopPropagation()} className="hover:text-yellow-400 transition-colors">
+                          <p className="font-medium truncate">{u.firstName} {u.lastName}</p>
+                        </Link>
                         <p className="text-[10px] text-txt-muted">{u.role || 'Student'}</p>
                       </div>
                       <MessageCircle className="w-4 h-4 text-txt-muted group-hover:text-yellow-400 transition-colors flex-shrink-0" />
@@ -513,6 +588,7 @@ const ChatRoom = () => {
         {/* Input */}
         <MessageInput
           onSend={handleSend}
+          onTyping={handleTyping}
           disabled={!socket}
           typingUser={typingUser}
         />

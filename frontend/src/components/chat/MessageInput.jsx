@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Send } from 'lucide-react';
 
-const MessageInput = ({ onSend, disabled = false, typingUser = null }) => {
+const MessageInput = ({ onSend, onTyping, disabled = false, typingUser = null }) => {
   const [content, setContent] = useState('');
 
   const handleSubmit = (e) => {
@@ -23,7 +23,10 @@ const MessageInput = ({ onSend, disabled = false, typingUser = null }) => {
       <form onSubmit={handleSubmit} className="flex items-center gap-3">
         <input
           type="text" value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => {
+            setContent(e.target.value);
+            if (onTyping) onTyping();
+          }}
           onKeyDown={handleKeyDown}
           placeholder="Type a message..."
           disabled={disabled}

@@ -32,7 +32,8 @@ export const getMessages = async (req, res) => {
 
     res.json(messages.reverse());
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Get messages error:', error);
+    res.status(500).json({ error: 'Failed to fetch messages' });
   }
 };
 
@@ -166,7 +167,8 @@ export const getRooms = async (req, res) => {
 
     res.json({ rooms, courseChannels: courseRooms });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Get rooms error:', error);
+    res.status(500).json({ error: 'Failed to fetch rooms' });
   }
 };
 
@@ -178,6 +180,22 @@ export const getUsers = async (req, res) => {
       .limit(50);
     res.json(users);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Get users error:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+};
+
+export const markRoomAsRead = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const userId = new mongoose.Types.ObjectId(req.userId);
+    await ChatMessage.updateMany(
+      { roomId, senderId: { $ne: userId }, readBy: { $ne: userId } },
+      { $addToSet: { readBy: userId } }
+    );
+    res.json({ message: 'Marked as read' });
+  } catch (error) {
+    console.error('Mark room read error:', error);
+    res.status(500).json({ error: 'Failed to mark as read' });
   }
 };

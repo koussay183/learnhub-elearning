@@ -4,12 +4,14 @@ import { gsap } from 'gsap';
 import {
   ArrowLeft, BookOpen, Users, Globe, BarChart3,
   Play, FileText, CheckCircle, Lock, Star,
-  Clock, LogOut, MessageSquare
+  Clock, LogOut, MessageSquare, Pencil, Layers,
+  Calendar, Timer, ClipboardList, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import api from '../../utils/api.js';
+import { getTestStatus, formatCountdownTo } from '../../utils/helpers.js';
 import useAuth from '../../hooks/useAuth.js';
 
-const TABS = ['Overview', 'Sessions', 'Reviews'];
+const TABS = ['Overview', 'Sessions', 'Tests', 'Reviews'];
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -32,6 +34,10 @@ const CourseDetail = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
+  const [courseTests, setCourseTests] = useState([]);
+  const [testsLoading, setTestsLoading] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
 
   const fetchCourse = useCallback(async () => {
     setLoading(true);
@@ -73,6 +79,57 @@ const CourseDetail = () => {
   }, [loading, course]);
 
   const isEnrolled = !!(enrollment || course?.isEnrolled);
+  const isCreator = user && course && (
+    course.instructor?._id === user._id ||
+    course.instructor === user._id
+  );
+
+  // Fetch course tests when Tests tab is active
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    if (activeTab === 'Tests') {
+      const interval = setInterval(() => setNow(new Date()), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'Tests' && id) {
+      const fetchTests = async () => {
+        setTestsLoading(true);
+        try {
+          const res = await api.get(`/api/courses/${id}/tests`);
+          setCourseTests(res.data || []);
+        } catch (err) { /* silent */ }
+        finally { setTestsLoading(false); }
+      };
+      fetchTests();
+    }
+  }, [activeTab, id]);
+
+  // Test schedule helpers
+  const getHighlightedDays = () => {
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
+    const highlighted = new Set();
+    courseTests.forEach(test => {
+      const windows = [...(test.settings?.scheduleWindows || [])];
+      if (test.settings?.scheduledStartTime && test.settings?.scheduledEndTime) {
+        windows.push({ startTime: test.settings.scheduledStartTime, endTime: test.settings.scheduledEndTime });
+      }
+      windows.forEach(w => {
+        const start = new Date(w.startTime);
+        const end = new Date(w.endTime);
+        const cursor = new Date(Math.max(start.getTime(), new Date(year, month, 1).getTime()));
+        const lastDay = new Date(Math.min(end.getTime(), new Date(year, month + 1, 0, 23, 59, 59).getTime()));
+        while (cursor <= lastDay) {
+          highlighted.add(cursor.getDate());
+          cursor.setDate(cursor.getDate() + 1);
+        }
+      });
+    });
+    return highlighted;
+  };
 
   const handleEnroll = async () => {
     if (!user) return navigate('/login');
@@ -208,7 +265,32 @@ const CourseDetail = () => {
                 )}
               </div>
 
-              {isEnrolled ? (
+              {isCreator ? (
+                <>
+                  <div className="text-center mb-4">
+                    <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-yellow-400/15 text-yellow-400 border border-yellow-400/30">
+                      Your Course
+                    </span>
+                  </div>
+                  <Link to={`/courses/${id}/edit`}>
+                    <button className="btn-primary w-full py-3 text-base mb-3">
+                      <span className="flex items-center justify-center gap-2">
+                        <Pencil className="w-4 h-4" />
+                        Edit Course
+                      </span>
+                    </button>
+                  </Link>
+                  <button
+                    className="btn-secondary w-full py-2.5 text-sm"
+                    onClick={() => navigate(`/courses/${id}/edit`)}
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      <Layers className="w-4 h-4" />
+                      Manage Sessions
+                    </span>
+                  </button>
+                </>
+              ) : isEnrolled ? (
                 <>
                   {/* Progress bar */}
                   <div className="mb-4">
@@ -382,7 +464,7 @@ const CourseDetail = () => {
                     .sort((a, b) => (a.order || 0) - (b.order || 0))
                     .map((session, index) => {
                       const isCompleted = completedSessions.has(session._id);
-                      const isLocked = !isEnrolled;
+                      const isLocked = !isEnrolled && !isCreator;
                       return (
                         <div
                           key={session._id}
@@ -450,6 +532,151 @@ const CourseDetail = () => {
           </div>
         )}
 
+        {/* Tests Tab */}
+        {activeTab === 'Tests' && (
+          <div className="animate-fadeIn space-y-6">
+            {/* Calendar */}
+            <div className="card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-txt flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-yellow-400" />
+                  Test Schedule
+                </h3>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1))}
+                    className="p-1.5 rounded-lg text-txt-muted hover:text-yellow-400 hover:bg-yellow-400/5 transition-colors">
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-sm font-semibold text-txt min-w-[120px] text-center">
+                    {calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </span>
+                  <button onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1))}
+                    className="p-1.5 rounded-lg text-txt-muted hover:text-yellow-400 hover:bg-yellow-400/5 transition-colors">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              {(() => {
+                const year = calendarMonth.getFullYear();
+                const month = calendarMonth.getMonth();
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const offset = firstDay === 0 ? 6 : firstDay - 1;
+                const highlighted = getHighlightedDays();
+                const today = new Date();
+                const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+                return (
+                  <div>
+                    <div className="grid grid-cols-7 gap-1 mb-2">
+                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
+                        <div key={d} className="text-center text-xs font-semibold text-txt-muted py-1">{d}</div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1">
+                      {Array.from({ length: offset }, (_, i) => (
+                        <div key={`empty-${i}`} className="h-10" />
+                      ))}
+                      {Array.from({ length: daysInMonth }, (_, i) => {
+                        const day = i + 1;
+                        const isHighlighted = highlighted.has(day);
+                        const isToday = isCurrentMonth && today.getDate() === day;
+                        return (
+                          <div key={day} className={`h-10 flex items-center justify-center rounded-lg text-sm relative transition-colors ${
+                            isHighlighted
+                              ? 'bg-yellow-400/15 text-yellow-400 font-bold border border-yellow-400/30'
+                              : isToday
+                              ? 'bg-surface-hover text-txt font-semibold'
+                              : 'text-txt-muted'
+                          }`}>
+                            {day}
+                            {isHighlighted && (
+                              <span className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-yellow-400" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+              <div className="flex items-center gap-4 mt-4 pt-4 border-t border-bdr text-xs text-txt-muted">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded bg-yellow-400/15 border border-yellow-400/30" />
+                  Test available
+                </span>
+              </div>
+            </div>
+
+            {/* Test Cards */}
+            {testsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="w-8 h-8 border-[3px] border-bdr border-t-yellow-400 rounded-full animate-spin" />
+              </div>
+            ) : courseTests.length === 0 ? (
+              <div className="card p-8 text-center">
+                <ClipboardList className="w-12 h-12 text-txt-muted mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-txt mb-1">No Tests Yet</h3>
+                <p className="text-txt-muted text-sm">
+                  {isCreator ? 'Add tests from the Edit Course page.' : 'The instructor hasn\'t added any tests yet.'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {courseTests.map(test => {
+                  const { status: testStatus, scheduledStart, scheduledEnd } = getTestStatus(test);
+                  return (
+                    <div key={test._id} className="card p-5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-bold text-txt truncate">{test.title}</h4>
+                            {testStatus === 'open' && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-green-400/10 text-green-400 border border-green-400/20">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                                Open
+                              </span>
+                            )}
+                            {testStatus === 'upcoming' && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-blue-400/10 text-blue-400 border border-blue-400/20">
+                                <Timer className="w-3 h-3" />
+                                Upcoming
+                              </span>
+                            )}
+                            {testStatus === 'closed' && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-400/10 text-red-400 border border-red-400/20">
+                                <Lock className="w-3 h-3" />
+                                Closed
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4 text-xs text-txt-muted">
+                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {test.settings?.duration || 30} min</span>
+                            <span>{test.questions?.length || 0} questions</span>
+                            {testStatus === 'upcoming' && scheduledStart && (
+                              <span className="text-blue-400 font-semibold">Opens in {formatCountdownTo(scheduledStart)}</span>
+                            )}
+                            {testStatus === 'open' && scheduledEnd && (
+                              <span className="text-green-400 font-semibold">Closes in {formatCountdownTo(scheduledEnd)}</span>
+                            )}
+                          </div>
+                        </div>
+                        {testStatus === 'open' && (isEnrolled || isCreator) && (
+                          <button
+                            onClick={() => navigate(`/tests/${test._id}/take`)}
+                            className="btn-primary text-sm px-4 py-2 flex-shrink-0"
+                          >
+                            Take Test
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Reviews Tab */}
         {activeTab === 'Reviews' && (
           <div className="animate-fadeIn">
@@ -475,6 +702,7 @@ const CourseDetail = () => {
                   onChange={(e) => setReviewComment(e.target.value)}
                   placeholder="Share your experience with this course..."
                   rows={3}
+                  maxLength={1000}
                   className="input-field resize-none mb-4"
                 />
                 <button type="submit" disabled={reviewSubmitting} className="btn-primary">

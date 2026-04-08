@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { gsap } from 'gsap';
 import {
   ArrowLeft, ChevronLeft, ChevronRight, CheckCircle, Play,
-  FileText, Video, Download
+  FileText, Video, Download, Trophy
 } from 'lucide-react';
 import api from '../../utils/api.js';
 import useAuth from '../../hooks/useAuth.js';
@@ -41,16 +42,19 @@ const SessionPlayer = () => {
   const [completedSessions, setCompletedSessions] = useState(new Set());
   const [progress, setProgress] = useState(0);
   const [slideDir, setSlideDir] = useState('');
+  const [showCongrats, setShowCongrats] = useState(false);
+  const congratsRef = useRef(null);
 
   const fetchCourse = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
       const res = await api.get(`/api/courses/${courseId}`);
-      const data = res.data.course || res.data;
+      const { course: courseData, sessions: sessionData, enrollment: enrollmentData } = res.data;
+      const data = courseData || res.data;
       setCourse(data);
 
-      const sortedSessions = (data.sessions || []).sort(
+      const sortedSessions = (sessionData || []).sort(
         (a, b) => (a.order || 0) - (b.order || 0)
       );
       setSessions(sortedSessions);
@@ -58,8 +62,8 @@ const SessionPlayer = () => {
       const current = sortedSessions.find((s) => s._id === sessionId) || sortedSessions[0];
       setCurrentSession(current);
 
-      setProgress(data.progress || 0);
-      const completed = (data.completedSessions || []).map((s) =>
+      setProgress(enrollmentData?.progress || 0);
+      const completed = (enrollmentData?.completedSessions || []).map((s) =>
         typeof s === 'string' ? s : s._id
       );
       setCompletedSessions(new Set(completed));
@@ -84,6 +88,40 @@ const SessionPlayer = () => {
     }
   }, [sessionId, sessions]);
 
+  useEffect(() => {
+    if (!showCongrats || !congratsRef.current) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(congratsRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.4, ease: 'power3.out' }
+      );
+      gsap.fromTo('.congrats-trophy',
+        { scale: 0, rotation: -15 },
+        { scale: 1, rotation: 0, duration: 0.6, delay: 0.2, ease: 'back.out(1.7)' }
+      );
+      gsap.fromTo('.congrats-text',
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, delay: 0.4, ease: 'power3.out' }
+      );
+      gsap.fromTo('.confetti-particle',
+        { y: 0, opacity: 1, scale: 0 },
+        {
+          y: () => gsap.utils.random(-200, 200),
+          x: () => gsap.utils.random(-250, 250),
+          rotation: () => gsap.utils.random(-360, 360),
+          scale: 1,
+          opacity: 0,
+          duration: 2,
+          delay: () => gsap.utils.random(0.2, 0.8),
+          ease: 'power2.out',
+          stagger: 0.05,
+        }
+      );
+    }, congratsRef);
+    const timer = setTimeout(() => setShowCongrats(false), 5000);
+    return () => { ctx.revert(); clearTimeout(timer); };
+  }, [showCongrats]);
+
   const currentIndex = sessions.findIndex((s) => s._id === currentSession?._id);
   const prevSession = currentIndex > 0 ? sessions[currentIndex - 1] : null;
   const nextSession = currentIndex < sessions.length - 1 ? sessions[currentIndex + 1] : null;
@@ -106,8 +144,12 @@ const SessionPlayer = () => {
       const newCompleted = completedSessions.size + 1;
       const newProgress = sessions.length > 0 ? (newCompleted / sessions.length) * 100 : 0;
       setProgress(newProgress);
+
+      if (completedSessions.size + 1 >= sessions.length) {
+        setShowCongrats(true);
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to mark as complete');
+      setError(err.response?.data?.error || err.response?.data?.message || 'Failed to mark as complete');
     } finally {
       setCompleting(false);
     }
@@ -370,6 +412,42 @@ const SessionPlayer = () => {
           </div>
         </div>
       </div>
+
+      {showCongrats && (
+        <div
+          ref={congratsRef}
+          onClick={() => setShowCongrats(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm cursor-pointer"
+        >
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {Array.from({ length: 24 }, (_, i) => (
+              <div
+                key={i}
+                className="confetti-particle absolute left-1/2 top-1/2"
+                style={{
+                  width: `${8 + (i % 3) * 4}px`,
+                  height: `${8 + (i % 3) * 4}px`,
+                  backgroundColor: ['#FACC15', '#3B82F6', '#22C55E', '#A855F7', '#F97316', '#EC4899'][i % 6],
+                  borderRadius: i % 3 === 0 ? '50%' : '2px',
+                }}
+              />
+            ))}
+          </div>
+          <div className="text-center relative z-10">
+            <div className="congrats-trophy mb-6">
+              <div className="w-24 h-24 mx-auto rounded-2xl bg-yellow-400/20 border-2 border-yellow-400/40 flex items-center justify-center">
+                <Trophy className="w-12 h-12 text-yellow-400" />
+              </div>
+            </div>
+            <div className="congrats-text">
+              <h2 className="text-4xl font-black text-white mb-2">Congratulations!</h2>
+              <p className="text-xl text-yellow-400 font-bold mb-2">Course Completed</p>
+              <p className="text-txt-muted">You finished all {sessions.length} sessions</p>
+              <p className="text-sm text-txt-muted mt-4">Click anywhere to close</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,25 +1,7 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Heart, MessageCircle, Eye, Pin, Clock } from 'lucide-react';
-
-const categoryColors = {
-  discussion: 'badge-blue',
-  question: 'badge-green',
-  announcement: 'badge-accent',
-  resource: 'badge-purple',
-};
-
-const timeAgo = (date) => {
-  const now = new Date();
-  const diff = now - new Date(date);
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  if (days > 0) return `${days}d ago`;
-  if (hours > 0) return `${hours}h ago`;
-  if (minutes > 0) return `${minutes}m ago`;
-  return 'Just now';
-};
+import { timeAgo } from '../../utils/helpers.js';
+import { CATEGORY_COLORS } from '../../utils/constants.js';
 
 const PostCard = ({ post, onLike, currentUserId }) => {
   const navigate = useNavigate();
@@ -38,7 +20,7 @@ const PostCard = ({ post, onLike, currentUserId }) => {
           {initial}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-txt">{author.firstName} {author.lastName}</p>
+          <Link to={`/users/${author._id}`} onClick={(e) => e.stopPropagation()} className="text-sm font-semibold text-txt hover:text-yellow-400 transition-colors">{author.firstName} {author.lastName}</Link>
           <div className="flex items-center gap-2 text-xs text-txt-muted">
             <Clock className="w-3 h-3" />
             {timeAgo(post.createdAt)}
@@ -48,7 +30,7 @@ const PostCard = ({ post, onLike, currentUserId }) => {
           {post.isPinned && (
             <span className="badge badge-accent flex items-center gap-1"><Pin className="w-3 h-3" /> Pinned</span>
           )}
-          <span className={`badge ${categoryColors[post.category] || 'badge-blue'}`}>
+          <span className={`badge ${CATEGORY_COLORS[post.category] || 'badge-blue'}`}>
             {post.category}
           </span>
         </div>

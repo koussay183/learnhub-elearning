@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { User, Mail, FileText, Link as LinkIcon, Bell, Globe, Save, Camera, Sun, Moon } from 'lucide-react';
 import api from '../../utils/api.js';
+import { validateName, validateUrl } from '../../utils/validators.js';
 import useAuth from '../../hooks/useAuth.js';
 import useAuthStore from '../../context/authStore.js';
 import { useTheme } from '../../context/ThemeContext.jsx';
@@ -46,6 +47,15 @@ const Profile = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     setError('');
+
+    const fnErr = validateName(firstName, 'First name');
+    const lnErr = validateName(lastName, 'Last name');
+    const urlErr = avatarUrl ? validateUrl(avatarUrl) : null;
+    if (fnErr || lnErr || urlErr) {
+      setError(fnErr || lnErr || urlErr);
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -155,6 +165,7 @@ const Profile = () => {
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="John"
+                  maxLength={50}
                   className="input-field"
                 />
               </div>
@@ -167,6 +178,7 @@ const Profile = () => {
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Doe"
+                  maxLength={50}
                   className="input-field"
                 />
               </div>
@@ -192,6 +204,7 @@ const Profile = () => {
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Tell us about yourself..."
                 rows={4}
+                maxLength={500}
                 className="input-field resize-none"
               />
             </div>

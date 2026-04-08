@@ -108,6 +108,21 @@ const MyCourses = () => {
         </div>
       </div>
 
+      {/* Tab Navigation */}
+      <div className="border-b border-bdr">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex gap-1">
+            <Link to="/courses" className="px-5 py-3 text-sm font-semibold text-txt-muted hover:text-txt-secondary transition-colors">
+              Discover Courses
+            </Link>
+            <span className="px-5 py-3 text-sm font-semibold text-yellow-400 relative cursor-default">
+              My Courses
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-400 rounded-t" />
+            </span>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Error */}
         {error && (
@@ -256,7 +271,7 @@ const MyCourses = () => {
                             </div>
                           </div>
                           <div className="pt-4 border-t border-bdr flex items-center gap-3">
-                            <Link to={`/courses/${courseId}`} className="flex-1">
+                            <Link to={`/courses/${courseId}/edit`} className="flex-1">
                               <button className="btn-secondary w-full">
                                 <span className="flex items-center justify-center gap-1.5">
                                   <Pencil className="w-4 h-4" />

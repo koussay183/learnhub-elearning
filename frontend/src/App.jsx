@@ -8,6 +8,7 @@ import Layout from './components/common/Layout.jsx';
 // Auth pages
 import { Login } from './pages/Login.jsx';
 import { Register } from './pages/Register.jsx';
+import NotFound from './pages/NotFound.jsx';
 
 // Main pages
 import Dashboard from './pages/Dashboard.jsx';
@@ -18,6 +19,7 @@ import CourseDetail from './pages/Courses/CourseDetail.jsx';
 import CreateCourse from './pages/Courses/CreateCourse.jsx';
 import SessionPlayer from './pages/Courses/SessionPlayer.jsx';
 import MyCourses from './pages/Courses/MyCourses.jsx';
+import EditCourse from './pages/Courses/EditCourse.jsx';
 
 // Community pages
 import Feed from './pages/Community/Feed.jsx';
@@ -31,6 +33,7 @@ import TestBrowser from './pages/Tests/TestBrowser.jsx';
 import CreateTest from './pages/Tests/CreateTest.jsx';
 import TakeTest from './pages/Tests/TakeTest.jsx';
 import TestResults from './pages/Tests/TestResults.jsx';
+import TestParticipants from './pages/Tests/TestParticipants.jsx';
 
 // Admin pages
 import AdminDashboard from './pages/Admin/AdminDashboard.jsx';
@@ -93,7 +96,8 @@ function App() {
           {/* Courses */}
           <Route path="/courses" element={<AppLayout activePage="courses"><CourseBrowser /></AppLayout>} />
           <Route path="/courses/create" element={<AppLayout activePage="courses"><CreateCourse /></AppLayout>} />
-          <Route path="/courses/my" element={<AppLayout activePage="courses"><MyCourses /></AppLayout>} />
+          <Route path="/courses/my" element={<AppLayout activePage="my-courses"><MyCourses /></AppLayout>} />
+          <Route path="/courses/:id/edit" element={<AppLayout activePage="courses"><EditCourse /></AppLayout>} />
           <Route path="/courses/:id" element={<AppLayout activePage="courses"><CourseDetail /></AppLayout>} />
           <Route path="/courses/:courseId/sessions/:sessionId" element={
             <ProtectedRoute><SessionPlayer /></ProtectedRoute>
@@ -114,6 +118,7 @@ function App() {
           {/* Tests */}
           <Route path="/tests" element={<AppLayout activePage="tests"><TestBrowser /></AppLayout>} />
           <Route path="/tests/create" element={<AppLayout activePage="tests"><CreateTest /></AppLayout>} />
+          <Route path="/tests/:testId/participants" element={<AppLayout activePage="tests"><TestParticipants /></AppLayout>} />
           <Route path="/tests/:testId/take" element={
             <ProtectedRoute><TakeTest /></ProtectedRoute>
           } />
@@ -144,7 +149,7 @@ function App() {
 
           {/* Landing / Default */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         </Router>
       </SocketProvider>

@@ -172,7 +172,7 @@ const TestResults = () => {
                   >
                     <div className="flex items-start justify-between mb-2">
                       <span className="text-sm font-bold text-txt-secondary">
-                        Q{index + 1}. {q.text || q.questionText}
+                        Q{index + 1}. {q.text || q.questionText || q.question}
                       </span>
                       {isCorrect ? (
                         <span className="badge badge-green inline-flex items-center gap-1">
@@ -184,6 +184,22 @@ const TestResults = () => {
                         </span>
                       )}
                     </div>
+                    {q.attachments?.length > 0 && (
+                      <div className="flex flex-wrap gap-3 my-3">
+                        {q.attachments.map((att, ai) => {
+                          const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(att.url || '');
+                          return isImage ? (
+                            <img key={ai} src={att.url} alt={att.name || `Attachment ${ai + 1}`}
+                              className="max-w-xs max-h-48 rounded-lg border-2 border-bdr object-contain" />
+                          ) : (
+                            <a key={ai} href={att.url} target="_blank" rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border-2 border-bdr rounded-lg text-xs font-medium text-yellow-400 hover:bg-yellow-400/10 transition-colors">
+                              {att.name || 'View File'}
+                            </a>
+                          );
+                        })}
+                      </div>
+                    )}
                     <div className="text-sm space-y-1 mt-2">
                       <p className="text-txt-secondary">
                         <span className="font-medium">Your answer:</span>{' '}

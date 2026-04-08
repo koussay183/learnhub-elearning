@@ -2,10 +2,14 @@ import mongoose from 'mongoose';
 
 const QuestionSchema = new mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
-  type: { type: String, enum: ['multiple-choice', 'short-answer', 'essay'], required: true },
+  type: { type: String, enum: ['multiple-choice', 'short-answer', 'essay', 'file-response'], required: true },
   question: { type: String, required: true },
   options: [String],
   correctAnswer: { type: String },
+  attachments: [{
+    url: { type: String, required: true },
+    name: { type: String, default: '' },
+  }],
   points: { type: Number, default: 1 },
 });
 
@@ -23,7 +27,12 @@ const TestSchema = new mongoose.Schema(
       showResults: { type: Boolean, default: true },
       scheduledStartTime: { type: Date, default: null },
       scheduledEndTime: { type: Date, default: null },
+      scheduleWindows: [{
+        startTime: { type: Date, required: true },
+        endTime: { type: Date, required: true },
+      }],
       openToPublic: { type: Boolean, default: true },
+      requireCamera: { type: Boolean, default: false },
     },
     totalAttempts: { type: Number, default: 0 },
     status: { type: String, enum: ['draft', 'published', 'archived'], default: 'draft' },
@@ -43,14 +52,21 @@ const TestAttemptSchema = new mongoose.Schema(
     score: { type: Number, default: 0 },
     totalPoints: { type: Number, default: 0 },
     percentage: { type: Number, default: 0 },
+    passed: { type: Boolean, default: false },
     timeTaken: { type: Number, default: 0 },
     startedAt: { type: Date, required: true },
     submittedAt: { type: Date, default: null },
-    status: { type: String, enum: ['in-progress', 'submitted', 'graded'], default: 'in-progress' },
+    status: { type: String, enum: ['in-progress', 'submitted', 'completed', 'graded'], default: 'in-progress' },
     sessionId: { type: String },
   },
   { timestamps: true }
 );
+
+TestSchema.index({ status: 1, createdAt: -1 });
+TestSchema.index({ courseId: 1 });
+TestSchema.index({ createdBy: 1 });
+TestAttemptSchema.index({ testId: 1, userId: 1 });
+TestAttemptSchema.index({ userId: 1 });
 
 export const Test = mongoose.model('Test', TestSchema);
 export const TestAttempt = mongoose.model('TestAttempt', TestAttemptSchema);

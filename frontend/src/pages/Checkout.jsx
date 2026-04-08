@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { CreditCard, Lock, CheckCircle, ArrowLeft, Shield } from 'lucide-react';
 import api from '../utils/api.js';
+import { validateCardNumber, validateExpiry, validateCvv } from '../utils/validators.js';
 
 const Checkout = () => {
   const { courseId } = useParams();
@@ -52,8 +53,17 @@ const Checkout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setProcessing(true);
     setError('');
+
+    const cardErr = validateCardNumber(card.cardNumber);
+    const expErr = validateExpiry(card.expiryDate);
+    const cvvErr = validateCvv(card.cvv);
+    if (cardErr || expErr || cvvErr) {
+      setError(cardErr || expErr || cvvErr);
+      return;
+    }
+
+    setProcessing(true);
 
     try {
       await api.post('/api/courses/checkout', {

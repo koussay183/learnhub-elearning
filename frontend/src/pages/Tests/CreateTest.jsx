@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plus, Trash2, HelpCircle, Star, Clock, Target, ArrowLeft, Shuffle, Eye, Calendar } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Plus, Trash2, HelpCircle, Star, Clock, Target, ArrowLeft, Shuffle, Eye, Calendar, Camera } from 'lucide-react';
 import api from '../../utils/api.js';
+import { validateTitle } from '../../utils/validators.js';
 
 const emptyQuestion = () => ({
   id: Date.now(),
@@ -10,10 +11,14 @@ const emptyQuestion = () => ({
   points: 1,
   options: ['', '', '', ''],
   correctAnswer: 0,
+  correctAnswerText: '',
+  attachments: [],
 });
 
 const CreateTest = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const courseId = searchParams.get('courseId');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -28,6 +33,7 @@ const CreateTest = () => {
   const [showResults, setShowResults] = useState(true);
   const [scheduledStartTime, setScheduledStartTime] = useState('');
   const [scheduledEndTime, setScheduledEndTime] = useState('');
+  const [requireCamera, setRequireCamera] = useState(false);
 
   // Questions
   const [questions, setQuestions] = useState([emptyQuestion()]);
@@ -58,6 +64,35 @@ const CreateTest = () => {
     );
   };
 
+  const addAttachment = (qIndex) => {
+    setQuestions((prev) =>
+      prev.map((q, i) => {
+        if (i !== qIndex) return q;
+        return { ...q, attachments: [...q.attachments, { url: '', name: '' }] };
+      })
+    );
+  };
+
+  const updateAttachment = (qIndex, aIndex, field, value) => {
+    setQuestions((prev) =>
+      prev.map((q, i) => {
+        if (i !== qIndex) return q;
+        const newAttachments = [...q.attachments];
+        newAttachments[aIndex] = { ...newAttachments[aIndex], [field]: value };
+        return { ...q, attachments: newAttachments };
+      })
+    );
+  };
+
+  const removeAttachment = (qIndex, aIndex) => {
+    setQuestions((prev) =>
+      prev.map((q, i) => {
+        if (i !== qIndex) return q;
+        return { ...q, attachments: q.attachments.filter((_, j) => j !== aIndex) };
+      })
+    );
+  };
+
   const totalPoints = questions.reduce((sum, q) => sum + (Number(q.points) || 0), 0);
 
   const handleSubmit = async (e) => {
@@ -65,8 +100,9 @@ const CreateTest = () => {
     setError('');
 
     // Validation
-    if (!title.trim()) {
-      setError('Test title is required.');
+    const titleErr = validateTitle(title, 200);
+    if (titleErr) {
+      setError(titleErr);
       return;
     }
     if (questions.some((q) => !q.text.trim())) {
@@ -88,11 +124,13 @@ const CreateTest = () => {
       title: title.trim(),
       description: description.trim(),
       status: 'published',
+      courseId: courseId || undefined,
       settings: {
         duration: Number(duration),
         passingScore: Number(passingScore),
         shuffleQuestions,
         showResults,
+        requireCamera,
         scheduledStartTime: scheduledStartTime || undefined,
         scheduledEndTime: scheduledEndTime || undefined,
       },
@@ -101,15 +139,20 @@ const CreateTest = () => {
         question: q.text.trim(),
         points: Number(q.points),
         options: q.type === 'multiple-choice' ? q.options : undefined,
+        attachments: q.type === 'file-response' && q.attachments.length > 0 ? q.attachments : undefined,
         correctAnswer:
-          q.type === 'multiple-choice' ? q.options[q.correctAnswer] : undefined,
+          q.type === 'multiple-choice'
+            ? q.options[q.correctAnswer]
+            : q.type === 'file-response'
+              ? q.correctAnswerText || undefined
+              : undefined,
       })),
     };
 
     try {
       setLoading(true);
       await api.post('/api/tests', payload);
-      navigate('/tests');
+      navigate(courseId ? `/courses/${courseId}/edit` : '/tests');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create test.');
     } finally {
@@ -124,10 +167,12 @@ const CreateTest = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-black text-txt">Create Test</h1>
-            <p className="mt-1 text-txt-muted">Design a new test with questions</p>
+            <p className="mt-1 text-txt-muted">
+              {courseId ? 'Creating test for a course' : 'Design a new test with questions'}
+            </p>
           </div>
           <button
-            onClick={() => navigate('/tests')}
+            onClick={() => navigate(courseId ? `/courses/${courseId}/edit` : '/tests')}
             className="btn-ghost flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" /> Cancel
@@ -154,6 +199,7 @@ const CreateTest = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. JavaScript Fundamentals Quiz"
+                  maxLength={200}
                   className="input-field"
                 />
               </div>
@@ -263,6 +309,24 @@ const CreateTest = () => {
                   <span className="text-sm text-txt-secondary">Show results to students after submission</span>
                 </div>
               </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div
+                  onClick={() => setRequireCamera(!requireCamera)}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    requireCamera ? 'bg-yellow-400' : 'bg-gray-700'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full shadow transition-transform ${
+                      requireCamera ? 'translate-x-5 bg-black' : 'bg-gray-400'
+                    }`}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-txt-muted" />
+                  <span className="text-sm text-txt-secondary">Require camera (anti-cheat)</span>
+                </div>
+              </label>
             </div>
           </div>
 
@@ -316,6 +380,7 @@ const CreateTest = () => {
                       >
                         <option value="multiple-choice">Multiple Choice</option>
                         <option value="short-answer">Short Answer</option>
+                        <option value="file-response">File Response (Image/PDF)</option>
                       </select>
                     </div>
                     <div>
@@ -388,6 +453,61 @@ const CreateTest = () => {
                           )}
                         </label>
                       ))}
+                    </div>
+                  )}
+
+                  {/* File response attachments & expected answer */}
+                  {question.type === 'file-response' && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-txt-secondary mb-1">
+                          Attachments (Image/PDF URLs)
+                        </label>
+                        {question.attachments.map((att, aIndex) => (
+                          <div key={aIndex} className="flex items-center gap-2 mb-2">
+                            <input
+                              type="text"
+                              value={att.name}
+                              onChange={(e) => updateAttachment(qIndex, aIndex, 'name', e.target.value)}
+                              placeholder="File name"
+                              className="input-field py-2 text-sm flex-1"
+                            />
+                            <input
+                              type="text"
+                              value={att.url}
+                              onChange={(e) => updateAttachment(qIndex, aIndex, 'url', e.target.value)}
+                              placeholder="File URL"
+                              className="input-field py-2 text-sm flex-[2]"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeAttachment(qIndex, aIndex)}
+                              className="text-red-400 hover:text-red-300 transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => addAttachment(qIndex)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-yellow-400 hover:text-yellow-300 transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Add Attachment
+                        </button>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-txt-secondary mb-1">
+                          Expected Correct Answer
+                        </label>
+                        <input
+                          type="text"
+                          value={question.correctAnswerText}
+                          onChange={(e) => updateQuestion(qIndex, 'correctAnswerText', e.target.value)}
+                          placeholder="Enter the expected correct answer..."
+                          className="input-field py-2 text-sm"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>

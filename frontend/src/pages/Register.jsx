@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus, Mail, Lock, User } from 'lucide-react';
 import useAuthStore from '../context/authStore.js';
+import { validateEmail, validatePassword, validateName } from '../utils/validators.js';
 
 export const Register = () => {
   const navigate = useNavigate();
@@ -25,16 +26,15 @@ export const Register = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.firstName) newErrors.firstName = 'First name is required';
-    if (!formData.lastName) newErrors.lastName = 'Last name is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      newErrors.email = 'Invalid email';
-    if (!formData.password) newErrors.password = 'Password is required';
-    else if (formData.password.length < 6)
-      newErrors.password = 'Password must be at least 6 characters';
-    if (formData.password !== formData.confirmPassword)
-      newErrors.confirmPassword = 'Passwords do not match';
+    const fnErr = validateName(formData.firstName, 'First name');
+    if (fnErr) newErrors.firstName = fnErr;
+    const lnErr = validateName(formData.lastName, 'Last name');
+    if (lnErr) newErrors.lastName = lnErr;
+    const emErr = validateEmail(formData.email);
+    if (emErr) newErrors.email = emErr;
+    const pwErr = validatePassword(formData.password);
+    if (pwErr) newErrors.password = pwErr;
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
     return newErrors;
   };
 
@@ -94,7 +94,8 @@ export const Register = () => {
                     placeholder="John"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className={`input-field pl-10 ${errors.firstName ? 'border-red-500' : ''}`}
+                    maxLength={50}
+                    className={`input-field pl-12 ${errors.firstName ? 'border-red-500' : ''}`}
                   />
                 </div>
                 {errors.firstName && <p className="text-red-400 text-sm mt-1">{errors.firstName}</p>}
@@ -109,7 +110,8 @@ export const Register = () => {
                     placeholder="Doe"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className={`input-field pl-10 ${errors.lastName ? 'border-red-500' : ''}`}
+                    maxLength={50}
+                    className={`input-field pl-12 ${errors.lastName ? 'border-red-500' : ''}`}
                   />
                 </div>
                 {errors.lastName && <p className="text-red-400 text-sm mt-1">{errors.lastName}</p>}
@@ -126,7 +128,8 @@ export const Register = () => {
                   placeholder="you@example.com"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`input-field pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                  maxLength={100}
+                  className={`input-field pl-12 ${errors.email ? 'border-red-500' : ''}`}
                 />
               </div>
               {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
@@ -142,7 +145,7 @@ export const Register = () => {
                   placeholder="--------"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`input-field pl-10 ${errors.password ? 'border-red-500' : ''}`}
+                  className={`input-field pl-12 ${errors.password ? 'border-red-500' : ''}`}
                 />
               </div>
               {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
@@ -158,7 +161,7 @@ export const Register = () => {
                   placeholder="--------"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`input-field pl-10 ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                  className={`input-field pl-12 ${errors.confirmPassword ? 'border-red-500' : ''}`}
                 />
               </div>
               {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}

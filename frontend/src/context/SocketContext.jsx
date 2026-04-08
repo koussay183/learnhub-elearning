@@ -1,18 +1,16 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import useAuthStore from './authStore.js';
+import { API_BASE_URL } from '../utils/constants.js';
 
 const SocketContext = createContext(null);
-
-const _envUrl = import.meta.env.VITE_API_URL;
-const SOCKET_URL = _envUrl && _envUrl.length > 0 ? _envUrl : `${window.location.protocol}//${window.location.hostname}:5000`;
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
-    const newSocket = io(SOCKET_URL, {
+    const newSocket = io(API_BASE_URL, {
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: 5,

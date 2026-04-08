@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BookOpen, MessageSquare, CheckCircle, XCircle, Trash2, X } from 'lucide-react';
 import api from '../../utils/api.js';
+import { formatDate } from '../../utils/helpers.js';
 
 const ContentModeration = () => {
   const [activeTab, setActiveTab] = useState('courses');
@@ -30,15 +31,6 @@ const ContentModeration = () => {
     };
     fetchData();
   }, [activeTab]);
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return 'N/A';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
 
   const approveCourse = async (courseId) => {
     try {

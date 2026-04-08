@@ -1,4 +1,6 @@
 import ChatMessage from '../models/ChatMessage.js';
+import Enrollment from '../models/Enrollment.js';
+import Course from '../models/Course.js';
 import { createNotification } from '../controllers/notificationController.js';
 
 const activeUsers = new Map();
@@ -36,6 +38,35 @@ export const setupSocketHandlers = (io) => {
         const populated = await ChatMessage.findById(message._id)
           .populate('senderId', 'firstName lastName avatar');
         io.to(roomId).emit('chat:receive-message', populated);
+
+        // Notify enrolled users for course channels (skip general — too noisy)
+        if (roomId.startsWith('course_')) {
+          const courseId = roomId.replace('course_', '');
+          const enrollments = await Enrollment.find({ courseId }).select('userId');
+          const course = await Course.findById(courseId).select('instructor title');
+
+          const recipientIds = enrollments.map(e => e.userId.toString());
+          if (course?.instructor) recipientIds.push(course.instructor.toString());
+          const uniqueRecipients = [...new Set(recipientIds)].filter(id => id !== userId);
+
+          // Find who is currently in the room
+          const socketsInRoom = await io.in(roomId).fetchSockets();
+          const usersInRoom = new Set(socketsInRoom.map(s => s.userId).filter(Boolean));
+
+          const sender = populated.senderId;
+          const senderName = `${sender.firstName} ${sender.lastName}`;
+          for (const recipientId of uniqueRecipients) {
+            if (!usersInRoom.has(recipientId)) {
+              createNotification(
+                io, recipientId, 'message',
+                `New message in ${course?.title || 'course'}`,
+                `${senderName}: ${content.substring(0, 80)}`,
+                { roomId, fromUserId: userId },
+                `/chat?room=${roomId}`
+              );
+            }
+          }
+        }
       } catch (err) {
         socket.emit('chat:error', { message: 'Failed to send message' });
       }
@@ -60,7 +91,8 @@ export const setupSocketHandlers = (io) => {
           io, toUserId, 'message',
           'New Message',
           `${sender.firstName} ${sender.lastName} sent you a message`,
-          { roomId, fromUserId: userId }
+          { roomId, fromUserId: userId },
+          `/chat?room=${roomId}`
         );
       } catch (err) {
         socket.emit('chat:error', { message: 'Failed to send message' });
@@ -69,7 +101,19 @@ export const setupSocketHandlers = (io) => {
 
     // Chat: typing indicator
     socket.on('chat:typing', ({ roomId, userId, userName }) => {
-      socket.to(roomId).emit('chat:user-typing', { userId, userName });
+      socket.to(roomId).emit('chat:user-typing', { userId, userName, roomId });
+    });
+
+    // Chat: mark messages as read
+    socket.on('chat:mark-read', async ({ roomId, userId }) => {
+      try {
+        await ChatMessage.updateMany(
+          { roomId, senderId: { $ne: userId }, readBy: { $ne: userId } },
+          { $addToSet: { readBy: userId } }
+        );
+      } catch (err) {
+        console.error('Mark read error:', err);
+      }
     });
 
     // Chat: leave room

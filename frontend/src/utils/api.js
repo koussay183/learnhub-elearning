@@ -1,10 +1,8 @@
 import axios from 'axios';
-
-const envUrl = import.meta.env.VITE_API_URL;
-const API_URL = envUrl && envUrl.length > 0 ? envUrl : `${window.location.protocol}//${window.location.hostname}:5000`;
+import { API_BASE_URL } from './constants.js';
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -33,12 +31,19 @@ api.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem('refreshToken');
-        const response = await axios.post(`${API_URL}/api/auth/refresh`, {
+        const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
           refreshToken,
         });
 
         localStorage.setItem('accessToken', response.data.accessToken);
         localStorage.setItem('refreshToken', response.data.refreshToken);
+
+        // Sync Zustand store
+        const { default: useAuthStore } = await import('../context/authStore.js');
+        useAuthStore.setState({
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
+        });
 
         api.defaults.headers.common['Authorization'] = `Bearer ${response.data.accessToken}`;
         originalRequest.headers['Authorization'] = `Bearer ${response.data.accessToken}`;
@@ -47,7 +52,9 @@ api.interceptors.response.use(
       } catch (refreshError) {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        // Sync Zustand store
+        const { default: useAuthStore } = await import('../context/authStore.js');
+        useAuthStore.getState().logout();
         return Promise.reject(refreshError);
       }
     }

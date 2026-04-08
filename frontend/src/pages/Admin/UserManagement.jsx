@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Edit3, Trash2, UserCheck, UserX, X, ChevronLeft, ChevronRight, Users } from 'lucide-react';
 import api from '../../utils/api.js';
+import { formatDate } from '../../utils/helpers.js';
 
 const ROLES = ['student', 'instructor', 'admin'];
 
@@ -97,15 +98,6 @@ const UserManagement = () => {
     }
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return 'N/A';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
   const roleBadgeColor = (role) => {
     const map = {
       admin: 'badge-red',
@@ -145,7 +137,7 @@ const UserManagement = () => {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search by name or email..."
-                  className="input-field pl-10"
+                  className="input-field pl-12"
                 />
               </div>
               <button

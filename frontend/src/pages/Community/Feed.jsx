@@ -188,6 +188,7 @@ const Feed = () => {
                     value={newPost.title}
                     onChange={(e) => setNewPost((p) => ({ ...p, title: e.target.value }))}
                     placeholder="What's on your mind?"
+                    maxLength={200}
                     className="w-full px-4 py-2.5 bg-surface-input border-2 border-bdr rounded-xl text-sm text-txt placeholder-txt-muted
                                focus:outline-none focus:border-yellow-400/50 transition-all"
                     required
@@ -203,6 +204,7 @@ const Feed = () => {
                     onChange={(e) => setNewPost((p) => ({ ...p, content: e.target.value }))}
                     placeholder="Share your thoughts, questions, or resources..."
                     rows={5}
+                    maxLength={10000}
                     className="w-full px-4 py-2.5 bg-surface-input border-2 border-bdr rounded-xl text-sm text-txt placeholder-txt-muted
                                focus:outline-none focus:border-yellow-400/50 transition-all resize-none"
                     required

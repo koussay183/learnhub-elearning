@@ -6,19 +6,9 @@ import {
   BookOpen, Image, DollarSign, Globe, Layers, GripVertical
 } from 'lucide-react';
 import api from '../../utils/api.js';
+import { COURSE_CATEGORIES, COURSE_LEVELS } from '../../utils/constants.js';
+import { validateTitle, validateDescription, validateUrl, validatePrice } from '../../utils/validators.js';
 import useAuth from '../../hooks/useAuth.js';
-
-const CATEGORIES = [
-  'Development',
-  'Business',
-  'Design',
-  'Marketing',
-  'Science',
-  'Language',
-  'Music',
-  'Other',
-];
-const LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
 
 const emptySession = { title: '', videoUrl: '', pdfUrl: '', order: 1 };
 
@@ -90,12 +80,27 @@ const CreateCourse = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!form.title.trim()) newErrors.title = 'Title is required';
-    if (!form.description.trim()) newErrors.description = 'Description is required';
-    if (form.price < 0) newErrors.price = 'Price cannot be negative';
+    const titleErr = validateTitle(form.title, 150);
+    if (titleErr) newErrors.title = titleErr;
+    const descErr = validateDescription(form.description, 5000);
+    if (descErr) newErrors.description = descErr;
+    const priceErr = validatePrice(form.price);
+    if (priceErr) newErrors.price = priceErr;
+    if (form.thumbnail) {
+      const thumbErr = validateUrl(form.thumbnail);
+      if (thumbErr) newErrors.thumbnail = thumbErr;
+    }
 
     sessions.forEach((s, i) => {
       if (!s.title.trim()) newErrors[`session_${i}_title`] = 'Session title is required';
+      if (s.videoUrl) {
+        const vidErr = validateUrl(s.videoUrl);
+        if (vidErr) newErrors[`session_${i}_videoUrl`] = vidErr;
+      }
+      if (s.pdfUrl) {
+        const pdfErr = validateUrl(s.pdfUrl);
+        if (pdfErr) newErrors[`session_${i}_pdfUrl`] = pdfErr;
+      }
     });
 
     return newErrors;
@@ -181,6 +186,7 @@ const CreateCourse = () => {
                       placeholder="e.g. Introduction to Web Development"
                       value={form.title}
                       onChange={handleChange}
+                      maxLength={150}
                       className={`input-field ${errors.title ? 'border-red-400' : ''}`}
                     />
                     {errors.title && (
@@ -199,6 +205,7 @@ const CreateCourse = () => {
                       placeholder="Describe what students will learn in this course..."
                       value={form.description}
                       onChange={handleChange}
+                      maxLength={5000}
                       className={`input-field resize-none ${errors.description ? 'border-red-400' : ''}`}
                     />
                     {errors.description && (
@@ -216,7 +223,7 @@ const CreateCourse = () => {
                         onChange={handleChange}
                         className="input-field"
                       >
-                        {CATEGORIES.map((cat) => (
+                        {COURSE_CATEGORIES.map((cat) => (
                           <option key={cat} value={cat}>{cat}</option>
                         ))}
                       </select>
@@ -230,7 +237,7 @@ const CreateCourse = () => {
                         onChange={handleChange}
                         className="input-field"
                       >
-                        {LEVELS.map((lvl) => (
+                        {COURSE_LEVELS.map((lvl) => (
                           <option key={lvl} value={lvl}>{lvl}</option>
                         ))}
                       </select>

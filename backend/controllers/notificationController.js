@@ -8,7 +8,8 @@ export const getNotifications = async (req, res) => {
     const unreadCount = await Notification.countDocuments({ userId: req.userId, read: false });
     res.json({ notifications, unreadCount });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Get notifications error:', error);
+    res.status(500).json({ error: 'Failed to fetch notifications' });
   }
 };
 
@@ -25,14 +26,15 @@ export const markAsRead = async (req, res) => {
     }
     res.json({ message: 'Marked as read' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Mark as read error:', error);
+    res.status(500).json({ error: 'Failed to mark as read' });
   }
 };
 
 // Helper to create + emit notification
-export const createNotification = async (io, userId, type, title, message, data = {}) => {
+export const createNotification = async (io, userId, type, title, message, data = {}, link = '') => {
   try {
-    const notification = await Notification.create({ userId, type, title, message, data });
+    const notification = await Notification.create({ userId, type, title, message, data, link });
     // Emit to the specific user's socket room
     io.to(`user_${userId}`).emit('notification:new', notification);
     return notification;

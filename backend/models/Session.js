@@ -14,4 +14,6 @@ const SessionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+SessionSchema.index({ courseId: 1, order: 1 });
+
 export default mongoose.model('Session', SessionSchema);

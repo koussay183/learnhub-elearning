@@ -419,7 +419,7 @@ const LandingPage = () => {
 
           <div className="text-center mt-12">
             <button
-              onClick={() => navigate('/courses')}
+              onClick={() => navigate('/register')}
               className="px-8 py-4 bg-white/5 text-white font-bold rounded-2xl border-2 border-white/10 hover:border-yellow-400/50 hover:bg-yellow-400/5 transition-all"
             >
               Browse All Courses →

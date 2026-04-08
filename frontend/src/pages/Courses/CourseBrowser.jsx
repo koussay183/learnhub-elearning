@@ -1,29 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { Search, BookOpen, SlidersHorizontal, ChevronLeft, ChevronRight, X, Plus } from 'lucide-react';
 import api from '../../utils/api.js';
+import { COURSE_CATEGORIES, COURSE_LEVELS } from '../../utils/constants.js';
 import useAuth from '../../hooks/useAuth.js';
 import CourseCard from '../../components/course/CourseCard.jsx';
 
-const CATEGORIES = [
-  'All Categories',
-  'Development',
-  'Business',
-  'Design',
-  'Marketing',
-  'Science',
-  'Language',
-  'Music',
-  'Other',
-];
-
-const LEVELS = ['All Levels', 'Beginner', 'Intermediate', 'Advanced'];
 const PRICE_OPTIONS = ['All', 'Free', 'Paid'];
 const PAGE_SIZE = 9;
 
 const CourseBrowser = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const cardsRef = useRef(null);
 
@@ -34,7 +23,7 @@ const CourseBrowser = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [filters, setFilters] = useState({
-    search: '',
+    search: searchParams.get('search') || '',
     category: 'All Categories',
     level: 'All Levels',
     price: 'All',
@@ -53,7 +42,7 @@ const CourseBrowser = () => {
 
       const res = await api.get('/api/courses', { params });
       setCourses(res.data.courses || res.data || []);
-      setTotalPages(res.data.totalPages || 1);
+      setTotalPages(res.data.pages || 1);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load courses');
     } finally {
@@ -110,6 +99,21 @@ const CourseBrowser = () => {
         </div>
       </div>
 
+      {/* Tab Navigation */}
+      <div className="border-b border-bdr">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex gap-1">
+            <span className="px-5 py-3 text-sm font-semibold text-yellow-400 relative cursor-default">
+              Discover Courses
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-400 rounded-t" />
+            </span>
+            <Link to="/courses/my" className="px-5 py-3 text-sm font-semibold text-txt-muted hover:text-txt-secondary transition-colors">
+              My Courses
+            </Link>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Filter Bar */}
         <div className="card p-5 mb-8">
@@ -131,7 +135,7 @@ const CourseBrowser = () => {
                 placeholder="Search courses..."
                 value={filters.search}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
-                className="input-field pl-10"
+                className="input-field pl-12"
               />
             </div>
 
@@ -141,7 +145,7 @@ const CourseBrowser = () => {
               onChange={(e) => handleFilterChange('category', e.target.value)}
               className="input-field"
             >
-              {CATEGORIES.map((cat) => (
+              {['All Categories', ...COURSE_CATEGORIES].map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
@@ -152,7 +156,7 @@ const CourseBrowser = () => {
               onChange={(e) => handleFilterChange('level', e.target.value)}
               className="input-field"
             >
-              {LEVELS.map((lvl) => (
+              {['All Levels', ...COURSE_LEVELS].map((lvl) => (
                 <option key={lvl} value={lvl}>{lvl}</option>
               ))}
             </select>

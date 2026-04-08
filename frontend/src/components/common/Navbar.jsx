@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Bell, Menu, X, ChevronDown, LogOut, Settings, User, BookOpen, MessageSquare, GraduationCap, Sun, Moon } from 'lucide-react';
+import { Search, Bell, Menu, X, ChevronDown, LogOut, Settings, User, BookOpen, MessageSquare, GraduationCap, Sun, Moon, LayoutDashboard, MessageCircle, Shield, ClipboardList } from 'lucide-react';
 import api from '../../utils/api.js';
+import { timeAgo } from '../../utils/helpers.js';
 import { useSocket } from '../../context/SocketContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
 
@@ -11,6 +12,7 @@ const Navbar = ({ user, onLogout }) => {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef(null);
   const notifRef = useRef(null);
   const navigate = useNavigate();
@@ -74,18 +76,17 @@ const Navbar = ({ user, onLogout }) => {
     { label: 'Tests', to: '/tests', icon: GraduationCap },
   ];
 
-  const userInitial = user?.firstName?.charAt(0)?.toUpperCase() || 'U';
+  const mobileNavItems = [
+    { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+    { label: 'Courses', to: '/courses', icon: BookOpen },
+    { label: 'My Courses', to: '/courses/my', icon: GraduationCap },
+    { label: 'Community', to: '/community', icon: MessageSquare },
+    { label: 'Chat', to: '/chat', icon: MessageCircle },
+    { label: 'Tests', to: '/tests', icon: ClipboardList },
+    { label: 'Settings', to: '/settings', icon: Settings },
+  ];
 
-  const timeAgo = (date) => {
-    const now = new Date();
-    const diff = now - new Date(date);
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Just now';
-    if (mins < 60) return `${mins}m ago`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}h ago`;
-    return `${Math.floor(hours / 24)}d ago`;
-  };
+  const userInitial = user?.firstName?.charAt(0)?.toUpperCase() || 'U';
 
   return (
     <nav className="fixed top-0 left-0 right-0 h-16 bg-surface/95 backdrop-blur-md border-b border-bdr z-50">
@@ -116,7 +117,15 @@ const Navbar = ({ user, onLogout }) => {
             <input
               type="text"
               placeholder="Search courses, topics..."
-              className="w-full pl-10 pr-4 py-2 bg-surface-input border-2 border-bdr rounded-xl text-sm text-txt placeholder-txt-muted
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchQuery.trim()) {
+                  navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
+                  setSearchQuery('');
+                }
+              }}
+              className="w-full pl-12 pr-4 py-2 bg-surface-input border-2 border-bdr rounded-xl text-sm text-txt placeholder-txt-muted
                          focus:border-yellow-400/50 focus:outline-none transition-all"
             />
           </div>
@@ -170,7 +179,17 @@ const Navbar = ({ user, onLogout }) => {
                     <div className="p-6 text-center text-txt-muted text-sm">No notifications yet</div>
                   ) : (
                     notifications.slice(0, 10).map((n) => (
-                      <div key={n._id} className={`px-4 py-3 border-b border-bdr/50 hover:bg-surface-hover transition-colors cursor-pointer ${!n.read ? 'bg-yellow-400/5' : ''}`}>
+                      <div key={n._id}
+                        onClick={async () => {
+                          if (!n.read) {
+                            try { await api.put(`/api/notifications/${n._id}/read`); } catch {}
+                            setNotifications(prev => prev.map(x => x._id === n._id ? { ...x, read: true } : x));
+                            setUnreadCount(prev => Math.max(0, prev - 1));
+                          }
+                          setNotifOpen(false);
+                          if (n.link) navigate(n.link);
+                        }}
+                        className={`px-4 py-3 border-b border-bdr/50 hover:bg-surface-hover transition-colors cursor-pointer ${!n.read ? 'bg-yellow-400/5' : ''}`}>
                         <p className="text-sm font-semibold text-txt">{n.title}</p>
                         <p className="text-xs text-txt-muted mt-0.5">{n.message}</p>
                         <p className="text-[10px] text-txt-muted mt-1">{timeAgo(n.createdAt)}</p>
@@ -199,9 +218,9 @@ const Navbar = ({ user, onLogout }) => {
                   <p className="text-xs text-txt-muted">{user?.email}</p>
                 </div>
                 <div className="py-1">
-                  <Link to="/settings" onClick={() => setProfileDropdownOpen(false)}
+                  <Link to={`/users/${user?._id}`} onClick={() => setProfileDropdownOpen(false)}
                     className="flex items-center gap-2 px-4 py-2.5 text-sm text-txt-secondary hover:text-yellow-400 hover:bg-yellow-400/5 transition-all">
-                    <User className="w-4 h-4" /> Profile
+                    <User className="w-4 h-4" /> View Profile
                   </Link>
                   <Link to="/settings" onClick={() => setProfileDropdownOpen(false)}
                     className="flex items-center gap-2 px-4 py-2.5 text-sm text-txt-secondary hover:text-yellow-400 hover:bg-yellow-400/5 transition-all">
@@ -227,17 +246,33 @@ const Navbar = ({ user, onLogout }) => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-txt-muted" />
               <input type="text" placeholder="Search courses..."
-                className="w-full pl-10 pr-4 py-2 bg-surface-input border-2 border-bdr rounded-xl text-sm text-txt placeholder-txt-muted focus:border-yellow-400/50 focus:outline-none" />
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim()) {
+                    navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
+                    setSearchQuery('');
+                    setMobileMenuOpen(false);
+                  }
+                }}
+                className="w-full pl-12 pr-4 py-2 bg-surface-input border-2 border-bdr rounded-xl text-sm text-txt placeholder-txt-muted focus:border-yellow-400/50 focus:outline-none" />
             </div>
           </div>
           <div className="px-2 pb-3 space-y-1">
-            {navLinks.map((link) => (
+            {mobileNavItems.map((link) => (
               <Link key={link.to} to={link.to} onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-txt-secondary hover:text-yellow-400 hover:bg-yellow-400/5 rounded-xl transition-all">
                 <link.icon className="w-4 h-4" />
                 {link.label}
               </Link>
             ))}
+            {user?.roles?.includes('admin') && (
+              <Link to="/admin" onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-txt-secondary hover:text-yellow-400 hover:bg-yellow-400/5 rounded-xl transition-all">
+                <Shield className="w-4 h-4" />
+                Admin Panel
+              </Link>
+            )}
           </div>
         </div>
       )}
