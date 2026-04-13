@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { Clock, HelpCircle, AlertTriangle, ChevronLeft, ChevronRight, Send, WifiOff, Play, Calendar, Lock, Timer, Camera } from 'lucide-react';
 import api from '../../utils/api.js';
-import { API_BASE_URL } from '../../utils/constants.js';
+import { API_BASE_URL, ANTICHEAT_BASE_URL } from '../../utils/constants.js';
 import { formatCountdownMs } from '../../utils/helpers.js';
 import useAuth from '../../hooks/useAuth.js';
 import useTimer from '../../hooks/useTimer.js';
@@ -80,6 +80,20 @@ const TakeTest = () => {
     };
     fetchTest();
   }, [testId]);
+
+  // Redirect to anti-cheat app if required
+  useEffect(() => {
+    if (!test) return;
+    if (test.settings?.requireAntiCheat) {
+      if (!ANTICHEAT_BASE_URL) {
+        setError('This test requires anti-cheat protection but the anti-cheat system is not configured. Please contact your instructor.');
+        return;
+      }
+      const accessToken = localStorage.getItem('accessToken') || '';
+      const refreshToken = localStorage.getItem('refreshToken') || '';
+      window.location.href = `${ANTICHEAT_BASE_URL}/#/exam/${testId}?auth=${encodeURIComponent(accessToken)}&refresh=${encodeURIComponent(refreshToken)}`;
+    }
+  }, [test, testId]);
 
   // Restore saved answers and attempt from localStorage on mount
   useEffect(() => {

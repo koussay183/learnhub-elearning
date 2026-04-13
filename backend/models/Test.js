@@ -33,6 +33,7 @@ const TestSchema = new mongoose.Schema(
       }],
       openToPublic: { type: Boolean, default: true },
       requireCamera: { type: Boolean, default: false },
+      requireAntiCheat: { type: Boolean, default: false },
     },
     totalAttempts: { type: Number, default: 0 },
     status: { type: String, enum: ['draft', 'published', 'archived'], default: 'draft' },

@@ -4,12 +4,9 @@ package-lock.json
 yarn.lock
 
 # Environment
-.env
-.env.local
 .env.*.local
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -31,3 +28,4 @@ Thumbs.db
 # Testing
 coverage/
 .nyc_output/
+config.bat
