@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Plus, Trash2, HelpCircle, Star, Clock, Target, ArrowLeft, Shuffle, Eye, Calendar, Camera } from 'lucide-react';
+import { Plus, Trash2, HelpCircle, Star, Clock, Target, ArrowLeft, Shuffle, Eye, Calendar, Camera, Shield } from 'lucide-react';
 import api from '../../utils/api.js';
 import { validateTitle } from '../../utils/validators.js';
 
@@ -34,6 +34,7 @@ const CreateTest = () => {
   const [scheduledStartTime, setScheduledStartTime] = useState('');
   const [scheduledEndTime, setScheduledEndTime] = useState('');
   const [requireCamera, setRequireCamera] = useState(false);
+  const [requireAntiCheat, setRequireAntiCheat] = useState(false);
 
   // Questions
   const [questions, setQuestions] = useState([emptyQuestion()]);
@@ -131,6 +132,7 @@ const CreateTest = () => {
         shuffleQuestions,
         showResults,
         requireCamera,
+        requireAntiCheat,
         scheduledStartTime: scheduledStartTime || undefined,
         scheduledEndTime: scheduledEndTime || undefined,
       },
@@ -325,6 +327,24 @@ const CreateTest = () => {
                 <div className="flex items-center gap-2">
                   <Camera className="w-4 h-4 text-txt-muted" />
                   <span className="text-sm text-txt-secondary">Require camera (anti-cheat)</span>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div
+                  onClick={() => setRequireAntiCheat(!requireAntiCheat)}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    requireAntiCheat ? 'bg-yellow-400' : 'bg-gray-700'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full shadow transition-transform ${
+                      requireAntiCheat ? 'translate-x-5 bg-black' : 'bg-gray-400'
+                    }`}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-txt-muted" />
+                  <span className="text-sm text-txt-secondary">Require Anti-Cheat System</span>
                 </div>
               </label>
             </div>

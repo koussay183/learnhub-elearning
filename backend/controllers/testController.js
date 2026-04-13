@@ -222,6 +222,7 @@ export const startTest = async (req, res) => {
       duration: test.settings?.duration,
       testTitle: test.title,
       requireCamera: test.settings?.requireCamera || false,
+      requireAntiCheat: test.settings?.requireAntiCheat || false,
     });
   } catch (error) {
     console.error('Start test error:', error);
